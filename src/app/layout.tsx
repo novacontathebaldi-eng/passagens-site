@@ -43,6 +43,9 @@ export const metadata: Metadata = {
   },
 };
 
+import { RefCatcher } from "@/components/RefCatcher";
+import { Suspense } from "react";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -54,6 +57,9 @@ export default function RootLayout({
         className={`${plusJakarta.variable} ${beVietnam.variable} antialiased`}
         suppressHydrationWarning
       >
+        <Suspense fallback={null}>
+          <RefCatcher />
+        </Suspense>
         {children}
       </body>
     </html>

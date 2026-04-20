@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
+import { LiveAlerts } from "@/components/LiveAlerts";
 
 export const metadata: Metadata = {
   title: "Admin — ViajaEdu!",
@@ -128,7 +129,10 @@ export default async function AdminLayout({
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          <LiveAlerts />
+          {children}
+        </main>
       </div>
     </div>
   );

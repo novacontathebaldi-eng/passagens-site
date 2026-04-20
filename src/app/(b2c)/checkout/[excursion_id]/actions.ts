@@ -9,6 +9,7 @@ interface CheckoutData {
   passengers: any[];
   selectedSeats: string[];
   totalAmount: number;
+  referralCode?: string;
 }
 
 export async function createReservation(data: CheckoutData) {
@@ -20,6 +21,19 @@ export async function createReservation(data: CheckoutData) {
   }
 
   try {
+    // Resolve promoter if referral code exists
+    let promoterId = null;
+    if (data.referralCode) {
+      const { data: promoter } = await supabase
+        .from("promoters")
+        .select("id")
+        .eq("referral_code", data.referralCode)
+        .single();
+      if (promoter) {
+        promoterId = promoter.id;
+      }
+    }
+
     // 1. Verificar disponibilidade de vagas
     const { data: excursion } = await supabase
       .from("excursions")
@@ -60,6 +74,7 @@ export async function createReservation(data: CheckoutData) {
       .insert({
         user_id: user.id,
         excursion_id: data.excursionId,
+        promoter_id: promoterId,
         total_amount: data.totalAmount,
         status: "PENDING_PIX",
         gateway_provider: "MANUAL_ASYNC_V1",

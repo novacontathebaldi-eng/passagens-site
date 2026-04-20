@@ -11,6 +11,8 @@ interface CheckoutClientProps {
   occupiedSeats: string[];
 }
 
+import Cookies from "js-cookie";
+
 export default function CheckoutClient({ excursion, user, occupiedSeats }: CheckoutClientProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -65,12 +67,14 @@ export default function CheckoutClient({ excursion, user, occupiedSeats }: Check
     setIsLoading(true);
     setError(null);
     try {
+      const referralCode = Cookies.get("viajaedu_ref");
       const res = await createReservation({
         excursionId: excursion.id,
         quantity,
         passengers,
         selectedSeats,
-        totalAmount
+        totalAmount,
+        referralCode
       });
       if (res.error) {
         setError(res.error);
