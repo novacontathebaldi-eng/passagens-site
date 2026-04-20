@@ -66,7 +66,7 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24 sm:pt-16 sm:pb-32 lg:pt-20 lg:pb-40">
           <HeroContainer className="max-w-3xl">
             <FadeInUp>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/90 text-sm font-medium mb-6 backdrop-blur-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white/90 text-sm font-medium mb-6 lg:backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 Vagas abertas para próximas excursões
               </div>
@@ -124,7 +124,7 @@ export default async function HomePage() {
                 {CATEGORIES.slice(1).map((cat) => (
                   <span
                     key={cat.value}
-                    className="px-4 py-2 rounded-full bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 cursor-pointer transition-colors backdrop-blur-sm"
+                    className="px-4 py-2 rounded-full bg-white/15 text-white/80 text-sm font-medium hover:bg-white/20 cursor-pointer transition-colors lg:backdrop-blur-sm"
                   >
                     {cat.label}
                   </span>
@@ -377,7 +377,7 @@ export default async function HomePage() {
                 </Link>
                 <SmoothScrollLink
                   href="/#excursoes"
-                  className="px-8 py-4 rounded-2xl bg-white/10 text-white font-semibold text-base hover:bg-white/20 transition-colors backdrop-blur-sm"
+                  className="px-8 py-4 rounded-2xl bg-white/15 text-white font-semibold text-base hover:bg-white/20 transition-colors lg:backdrop-blur-sm"
                 >
                   Ver excursões
                 </SmoothScrollLink>
