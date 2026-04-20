@@ -10,6 +10,10 @@ import { addContactToBrevo } from "@/lib/brevo";
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
+  // Read redirect FIRST — before any role checks that could lose it
+  const rawRedirect = formData.get("redirect") as string | null;
+  const safeRedirect = rawRedirect && rawRedirect.startsWith("/") ? rawRedirect : null;
+
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -20,6 +24,7 @@ export async function login(formData: FormData) {
   if (error) {
     const searchParams = new URLSearchParams();
     searchParams.set("error", error.message);
+    if (safeRedirect) searchParams.set("redirect", safeRedirect);
     redirect(`/login?${searchParams.toString()}`);
   }
 
@@ -28,6 +33,8 @@ export async function login(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const nextParam = safeRedirect ? `?next=${encodeURIComponent(safeRedirect)}` : "";
+
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -35,24 +42,25 @@ export async function login(formData: FormData) {
       .eq("id", user.id)
       .single();
 
-    // If profile is incomplete (Google login without CPF), redirect to complete
+    // If profile is incomplete (Google login without CPF), redirect to complete — preserve next
     if (profile && !profile.cpf) {
-      redirect("/completar-cadastro");
+      redirect(`/completar-cadastro${nextParam}`);
     }
 
-    if (profile?.role === "ADMIN" || profile?.role === "AGENT") {
-      redirect("/admin");
-    }
-    if (profile?.role === "DRIVER") {
-      redirect("/motorista");
+    // Role-based redirects only when there's no explicit destination
+    if (!safeRedirect) {
+      if (profile?.role === "ADMIN" || profile?.role === "AGENT") {
+        redirect("/admin");
+      }
+      if (profile?.role === "DRIVER") {
+        redirect("/motorista");
+      }
     }
   }
 
-  const redirectUrl = formData.get("redirect") as string;
-
   revalidatePath("/", "layout");
-  if (redirectUrl) {
-    redirect(redirectUrl);
+  if (safeRedirect) {
+    redirect(safeRedirect);
   }
   redirect("/painel");
 }
@@ -192,10 +200,11 @@ export async function completeProfile(formData: FormData) {
 
   revalidatePath("/", "layout");
 
-  const redirectUrl = formData.get("next") as string;
+  const rawNext = formData.get("next") as string | null;
+  const safeNext = rawNext && rawNext.startsWith("/") ? rawNext : null;
 
-  if (redirectUrl) {
-    redirect(redirectUrl);
+  if (safeNext) {
+    redirect(safeNext);
   }
 
   if (profile?.role === "ADMIN" || profile?.role === "AGENT") {

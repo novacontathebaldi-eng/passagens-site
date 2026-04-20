@@ -2,7 +2,10 @@ import { sendEmail } from '@/lib/brevo';
 import crypto from 'crypto';
 
 export async function sendConfirmationEmail(userId: string, userEmail: string) {
-  const secret = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const secret = process.env.EMAIL_CONFIRM_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) {
+    throw new Error("EMAIL_CONFIRM_SECRET env var is required for secure email confirmation tokens.");
+  }
   const payload = `${userId}:${userEmail}`;
   const token = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -8,13 +7,9 @@ export default function NotFound() {
         {/* Imagem (O ônibus) */}
         <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-xl mb-8 border border-outline-variant/30">
           <img
-            src="/assets/eita404.png"
+            src="/images/eita404.png"
             alt="Ônibus perdido"
             className="w-full h-full object-cover"
-            onError={(e) => {
-              // Fallback caso a imagem não esteja no public
-              e.currentTarget.src = "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800";
-            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute bottom-4 left-4 text-left">
