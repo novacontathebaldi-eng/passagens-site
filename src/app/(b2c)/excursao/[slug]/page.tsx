@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, CalendarDays, Bus, ShieldCheck } from "lucide-react";
 import WaitlistButton from "./WaitlistButton";
 import LightboxGallery from "./LightboxGallery";
+import StickyExcursionTitle from "@/components/StickyExcursionTitle";
 
 type Params = Promise<{ slug: string }>;
 
@@ -173,6 +174,10 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
           {/* ── DIREITA: STICKY CHECKOUT PANEL ── */}
           <div className="w-full lg:w-1/3">
             <div className="sticky top-24 bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 shadow-xl">
+              
+              {/* COMPONENTE DE TÍTULO ANIMADO STICKY */}
+              <StickyExcursionTitle title={pkg.title} />
+
               <h3 className="text-xl font-bold text-on-surface mb-2">Selecione uma Data</h3>
               <p className="text-sm text-on-surface-variant mb-6">Escolha o dia da sua viagem para consultar os valores.</p>
 
