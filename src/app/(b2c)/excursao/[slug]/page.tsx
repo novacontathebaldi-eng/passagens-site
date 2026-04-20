@@ -86,8 +86,8 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
               {pkg.category || "Destino Incrível"}
             </div>
             <h1
-              className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-white leading-tight font-[family-name:var(--font-display)]"
-              style={{ textShadow: "0px 2px 4px rgba(0,0,0,0.5)" }}
+              className="text-4xl md:text-5xl lg:text-7xl font-extrabold leading-tight font-[family-name:var(--font-display)]"
+              style={{ color: "#FFFFFF", textShadow: "0px 2px 4px rgba(0,0,0,0.5)" }}
             >
               {pkg.title}
             </h1>
