@@ -13,7 +13,7 @@ export default function NotFound() {
           {/* Illustration Container */}
           <div className="w-full h-64 md:h-80 mb-10 rounded-2xl overflow-hidden relative bg-white flex items-center justify-center shadow-inner">
             <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwKUtDQ4qNd7HNGMxhqMWwffuOgf25scV5SQUR80HVnI6pPMCS1OrnvC_0bLi0E4dg4DcatSBQnaOlk7M8LfU-GmrUm63K5CxEg7XzMTfCs3szDbqayXuEeqHkSxCxAXQt721N_Ry5xZg8XfCy70QfD7I43XY2ZLxbM1LMNbA2tHhcr6quK5-OIrsCmlSZ0Len6UT16oTnNhghneykWocJNoSYe_BVO_CkVih9vEfrk2bjtz-wnJPj6qr7pA1FgV4oBQpS-nw5MGGH"
+              src="/images/eita404.png"
               alt="Eita, o ônibus virou a esquina!"
               className="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-multiply"
             />
