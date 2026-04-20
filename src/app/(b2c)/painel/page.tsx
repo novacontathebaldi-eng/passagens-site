@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 import { CalendarDays, Bus, Clock, CheckCircle2, XCircle, Users } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
 
@@ -169,9 +170,9 @@ export default async function PainelClientePage({
                 </svg>
                 <h3 className="mt-4 text-lg font-bold text-on-surface">Você ainda não possui viagens</h3>
                 <p className="mt-2 text-sm text-on-surface-variant">Que tal planejar sua próxima aventura hoje mesmo?</p>
-                <Link href="/#excursoes" className="mt-6 inline-block px-6 py-2 rounded-xl gradient-cta text-on-cta font-bold shadow-sm hover:shadow-glow-cta transition-all">
+                <SmoothScrollLink href="/#excursoes" className="mt-6 inline-block px-6 py-2 rounded-xl gradient-cta text-on-cta font-bold shadow-sm hover:shadow-glow-cta transition-all">
                   Explorar Destinos
-                </Link>
+                </SmoothScrollLink>
               </div>
             )}
           </div>

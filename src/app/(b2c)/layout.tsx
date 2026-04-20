@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteSettings } from "@/lib/get-settings";
+import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 
 export const metadata: Metadata = {
   title: "ViajaEdu! — Excursões Turísticas Rodoviárias",
@@ -119,12 +120,12 @@ export default async function B2CLayout({
 
           {/* Nav Links (Desktop) */}
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-on-surface-variant">
-            <Link
+            <SmoothScrollLink
               href="/#excursoes"
               className="hover:text-primary transition-colors"
             >
               Excursões
-            </Link>
+            </SmoothScrollLink>
             <Link
               href="/sobre"
               className="hover:text-primary transition-colors"
@@ -209,12 +210,12 @@ export default async function B2CLayout({
               </h3>
               <ul className="space-y-2 text-sm text-outline-variant">
                 <li>
-                  <Link
+                  <SmoothScrollLink
                     href="/#excursoes"
                     className="hover:text-white transition-colors"
                   >
                     Excursões
-                  </Link>
+                  </SmoothScrollLink>
                 </li>
                 <li>
                   <Link

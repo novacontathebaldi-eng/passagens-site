@@ -1,5 +1,6 @@
 import { Bus, Map, ShieldCheck, HeartHandshake } from "lucide-react";
 import Link from "next/link";
+import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 
 export default function SobrePage() {
   return (
@@ -57,9 +58,9 @@ export default function SobrePage() {
       {/* CTA */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
         <h2 className="text-3xl font-bold text-on-surface mb-6">Pronto para sua próxima aventura?</h2>
-        <Link href="/#excursoes" className="inline-block px-8 py-4 rounded-xl gradient-cta text-on-cta font-bold shadow-md hover:shadow-glow-cta transition-all text-lg">
+        <SmoothScrollLink href="/#excursoes" className="inline-block px-8 py-4 rounded-xl gradient-cta text-on-cta font-bold shadow-md hover:shadow-glow-cta transition-all text-lg">
           Ver Destinos Disponíveis
-        </Link>
+        </SmoothScrollLink>
       </div>
     </div>
   );

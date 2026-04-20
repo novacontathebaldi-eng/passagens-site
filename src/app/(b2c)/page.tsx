@@ -9,6 +9,7 @@ import {
   CardGrid,
   MotionCard,
 } from "@/components/MotionWrappers";
+import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 
 const CATEGORIES = [
   { label: "Todos", value: "" },
@@ -374,12 +375,12 @@ export default async function HomePage() {
                 >
                   Criar conta gratuita
                 </Link>
-                <Link
+                <SmoothScrollLink
                   href="/#excursoes"
                   className="px-8 py-4 rounded-2xl bg-white/10 text-white font-semibold text-base hover:bg-white/20 transition-colors backdrop-blur-sm"
                 >
                   Ver excursões
-                </Link>
+                </SmoothScrollLink>
               </div>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 
 export default function NotFound() {
   return (
@@ -34,12 +35,12 @@ export default function NotFound() {
           >
             Voltar para o início
           </Link>
-          <Link
+          <SmoothScrollLink
             href="/#excursoes"
             className="w-full sm:w-auto bg-surface-container-low text-on-surface hover:bg-surface-container font-semibold py-3 px-8 rounded-xl border border-outline-variant transition-all duration-200"
           >
             Ver Viagens
-          </Link>
+          </SmoothScrollLink>
         </div>
       </div>
     </main>
