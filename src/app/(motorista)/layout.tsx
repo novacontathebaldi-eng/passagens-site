@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { BusFront, ClipboardCheck, Settings, LogOut } from "lucide-react";
+import { logout } from "@/app/(auth)/actions";
 
 export default async function MotoristaLayout({
   children,
@@ -41,7 +42,7 @@ export default async function MotoristaLayout({
           <span className="text-xl">🚌</span> 
           <span className="tracking-tight">Expedição ViajaEdu</span>
         </div>
-        <form action="/auth/logout" method="post">
+        <form action={logout}>
           <button type="submit" className="p-2 text-outline hover:text-error transition-colors rounded-full">
             <LogOut className="w-5 h-5" />
           </button>
