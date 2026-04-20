@@ -13,7 +13,10 @@ export async function GET(request: Request) {
   }
 
   // Verify the HMAC token
-  const secret = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const secret = process.env.EMAIL_CONFIRM_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) {
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent("Erro de configuração do servidor.")}`);
+  }
   const payload = `${uid}:${email}`;
   const expectedToken = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 

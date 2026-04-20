@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, formatCPF, validateCPF } from "@/lib/utils";
 import { createReservation } from "./actions";
 
 interface CheckoutClientProps {
@@ -41,9 +41,14 @@ export default function CheckoutClient({ excursion, user, occupiedSeats }: Check
     
     if (step === 2) {
       // Validate passengers
-      for (const p of passengers) {
+      for (let i = 0; i < passengers.length; i++) {
+        const p = passengers[i];
         if (!p.full_name || !p.cpf) {
-          setError("Preencha o Nome e CPF de todos os passageiros.");
+          setError(`Preencha o Nome e CPF do Passageiro ${i + 1}.`);
+          return;
+        }
+        if (!validateCPF(p.cpf)) {
+          setError(`O CPF do Passageiro ${i + 1} é inválido.`);
           return;
         }
       }
@@ -178,9 +183,10 @@ export default function CheckoutClient({ excursion, user, occupiedSeats }: Check
                           value={p.cpf}
                           onChange={e => {
                             const newP = [...passengers];
-                            newP[idx].cpf = e.target.value;
+                            newP[idx].cpf = formatCPF(e.target.value);
                             setPassengers(newP);
                           }}
+                          maxLength={14}
                           className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface" 
                           placeholder="000.000.000-00"
                         />

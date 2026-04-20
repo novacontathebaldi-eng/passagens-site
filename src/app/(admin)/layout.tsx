@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
 import { LiveAlerts } from "@/components/LiveAlerts";
+import { AdminMobileMenu } from "./AdminMobileMenu";
 
 export const metadata: Metadata = {
   title: "Admin — ViajaEdu!",
@@ -121,7 +122,12 @@ export default async function AdminLayout({
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header (Mobile) */}
         <header className="lg:hidden h-14 bg-surface-container-lowest border-b border-outline-variant/30 flex items-center px-4 gap-3">
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <AdminMobileMenu 
+            navItems={NAV_ITEMS}
+            profile={profile}
+            initials={initials}
+          />
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="ml-1">
             <rect width="32" height="32" rx="8" className="fill-primary" />
             <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>

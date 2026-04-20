@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense, useTransition } from "react";
+import { Suspense, useTransition, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { completeProfile } from "../actions";
+import { formatCPF, validateCPF } from "@/lib/utils";
 
 export default function CompletarCadastroPage() {
   return (
@@ -15,10 +16,20 @@ export default function CompletarCadastroPage() {
 
 function CompletarContent() {
   const searchParams = useSearchParams();
-  const error = searchParams.get("error");
+  const errorParam = searchParams.get("error");
+  const [error, setError] = useState<string | null>(errorParam);
   const [isPending, startTransition] = useTransition();
+  const [cpf, setCpf] = useState("");
 
   const handleAction = (formData: FormData) => {
+    setError(null);
+    const cpfValue = formData.get("cpf") as string;
+    
+    if (!validateCPF(cpfValue)) {
+      setError("O CPF informado é inválido. Verifique os dígitos.");
+      return;
+    }
+
     startTransition(() => {
       const nextParam = searchParams.get("next");
       if (nextParam) {
@@ -58,6 +69,8 @@ function CompletarContent() {
             </label>
             <input id="cpf" name="cpf" type="text" required placeholder="000.000.000-00"
               maxLength={14}
+              value={cpf}
+              onChange={(e) => setCpf(formatCPF(e.target.value))}
               className="w-full rounded-xl border-2 border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 transition-colors" />
             <p className="mt-1 text-xs text-outline">
               Obrigatório para emissão de voucher e embarque.

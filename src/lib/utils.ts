@@ -1,8 +1,40 @@
-/** Format a CPF string with mask: 000.000.000-00 */
+/** Format a CPF string with mask: 000.000.000-00, supporting partial inputs */
 export function formatCPF(cpf: string): string {
+  const digits = cpf.replace(/\D/g, "").slice(0, 11);
+  return digits
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
+/** Validate a CPF using the official mathematical algorithm */
+export function validateCPF(cpf: string): boolean {
   const digits = cpf.replace(/\D/g, "");
-  if (digits.length !== 11) return cpf;
-  return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  
+  if (digits.length !== 11) return false;
+  
+  // Reject known invalid sequences (e.g., 111.111.111-11)
+  if (/^(\d)\1{10}$/.test(digits)) return false;
+  
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(digits.charAt(i)) * (10 - i);
+  }
+  let remainder = 11 - (sum % 11);
+  let d1 = remainder === 10 || remainder === 11 ? 0 : remainder;
+  
+  if (d1 !== parseInt(digits.charAt(9))) return false;
+  
+  sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(digits.charAt(i)) * (11 - i);
+  }
+  remainder = 11 - (sum % 11);
+  let d2 = remainder === 10 || remainder === 11 ? 0 : remainder;
+  
+  if (d2 !== parseInt(digits.charAt(10))) return false;
+  
+  return true;
 }
 
 /** Format a phone number: (00) 00000-0000 */
