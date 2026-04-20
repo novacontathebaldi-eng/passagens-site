@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { formatBRL, formatDate } from "@/lib/utils";
 import { Bus, MapPin, CalendarDays, User, Printer } from "lucide-react";
+import { PrintVoucherButton } from "./PrintVoucherButton";
 
 export default async function VoucherPage({
   params,
@@ -54,12 +55,7 @@ export default async function VoucherPage({
         
         {/* Botão de Imprimir (Escondido na impressão) */}
         <div className="flex justify-end mb-6 print:hidden">
-          <button 
-            type="button"
-            className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-xl text-sm font-bold text-on-surface hover:bg-surface-container-highest transition-colors"
-          >
-            <Printer className="w-4 h-4" /> Imprimir Voucher
-          </button>
+          <PrintVoucherButton />
         </div>
 
         {/* Voucher Card */}
@@ -143,12 +139,6 @@ export default async function VoucherPage({
         </div>
       </div>
 
-      {/* Inject print functionality */}
-      <script dangerouslySetInnerHTML={{ __html: `
-        document.querySelector('button')?.addEventListener('click', () => {
-          window.print();
-        });
-      `}} />
     </div>
   );
 }
