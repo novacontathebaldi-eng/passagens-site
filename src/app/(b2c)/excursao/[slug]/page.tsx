@@ -4,6 +4,7 @@ import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { CheckCircle2, CalendarDays, Bus, ShieldCheck } from "lucide-react";
 import WaitlistButton from "./WaitlistButton";
+import LightboxGallery from "./LightboxGallery";
 
 type Params = Promise<{ slug: string }>;
 
@@ -84,7 +85,7 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/80 backdrop-blur-md text-white text-xs font-bold mb-4 uppercase tracking-wider">
               {pkg.category || "Destino Incrível"}
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight font-[family-name:var(--font-display)]">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight font-[family-name:var(--font-display)] drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
               {pkg.title}
             </h1>
             <p className="mt-4 text-lg md:text-xl text-white/90 max-w-2xl font-medium text-shadow">
@@ -133,13 +134,7 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
             {pkg.images && pkg.images.length > 1 && (
               <section className="space-y-4">
                 <h2 className="text-2xl font-bold text-on-surface">Galeria de Fotos</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {pkg.images.slice(1).map((img: string, i: number) => (
-                    <div key={i} className="rounded-2xl overflow-hidden aspect-video relative group">
-                      <img src={img} alt={`${pkg.title} - Foto ${i+1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                    </div>
-                  ))}
-                </div>
+                <LightboxGallery images={pkg.images.slice(1)} title={pkg.title} />
               </section>
             )}
 
