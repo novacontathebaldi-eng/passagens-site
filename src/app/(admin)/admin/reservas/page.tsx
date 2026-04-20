@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type Reservation = {
   id: string;
@@ -15,6 +16,12 @@ type Reservation = {
   } | null;
 };
 
+type ExcursionOption = {
+  id: string;
+  departure_date: string;
+  tour_packages: { title: string } | null;
+};
+
 const COLUMNS = [
   { id: "PENDING_PIX", title: "Aguardando PIX", color: "border-warning" },
   { id: "AWAITING_MANUAL_CHECK", title: "Em Análise", color: "border-cta" },
@@ -25,12 +32,29 @@ const COLUMNS = [
 
 export default function KanbanReservasPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [excursions, setExcursions] = useState<ExcursionOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const selectedExcursionId = searchParams.get("excursion_id") || "ALL";
+
+  useEffect(() => {
+    async function loadExcursions() {
+      const { data } = await supabase
+        .from("excursions")
+        .select("id, departure_date, tour_packages(title)")
+        .order("departure_date", { ascending: false });
+      if (data) setExcursions(data as unknown as ExcursionOption[]);
+    }
+    loadExcursions();
+  }, [supabase]);
 
   useEffect(() => {
     async function fetchReservations() {
-      const { data, error } = await supabase
+      setIsLoading(true);
+      let query = supabase
         .from("reservations")
         .select(`
           id,
@@ -45,6 +69,11 @@ export default function KanbanReservasPage() {
         `)
         .order("created_at", { ascending: false });
 
+      if (selectedExcursionId !== "ALL") {
+        query = query.eq("excursion_id", selectedExcursionId);
+      }
+
+      const { data } = await query;
       if (data) {
         setReservations(data as unknown as Reservation[]);
       }
@@ -60,8 +89,6 @@ export default function KanbanReservasPage() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'reservations' },
         (payload) => {
-          // Simplest real-time handling: just re-fetch to ensure relations are joined
-          // Alternatively, we could manually merge the payload into state
           fetchReservations();
         }
       )
@@ -70,7 +97,7 @@ export default function KanbanReservasPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [supabase, selectedExcursionId]);
 
   async function handleStatusChange(id: string, newStatus: Reservation["status"]) {
     // Optimistic update
@@ -84,13 +111,11 @@ export default function KanbanReservasPage() {
 
     if (error) {
       alert("Erro ao atualizar status: " + error.message);
-      // Revert if error (simplification: refetch)
+      // Fallback: reload state from db if error
       const { data } = await supabase.from("reservations").select("*, profiles(*), excursions(*, tour_packages(*))").eq("id", id).single();
       if (data) {
         setReservations(prev => prev.map(res => res.id === id ? (data as unknown as Reservation) : res));
       }
-    } else {
-      // In a real scenario, also insert into audit_logs via a trigger or RPC
     }
   }
 
@@ -99,7 +124,7 @@ export default function KanbanReservasPage() {
   };
 
   return (
-    <div className="space-y-6 flex flex-col h-[calc(100vh-100px)]">
+    <div className="space-y-6 flex flex-col h-[calc(100vh-100px)] p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0">
         <div>
           <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-on-surface">
@@ -108,6 +133,30 @@ export default function KanbanReservasPage() {
           <p className="text-on-surface-variant text-sm mt-1">
             Arraste ou clique para mover as reservas pelo funil de vendas. Atualização em tempo real.
           </p>
+        </div>
+        
+        <div className="w-full sm:w-auto">
+          <select
+            value={selectedExcursionId}
+            onChange={(e) => {
+              if (e.target.value === "ALL") {
+                router.push("/admin/reservas");
+              } else {
+                router.push(`/admin/reservas?excursion_id=${e.target.value}`);
+              }
+            }}
+            className="w-full sm:w-64 rounded-xl border border-outline-variant bg-surface px-4 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+          >
+            <option value="ALL">Todas as Excursões</option>
+            {excursions.map(exc => {
+              const tourTitle = Array.isArray(exc.tour_packages) ? exc.tour_packages[0]?.title : exc.tour_packages?.title;
+              return (
+                <option key={exc.id} value={exc.id}>
+                  {tourTitle} ({new Date(exc.departure_date).toLocaleDateString("pt-BR")})
+                </option>
+              );
+            })}
+          </select>
         </div>
       </div>
 
@@ -152,7 +201,7 @@ export default function KanbanReservasPage() {
                             {excursion?.departure_date && new Date(excursion.departure_date).toLocaleDateString("pt-BR")}
                           </div>
                           
-                          {/* Ações (Simulação de DND) */}
+                          {/* Ações */}
                           <div className="flex gap-2 pt-3 border-t border-outline-variant/20">
                             {res.status === "PENDING_PIX" || res.status === "AWAITING_MANUAL_CHECK" ? (
                               <>

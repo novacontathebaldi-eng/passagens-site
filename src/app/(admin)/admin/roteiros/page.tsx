@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
 type TourPackage = {
   id: string;
@@ -14,25 +15,39 @@ type TourPackage = {
 export default function RoteirosPage() {
   const [packages, setPackages] = useState<TourPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
-    async function fetchPackages() {
-      const { data, error } = await supabase
-        .from("tour_packages")
-        .select("id, title, slug, category, short_description")
-        .order("created_at", { ascending: false });
-
-      if (data) {
-        setPackages(data);
-      }
-      setIsLoading(false);
-    }
     fetchPackages();
-  }, [supabase]);
+  }, []);
+
+  async function fetchPackages() {
+    const { data } = await supabase
+      .from("tour_packages")
+      .select("id, title, slug, category, short_description")
+      .order("created_at", { ascending: false });
+
+    if (data) setPackages(data);
+    setIsLoading(false);
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Tem certeza que deseja excluir este roteiro? Excursões vinculadas a ele também serão afetadas.")) return;
+
+    setDeletingId(id);
+    const { error } = await supabase.from("tour_packages").delete().eq("id", id);
+
+    if (error) {
+      alert("Erro ao excluir: " + error.message);
+    } else {
+      setPackages(prev => prev.filter(p => p.id !== id));
+    }
+    setDeletingId(null);
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 lg:p-8 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-on-surface">
@@ -42,9 +57,12 @@ export default function RoteirosPage() {
             Gerencie os destinos e pacotes turísticos que servirão de base para as suas excursões.
           </p>
         </div>
-        <button className="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm whitespace-nowrap">
+        <Link
+          href="/admin/roteiros/novo"
+          className="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm whitespace-nowrap text-center"
+        >
           + Novo Roteiro
-        </button>
+        </Link>
       </div>
 
       <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
@@ -61,14 +79,18 @@ export default function RoteirosPage() {
             <tbody className="divide-y divide-outline-variant/20">
               {isLoading ? (
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-outline">
-                    Carregando roteiros...
-                  </td>
+                  <td colSpan={4} className="py-8 text-center text-outline">Carregando roteiros...</td>
                 </tr>
               ) : packages.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-outline">
+                  <td colSpan={4} className="py-12 text-center text-outline">
+                    <svg className="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
                     Nenhum roteiro cadastrado.
+                    <Link href="/admin/roteiros/novo" className="block mt-2 text-primary hover:underline text-sm font-medium">
+                      Criar primeiro roteiro →
+                    </Link>
                   </td>
                 </tr>
               ) : (
@@ -86,12 +108,19 @@ export default function RoteirosPage() {
                       </span>
                     </td>
                     <td className="py-4 px-6 text-sm text-outline">/{pkg.slug}</td>
-                    <td className="py-4 px-6 text-right">
-                      <button className="text-primary hover:text-primary-dark text-sm font-medium mr-4 transition-colors">
+                    <td className="py-4 px-6 text-right space-x-2">
+                      <Link
+                        href={`/admin/roteiros/${pkg.id}/editar`}
+                        className="text-primary hover:text-primary-dark text-sm font-medium transition-colors"
+                      >
                         Editar
-                      </button>
-                      <button className="text-error hover:text-error-light text-sm font-medium transition-colors">
-                        Excluir
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(pkg.id)}
+                        disabled={deletingId === pkg.id}
+                        className="text-error hover:text-error-light text-sm font-medium transition-colors disabled:opacity-50"
+                      >
+                        {deletingId === pkg.id ? "..." : "Excluir"}
                       </button>
                     </td>
                   </tr>
