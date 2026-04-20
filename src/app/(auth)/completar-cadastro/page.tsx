@@ -20,6 +20,10 @@ function CompletarContent() {
 
   const handleAction = (formData: FormData) => {
     startTransition(() => {
+      const nextParam = searchParams.get("next");
+      if (nextParam) {
+        formData.append("next", nextParam);
+      }
       completeProfile(formData);
     });
   };

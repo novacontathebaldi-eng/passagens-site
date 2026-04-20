@@ -48,7 +48,12 @@ export async function login(formData: FormData) {
     }
   }
 
+  const redirectUrl = formData.get("redirect") as string;
+
   revalidatePath("/", "layout");
+  if (redirectUrl) {
+    redirect(redirectUrl);
+  }
   redirect("/painel");
 }
 
@@ -90,11 +95,14 @@ export async function signup(formData: FormData) {
     }
   }
 
+  const redirectUrl = formData.get("redirect") as string;
+  const nextParam = redirectUrl ? `?next=${encodeURIComponent(redirectUrl)}` : "";
+
   revalidatePath("/", "layout");
-  redirect("/completar-cadastro");
+  redirect(`/completar-cadastro${nextParam}`);
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(nextUrl?: string | null) {
   const supabase = await createClient();
   const headersList = await headers();
   const host = headersList.get("x-forwarded-host") || headersList.get("host");
@@ -104,7 +112,7 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: nextUrl ? `${origin}/auth/callback?next=${encodeURIComponent(nextUrl)}` : `${origin}/auth/callback`,
       queryParams: {
         access_type: "offline",
         prompt: "consent",
@@ -183,6 +191,12 @@ export async function completeProfile(formData: FormData) {
     .single();
 
   revalidatePath("/", "layout");
+
+  const redirectUrl = formData.get("next") as string;
+
+  if (redirectUrl) {
+    redirect(redirectUrl);
+  }
 
   if (profile?.role === "ADMIN" || profile?.role === "AGENT") {
     redirect("/admin");

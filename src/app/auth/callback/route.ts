@@ -25,7 +25,8 @@ export async function GET(request: Request) {
 
         // Google login users might not have CPF yet — always redirect to complete
         if (profile && !profile.cpf && next !== "/redefinir-senha") {
-          return NextResponse.redirect(`${origin}/completar-cadastro`);
+          const redirectUrl = next && next !== "/" ? `/completar-cadastro?next=${encodeURIComponent(next)}` : `/completar-cadastro`;
+          return NextResponse.redirect(`${origin}${redirectUrl}`);
         }
 
         // Role-based redirect (only when next is default)

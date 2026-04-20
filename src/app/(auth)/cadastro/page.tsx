@@ -16,19 +16,23 @@ export default function CadastroPage() {
 function CadastroContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const redirectParams = searchParams.get("redirect");
 
   const [isEmailPending, startEmailTransition] = useTransition();
   const [isGooglePending, startGoogleTransition] = useTransition();
 
   const handleEmailAction = (formData: FormData) => {
     startEmailTransition(() => {
+      if (redirectParams) {
+        formData.append("redirect", redirectParams);
+      }
       signup(formData);
     });
   };
 
   const handleGoogleAction = () => {
     startGoogleTransition(() => {
-      signInWithGoogle();
+      signInWithGoogle(redirectParams);
     });
   };
 

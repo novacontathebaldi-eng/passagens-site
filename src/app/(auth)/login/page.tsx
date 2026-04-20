@@ -32,7 +32,7 @@ function LoginContent() {
 
   const handleGoogleAction = () => {
     startGoogleTransition(() => {
-      signInWithGoogle();
+      signInWithGoogle(redirectParams);
     });
   };
 
