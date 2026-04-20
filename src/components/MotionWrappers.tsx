@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, Transition } from "framer-motion";
 import { ReactNode } from "react";
 
-const springTransition = {
+const springTransition: Transition = {
   type: "spring",
   stiffness: 100,
   damping: 15,
