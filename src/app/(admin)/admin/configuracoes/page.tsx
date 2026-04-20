@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { convertToWebP, getExtForType, getOldFilePaths } from "@/lib/image-utils";
 import Image from "next/image";
 
 type GlobalSettings = {
@@ -50,32 +51,41 @@ function ImageUploader({
     if (!file) return;
 
     setIsUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `site/${field.key}.${ext}`;
 
-    // Remove old file if exists
-    await supabase.storage.from("assets").remove([path]);
+    try {
+      // 1. Convert to WebP (preserves transparency; SVG/ICO pass through)
+      const processed = await convertToWebP(file);
+      const ext = getExtForType(processed);
+      const path = `site/${field.key}.${ext}`;
 
-    // Upload new file
-    const { error } = await supabase.storage
-      .from("assets")
-      .upload(path, file, { upsert: true, cacheControl: "3600" });
+      // 2. Clean up ALL old files with any extension (prevents bucket bloat)
+      const oldPaths = getOldFilePaths(field.key);
+      await supabase.storage.from("assets").remove(oldPaths);
 
-    if (error) {
-      alert("Erro ao fazer upload: " + error.message);
+      // 3. Upload the new file
+      const { error } = await supabase.storage
+        .from("assets")
+        .upload(path, processed, { upsert: true, cacheControl: "3600" });
+
+      if (error) {
+        alert("Erro ao fazer upload: " + error.message);
+        return;
+      }
+
+      // 4. Get public URL with cache buster
+      const { data: urlData } = supabase.storage
+        .from("assets")
+        .getPublicUrl(path);
+
+      const url = `${urlData.publicUrl}?v=${Date.now()}`;
+      onUploaded(url);
+    } catch (err) {
+      alert("Erro ao processar imagem: " + (err instanceof Error ? err.message : "Erro desconhecido"));
+    } finally {
       setIsUploading(false);
-      return;
+      // Reset input so the same file can be re-uploaded
+      if (inputRef.current) inputRef.current.value = "";
     }
-
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from("assets")
-      .getPublicUrl(path);
-
-    // Add cache buster
-    const url = `${urlData.publicUrl}?v=${Date.now()}`;
-    onUploaded(url);
-    setIsUploading(false);
   };
 
   return (

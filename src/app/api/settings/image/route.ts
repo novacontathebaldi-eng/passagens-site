@@ -10,6 +10,12 @@ const ALLOWED_FIELDS = [
   "logo_url",
 ] as const;
 
+// Transparent 1×1 PNG fallback (49 bytes)
+const TRANSPARENT_PIXEL = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+  "base64"
+);
+
 export async function GET(request: NextRequest) {
   const field = request.nextUrl.searchParams.get("field");
 
@@ -24,15 +30,10 @@ export async function GET(request: NextRequest) {
     .eq("id", 1)
     .single();
 
-  const url = data?.[field as keyof typeof data] as string | null;
+  const rawUrl = data?.[field as keyof typeof data] as string | null;
 
-  if (!url) {
-    // Return a transparent 1x1 pixel as fallback
-    const pixel = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
-      "base64"
-    );
-    return new NextResponse(pixel, {
+  if (!rawUrl) {
+    return new NextResponse(TRANSPARENT_PIXEL, {
       headers: {
         "Content-Type": "image/png",
         "Cache-Control": "public, max-age=60, s-maxage=300",
@@ -40,11 +41,37 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // Redirect to the actual image URL (Supabase Storage)
-  return NextResponse.redirect(url, {
-    status: 302,
-    headers: {
-      "Cache-Control": "public, max-age=300, s-maxage=600",
-    },
-  });
+  // Strip cache buster from URL for fetching
+  const cleanUrl = rawUrl.split("?")[0];
+
+  try {
+    // Proxy: fetch image bytes from Supabase Storage and stream them back
+    const imageResponse = await fetch(cleanUrl, { next: { revalidate: 300 } });
+
+    if (!imageResponse.ok) {
+      return new NextResponse(TRANSPARENT_PIXEL, {
+        headers: {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=60",
+        },
+      });
+    }
+
+    const contentType = imageResponse.headers.get("content-type") || "image/webp";
+    const imageBuffer = await imageResponse.arrayBuffer();
+
+    return new NextResponse(Buffer.from(imageBuffer), {
+      headers: {
+        "Content-Type": contentType,
+        "Cache-Control": "public, max-age=300, s-maxage=600, stale-while-revalidate=60",
+      },
+    });
+  } catch {
+    return new NextResponse(TRANSPARENT_PIXEL, {
+      headers: {
+        "Content-Type": "image/png",
+        "Cache-Control": "public, max-age=60",
+      },
+    });
+  }
 }

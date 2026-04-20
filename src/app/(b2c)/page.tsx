@@ -45,8 +45,13 @@ export default async function HomePage() {
     <>
       {/* ══════════ HERO SECTION ══════════ */}
       <section className="relative overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 gradient-hero" />
+        {/* Dynamic hero background image from admin */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url('/api/settings/image?field=hero_image_url')` }}
+        />
+        {/* Gradient overlay (ensures readability over any image) */}
+        <div className="absolute inset-0 gradient-hero opacity-90" />
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 -left-20 w-96 h-96 rounded-full bg-white/20 blur-3xl animate-pulse" />
           <div className="absolute bottom-10 right-0 w-[500px] h-[500px] rounded-full bg-secondary/20 blur-3xl" />

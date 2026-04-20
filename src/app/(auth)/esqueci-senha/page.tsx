@@ -48,7 +48,12 @@ function EsqueciSenhaContent() {
 
         {success ? (
           <div className="rounded-xl bg-success-light border border-success/20 px-4 py-4 text-center">
-            <p className="text-sm text-success font-medium">✅ E-mail enviado!</p>
+            <p className="text-sm text-success font-medium flex items-center justify-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              E-mail enviado!
+            </p>
             <p className="text-sm text-on-surface-variant mt-2">
               Verifique sua caixa de entrada e spam.
             </p>

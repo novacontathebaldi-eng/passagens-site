@@ -20,7 +20,9 @@ export function ResetPasswordClient() {
   if (success) {
     return (
       <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-8 shadow-sm text-center">
-        <span className="text-4xl block mb-4">✅</span>
+        <svg className="w-12 h-12 mx-auto mb-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
         <h2 className="text-xl font-bold text-on-surface mb-2">Senha atualizada!</h2>
         <p className="text-on-surface-variant text-sm mb-6">
           Sua senha foi redefinida com sucesso. Agora você pode entrar na sua conta.
