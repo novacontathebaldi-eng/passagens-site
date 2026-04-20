@@ -115,12 +115,14 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
                   <CheckCircle2 className="text-primary w-6 h-6" /> O que está incluso?
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {pkg.includes.map((item: string, i: number) => (
+                  {pkg.includes.map((item: any, i: number) => (
                     <div key={i} className="flex items-start gap-3">
                       <div className="mt-1 bg-success/20 rounded-full p-1 text-success">
                         <CheckCircle2 className="w-4 h-4" />
                       </div>
-                      <span className="text-on-surface-variant font-medium">{item}</span>
+                      <span className="text-on-surface-variant font-medium">
+                        {typeof item === 'string' ? item : item.text}
+                      </span>
                     </div>
                   ))}
                 </div>
