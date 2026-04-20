@@ -71,37 +71,31 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
 
   return (
     <div className="min-h-screen bg-surface">
-      {/* ── HERO HEADER ── */}
-      <div className="relative h-[40vh] md:h-[60vh] w-full">
+      {/* ── HEADER FOTOGRÁFICO ── */}
+      <div className="relative h-[30vh] md:h-[45vh] w-full bg-surface-container-highest">
         <img
           src={heroImage}
           alt={pkg.title}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/10" />
-
-        <div className="absolute inset-0 flex items-end">
-          <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/80 backdrop-blur-md text-white text-xs font-bold mb-4 uppercase tracking-wider">
-              {pkg.category || "Destino Incrível"}
-            </div>
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight font-[family-name:var(--font-display)]"
-              style={{ textShadow: "0 2px 4px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.6)" }}
-            >
-              {pkg.title}
-            </h1>
-            <p
-              className="mt-4 text-lg md:text-xl text-white/90 max-w-2xl font-medium"
-              style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}
-            >
-              {pkg.short_description}
-            </p>
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-black/5" /> 
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        {/* ── TÍTULO E INTRODUÇÃO (Fora da imagem, contraste perfeito) ── */}
+        <div className="mb-8 md:mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4 uppercase tracking-wider">
+            {pkg.category || "Destino Incrível"}
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-on-surface leading-tight font-[family-name:var(--font-display)]">
+            {pkg.title}
+          </h1>
+          <p className="mt-4 text-lg md:text-xl text-on-surface-variant max-w-3xl font-medium">
+            {pkg.short_description}
+          </p>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 relative">
 
           {/* ── ESQUERDA: DETALHES DA VIAGEM ── */}
