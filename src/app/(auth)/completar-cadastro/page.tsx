@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
-import { useFormStatus } from "react-dom";
+import { Suspense, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { completeProfile } from "../actions";
 
@@ -13,19 +12,17 @@ export default function CompletarCadastroPage() {
   );
 }
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button type="submit" disabled={pending}
-      className="w-full gradient-cta text-on-cta font-semibold py-3.5 rounded-xl shadow-md hover:shadow-glow-cta transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
-      {pending ? "Salvando..." : "Completar cadastro"}
-    </button>
-  );
-}
 
 function CompletarContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const [isPending, startTransition] = useTransition();
+
+  const handleAction = (formData: FormData) => {
+    startTransition(() => {
+      completeProfile(formData);
+    });
+  };
 
   return (
     <main className="min-h-screen bg-surface flex items-center justify-center p-4">
@@ -46,7 +43,7 @@ function CompletarContent() {
           </div>
         )}
 
-        <form action={completeProfile} className="space-y-5">
+        <form action={handleAction} className="space-y-5">
           <div>
             <label htmlFor="cpf" className="block text-sm font-medium text-on-surface mb-1.5">
               CPF <span className="text-error">*</span>
@@ -75,7 +72,10 @@ function CompletarContent() {
               className="w-full rounded-xl border-2 border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface focus:border-primary focus:ring-0 transition-colors" />
           </div>
 
-          <SubmitButton />
+          <button type="submit" disabled={isPending}
+            className="w-full gradient-cta text-on-cta font-semibold py-3.5 rounded-xl shadow-md hover:shadow-glow-cta transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
+            {isPending ? "Salvando..." : "Completar cadastro"}
+          </button>
         </form>
       </div>
     </main>

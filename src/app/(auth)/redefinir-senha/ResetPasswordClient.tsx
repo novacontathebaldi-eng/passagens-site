@@ -1,34 +1,21 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
+import { useTransition } from "react";
 import { updatePassword } from "@/app/(auth)/actions";
 import { useSearchParams } from "next/navigation";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="w-full bg-cta hover:bg-cta/90 text-on-cta font-bold py-3 rounded-xl transition-all shadow-sm hover:shadow-glow-cta disabled:opacity-50 flex items-center justify-center gap-2"
-    >
-      {pending ? (
-        <>
-          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          Salvando...
-        </>
-      ) : (
-        "Salvar Nova Senha"
-      )}
-    </button>
-  );
-}
 
 export function ResetPasswordClient() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const success = searchParams.get("success");
+  const [isPending, startTransition] = useTransition();
+
+  const handleAction = (formData: FormData) => {
+    startTransition(() => {
+      updatePassword(formData);
+    });
+  };
 
   if (success) {
     return (
@@ -57,7 +44,7 @@ export function ResetPasswordClient() {
         </div>
       )}
 
-      <form action={updatePassword} className="space-y-5">
+      <form action={handleAction} className="space-y-5">
         <div>
           <label
             htmlFor="password"
@@ -76,7 +63,20 @@ export function ResetPasswordClient() {
           />
         </div>
 
-        <SubmitButton />
+        <button
+          type="submit"
+          disabled={isPending}
+          className="w-full bg-cta hover:bg-cta/90 text-on-cta font-bold py-3 rounded-xl transition-all shadow-sm hover:shadow-glow-cta disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {isPending ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            "Salvar Nova Senha"
+          )}
+        </button>
       </form>
     </div>
   );
