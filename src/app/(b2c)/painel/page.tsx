@@ -5,7 +5,13 @@ import Link from "next/link";
 import { CalendarDays, Bus, Clock, CheckCircle2, XCircle, Users } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
 
-export default async function PainelClientePage() {
+import { ConfirmEmailBanner } from "./ConfirmEmailBanner";
+
+export default async function PainelClientePage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -13,6 +19,9 @@ export default async function PainelClientePage() {
   if (!user) {
     redirect("/login");
   }
+
+  const successMessage = searchParams?.success as string;
+  const errorMessage = searchParams?.error as string;
 
   // 1. Perfil do Usuário
   const { data: profile } = await supabase
@@ -64,6 +73,24 @@ export default async function PainelClientePage() {
     <div className="min-h-screen bg-surface py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
+        {successMessage && (
+          <div className="mb-6 p-4 rounded-xl bg-success/10 border border-success/20 text-success text-sm font-medium flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5" />
+            {successMessage}
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="mb-6 p-4 rounded-xl bg-error/10 border border-error/20 text-error text-sm font-medium flex items-center gap-2">
+            <XCircle className="w-5 h-5" />
+            {errorMessage}
+          </div>
+        )}
+
+        {!profile?.email_confirmed_at && (
+          <ConfirmEmailBanner email={user.email!} />
+        )}
+
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-4">

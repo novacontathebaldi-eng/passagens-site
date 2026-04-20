@@ -81,11 +81,15 @@ export async function signup(formData: FormData) {
 
 export async function signInWithGoogle() {
   const supabase = await createClient();
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") || headersList.get("host");
+  const protocol = headersList.get("x-forwarded-proto") || "https";
+  const origin = headersList.get("origin") || (host ? `${protocol}://${host}` : null) || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL!.replace(".supabase.co", "")}.supabase.co/auth/v1/callback`,
+      redirectTo: `${origin}/auth/callback`,
       queryParams: {
         access_type: "offline",
         prompt: "consent",
