@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+/* ==========================================
+   ViajaEdu! — Design System Tokens
+   "The Curated Transit" — Premium Travel Experience
+   ========================================== */
+
+@theme inline {
+  /* ── Primary Palette: Royal Blue (Trust & Horizon) ── */
+  --color-primary: #1E40AF;
+  --color-primary-dark: #00288E;
+  --color-primary-light: #3755C3;
+  --color-primary-container: #DDE1FF;
+  --color-on-primary: #FFFFFF;
+  --color-on-primary-container: #001453;
+
+  /* ── Secondary Palette: Turquoise (Clarity & Movement) ── */
+  --color-secondary: #06B6D4;
+  --color-secondary-dark: #00687A;
+  --color-secondary-light: #4CD7F6;
+  --color-secondary-container: #57DFFE;
+  --color-on-secondary: #FFFFFF;
+  --color-on-secondary-container: #001F26;
+
+  /* ── Tertiary / CTA Palette: Solar Orange (Action & Energy) ── */
+  --color-cta: #F97316;
+  --color-cta-dark: #5B2400;
+  --color-cta-light: #FFB690;
+  --color-cta-container: #FFDBCA;
+  --color-on-cta: #FFFFFF;
+  --color-on-cta-container: #341100;
+
+  /* ── Surface Architecture ── */
+  --color-surface: #F7F9FB;
+  --color-surface-bright: #F7F9FB;
+  --color-surface-dim: #D8DADC;
+  --color-surface-container: #ECEEF0;
+  --color-surface-container-low: #F2F4F6;
+  --color-surface-container-high: #E6E8EA;
+  --color-surface-container-lowest: #FFFFFF;
+
+  /* ── Text Colors ── */
+  --color-on-surface: #191C1E;
+  --color-on-surface-variant: #444653;
+  --color-outline: #757684;
+  --color-outline-variant: #C4C5D5;
+
+  /* ── Feedback ── */
+  --color-success: #16A34A;
+  --color-success-light: #DCFCE7;
+  --color-error: #BA1A1A;
+  --color-error-light: #FFDAD6;
+  --color-warning: #EAB308;
+  --color-warning-light: #FEF9C3;
+
+  /* ── Typography ── */
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* ── Spacing and Radius left to Tailwind defaults for v4 compatibility ── */
+
+  /* ── Shadows (Ambient, No Pure Black) ── */
+  --shadow-sm: 0 1px 3px rgba(25, 28, 30, 0.04);
+  --shadow-md: 0 4px 16px rgba(25, 28, 30, 0.06);
+  --shadow-lg: 0 8px 32px rgba(25, 28, 30, 0.08);
+  --shadow-xl: 0 16px 64px rgba(25, 28, 30, 0.1);
+  --shadow-glow-primary: 0 0 24px rgba(30, 64, 175, 0.15);
+  --shadow-glow-cta: 0 0 24px rgba(249, 115, 22, 0.2);
+}
+
+/* ── Base Styles ── */
+body {
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-on-surface);
+}
+
+/* ── Glassmorphism Utility ── */
+.glass {
+  background: rgba(247, 249, 251, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-dark {
+  background: rgba(25, 28, 30, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Gradient Utilities ── */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+}
+
+.gradient-cta {
+  background: linear-gradient(135deg, var(--color-cta) 0%, #EA580C 100%);
+}
+
+.gradient-hero {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary-dark) 50%, var(--color-primary-dark) 100%);
+}
+
+/* ── Scrollbar Styling ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-container-low);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline);
+}
+
+/* ── Focus States (Accessibility) ── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

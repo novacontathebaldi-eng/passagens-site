@@ -1,0 +1,357 @@
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { formatBRL, formatDate } from "@/lib/utils";
+
+const CATEGORIES = [
+  { label: "Todos", value: "" },
+  { label: "🏖️ Praias", value: "Praias" },
+  { label: "⛪ Religioso", value: "Religioso" },
+  { label: "🏔️ Serra", value: "Serra" },
+  { label: "🚀 Bate-volta", value: "Bate-volta" },
+];
+
+export default async function HomePage() {
+  const supabase = await createClient();
+
+  const { data: excursions } = await supabase
+    .from("excursions")
+    .select(
+      `
+      id,
+      price_per_seat,
+      departure_date,
+      return_date,
+      status,
+      allow_seat_selection,
+      highlight_text,
+      boarding_locations,
+      tour_packages (
+        id,
+        title,
+        slug,
+        short_description,
+        images,
+        category
+      ),
+      vehicle_layouts (
+        capacity
+      )
+    `
+    )
+    .eq("status", "PUBLISHED")
+    .order("departure_date", { ascending: true });
+
+  return (
+    <>
+      {/* ══════════ HERO SECTION ══════════ */}
+      <section className="relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 gradient-hero" />
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 -left-20 w-96 h-96 rounded-full bg-white/20 blur-3xl animate-pulse" />
+          <div className="absolute bottom-10 right-0 w-[500px] h-[500px] rounded-full bg-secondary/20 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/5 blur-3xl" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/90 text-sm font-medium mb-6 backdrop-blur-sm">
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+              Vagas abertas para próximas excursões
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
+              Descubra destinos{" "}
+              <span className="bg-gradient-to-r from-cta-light to-cta bg-clip-text text-transparent">
+                incríveis
+              </span>{" "}
+              pelo Brasil
+            </h1>
+
+            <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed max-w-2xl">
+              Excursões turísticas de ônibus com tudo incluso. Escolha seu
+              destino, garanta sua vaga e embarque na aventura!
+            </p>
+
+            {/* Search Bar */}
+            <div className="mt-10 flex flex-col sm:flex-row gap-3">
+              <div className="flex-1 relative">
+                <svg
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Para onde você quer viajar?"
+                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white text-on-surface text-base placeholder:text-outline shadow-xl focus:ring-2 focus:ring-cta focus:outline-none transition-all"
+                />
+              </div>
+              <button className="px-8 py-4 rounded-2xl gradient-cta text-on-cta font-bold text-base shadow-xl hover:shadow-glow-cta transition-all whitespace-nowrap">
+                Buscar
+              </button>
+            </div>
+
+            {/* Quick Filters */}
+            <div className="mt-6 flex flex-wrap gap-2">
+              {CATEGORIES.slice(1).map((cat) => (
+                <span
+                  key={cat.value}
+                  className="px-4 py-2 rounded-full bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 cursor-pointer transition-colors backdrop-blur-sm"
+                >
+                  {cat.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Wave separator */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg
+            viewBox="0 0 1440 80"
+            fill="none"
+            className="w-full text-surface"
+          >
+            <path
+              d="M0 32C240 64 480 80 720 64C960 48 1200 16 1440 32V80H0V32Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+      </section>
+
+      {/* ══════════ STATS BAR ══════════ */}
+      <section className="relative -mt-2 z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: "🚌", number: "50+", label: "Excursões realizadas" },
+              { icon: "😊", number: "2.000+", label: "Viajantes felizes" },
+              { icon: "🌴", number: "15+", label: "Destinos" },
+              { icon: "⭐", number: "4.9", label: "Avaliação média" },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="bg-surface-container-lowest rounded-2xl p-5 text-center shadow-md hover:shadow-lg transition-shadow"
+              >
+                <span className="text-2xl">{stat.icon}</span>
+                <p className="text-2xl font-bold text-primary mt-1">
+                  {stat.number}
+                </p>
+                <p className="text-xs text-on-surface-variant mt-1">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ EXCURSÕES ══════════ */}
+      <section id="excursoes" className="py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-on-surface">
+              Próximas Excursões
+            </h2>
+            <p className="mt-3 text-on-surface-variant text-lg max-w-2xl mx-auto">
+              Escolha seu destino e garanta sua vaga. Pagamento facilitado via
+              PIX com confirmação em até 24h.
+            </p>
+          </div>
+
+          {/* Excursion Cards Grid */}
+          {excursions && excursions.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {excursions.map((exc) => {
+                const pkgRaw = exc.tour_packages as unknown;
+                const pkg = (Array.isArray(pkgRaw) ? pkgRaw[0] : pkgRaw) as {
+                  id: string;
+                  title: string;
+                  slug: string;
+                  short_description: string;
+                  images: string[];
+                  category: string;
+                } | null;
+                const vehRaw = exc.vehicle_layouts as unknown;
+                const vehicle = (Array.isArray(vehRaw) ? vehRaw[0] : vehRaw) as {
+                  capacity: number;
+                } | null;
+
+                if (!pkg) return null;
+
+                return (
+                  <article
+                    key={exc.id}
+                    className="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                  >
+                    {/* Image */}
+                    <div className="relative h-52 overflow-hidden">
+                      <img
+                        src={pkg.images?.[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800"}
+                        alt={pkg.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+                      {/* Category badge */}
+                      {pkg.category && (
+                        <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-on-surface">
+                          {pkg.category}
+                        </span>
+                      )}
+
+                      {/* Highlight badge */}
+                      {exc.highlight_text && (
+                        <span className="absolute top-3 right-3 px-3 py-1 rounded-full gradient-cta text-on-cta text-xs font-bold shadow-md">
+                          {exc.highlight_text}
+                        </span>
+                      )}
+
+                      {/* Price overlay */}
+                      <div className="absolute bottom-3 right-3 bg-white rounded-xl px-3 py-1.5 shadow-lg">
+                        <span className="text-xs text-on-surface-variant">
+                          a partir de
+                        </span>
+                        <p className="text-lg font-bold text-primary -mt-0.5">
+                          {formatBRL(Number(exc.price_per_seat))}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className="text-lg font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">
+                        {pkg.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-on-surface-variant leading-relaxed line-clamp-2 flex-1">
+                        {pkg.short_description}
+                      </p>
+
+                      {/* Meta */}
+                      <div className="mt-4 flex items-center gap-4 text-xs text-outline">
+                        <span className="flex items-center gap-1">
+                          📅 {formatDate(exc.departure_date)}
+                        </span>
+                        {vehicle && (
+                          <span className="flex items-center gap-1">
+                            💺 {vehicle.capacity} vagas
+                          </span>
+                        )}
+                      </div>
+
+                      {/* CTA */}
+                      <Link
+                        href={`/excursao/${pkg.slug}`}
+                        className="mt-4 block text-center py-3 rounded-xl gradient-cta text-on-cta font-semibold text-sm shadow-sm hover:shadow-glow-cta transition-all"
+                      >
+                        Ver detalhes e reservar
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <span className="text-5xl">🚌</span>
+              <p className="mt-4 text-lg text-on-surface-variant">
+                Novas excursões em breve! Cadastre-se para ser avisado.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ══════════ HOW IT WORKS ══════════ */}
+      <section className="py-16 bg-surface-container-low">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-extrabold text-center text-on-surface mb-12">
+            Como funciona?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "01",
+                icon: "🎯",
+                title: "Escolha seu destino",
+                desc: "Navegue pelas excursões disponíveis e encontre a viagem perfeita para você.",
+              },
+              {
+                step: "02",
+                icon: "💳",
+                title: "Pague via PIX",
+                desc: "Faça o pagamento por PIX e envie o comprovante. Confirmação em até 24h.",
+              },
+              {
+                step: "03",
+                icon: "🎉",
+                title: "Embarque e aproveite!",
+                desc: "Receba seu voucher digital, vá ao ponto de embarque e aproveite a viagem!",
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="relative bg-surface-container-lowest rounded-2xl p-6 shadow-md text-center group hover:shadow-lg transition-all"
+              >
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full gradient-primary text-on-primary text-xs font-bold flex items-center justify-center shadow-md">
+                  {item.step}
+                </div>
+                <span className="text-4xl block mt-2 mb-4">{item.icon}</span>
+                <h3 className="text-lg font-bold text-on-surface">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm text-on-surface-variant leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ CTA FINAL ══════════ */}
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="gradient-hero rounded-3xl p-10 sm:p-16 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-white/20 blur-3xl" />
+            </div>
+            <div className="relative z-10">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+                Pronto para embarcar?
+              </h2>
+              <p className="mt-4 text-lg text-white/80 max-w-xl mx-auto">
+                Cadastre-se gratuitamente e garanta sua vaga nas melhores
+                excursões do Brasil.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/cadastro"
+                  className="px-8 py-4 rounded-2xl gradient-cta text-on-cta font-bold text-base shadow-xl hover:shadow-glow-cta transition-all"
+                >
+                  Criar conta gratuita
+                </Link>
+                <Link
+                  href="/#excursoes"
+                  className="px-8 py-4 rounded-2xl bg-white/10 text-white font-semibold text-base hover:bg-white/20 transition-colors backdrop-blur-sm"
+                >
+                  Ver excursões
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

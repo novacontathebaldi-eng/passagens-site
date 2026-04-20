@@ -1,0 +1,233 @@
+"use client";
+
+import { Suspense, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { signup, signInWithGoogle } from "../actions";
+
+export default function CadastroPage() {
+  return (
+    <Suspense>
+      <CadastroContent />
+    </Suspense>
+  );
+}
+
+function CadastroContent() {
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleSubmit(formData: FormData) {
+    setIsLoading(true);
+    await signup(formData);
+    setIsLoading(false);
+  }
+
+  return (
+    <main className="min-h-screen bg-surface flex">
+      {/* Left: Decorative Panel */}
+      <div className="hidden lg:flex lg:w-1/2 gradient-hero relative overflow-hidden items-center justify-center">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-32 left-16 w-80 h-80 rounded-full bg-white/20 blur-3xl" />
+          <div className="absolute bottom-16 right-24 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
+        </div>
+        <div className="relative z-10 text-center text-white px-12 max-w-lg">
+          <div className="text-6xl mb-6">🎉</div>
+          <h2 className="text-4xl font-extrabold font-[family-name:var(--font-display)] mb-4">
+            Garanta sua vaga!
+          </h2>
+          <p className="text-lg opacity-90 leading-relaxed">
+            Crie sua conta gratuita e descubra excursões incríveis para os
+            melhores destinos do Brasil.
+          </p>
+          <div className="mt-8 grid grid-cols-1 gap-3 text-left text-sm">
+            <div className="flex items-start gap-3 bg-white/10 rounded-xl p-3">
+              <span className="text-lg">🎫</span>
+              <div>
+                <p className="font-semibold">Garanta sua vaga antecipado</p>
+                <p className="opacity-75">Reserve antes e não fique de fora</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 bg-white/10 rounded-xl p-3">
+              <span className="text-lg">👨‍👩‍👧‍👦</span>
+              <div>
+                <p className="font-semibold">Salve seus acompanhantes</p>
+                <p className="opacity-75">Cadastre familiares para compras rápidas</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 bg-white/10 rounded-xl p-3">
+              <span className="text-lg">📱</span>
+              <div>
+                <p className="font-semibold">Voucher digital no celular</p>
+                <p className="opacity-75">Sem papel, tudo no seu smartphone</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right: Signup Form */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-md space-y-8">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center">
+            <span className="text-4xl">🚌</span>
+            <h1 className="text-2xl font-extrabold font-[family-name:var(--font-display)] text-primary mt-2">
+              ViajaEdu!
+            </h1>
+          </div>
+
+          <div>
+            <h1 className="text-3xl font-bold font-[family-name:var(--font-display)] text-on-surface">
+              Criar sua conta
+            </h1>
+            <p className="mt-2 text-on-surface-variant">
+              É rápido, grátis e você já pode reservar.
+            </p>
+          </div>
+
+          {error && (
+            <div className="rounded-xl bg-error-light border border-error/20 px-4 py-3 text-sm text-error">
+              {error}
+            </div>
+          )}
+
+          {/* Google Login */}
+          <form action={signInWithGoogle}>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border-2 border-outline-variant hover:border-primary hover:bg-primary-container/30 transition-all duration-200 font-medium text-on-surface"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              </svg>
+              Cadastrar com Google
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-outline-variant" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-surface text-on-surface-variant">
+                ou cadastre com e-mail
+              </span>
+            </div>
+          </div>
+
+          {/* Signup Form */}
+          <form action={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="full_name" className="block text-sm font-medium text-on-surface mb-1.5">
+                Nome completo
+              </label>
+              <input
+                id="full_name"
+                name="full_name"
+                type="text"
+                autoComplete="name"
+                required
+                placeholder="Seu nome completo"
+                className="w-full rounded-xl border-2 border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 transition-colors"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-on-surface mb-1.5">
+                E-mail
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                placeholder="seu@email.com"
+                className="w-full rounded-xl border-2 border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 transition-colors"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-on-surface mb-1.5">
+                Senha
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={6}
+                placeholder="Mínimo 6 caracteres"
+                className="w-full rounded-xl border-2 border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 transition-colors"
+              />
+            </div>
+
+            {/* Marketing Opt-in (LGPD) */}
+            <label
+              htmlFor="accepts_marketing"
+              className="flex items-start gap-3 cursor-pointer group"
+            >
+              <input
+                id="accepts_marketing"
+                name="accepts_marketing"
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
+              />
+              <span className="text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">
+                Quero receber ofertas exclusivas e vagas em primeira mão por
+                e-mail. Posso cancelar a qualquer momento.
+              </span>
+            </label>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full gradient-cta text-on-cta font-semibold py-3.5 rounded-xl shadow-md hover:shadow-glow-cta transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Criando conta...
+                </span>
+              ) : (
+                "Criar conta gratuita"
+              )}
+            </button>
+
+            <p className="text-xs text-center text-outline">
+              Ao criar sua conta, você concorda com nossos{" "}
+              <Link href="/termos" className="text-primary hover:underline">
+                Termos de Uso
+              </Link>{" "}
+              e{" "}
+              <Link href="/privacidade" className="text-primary hover:underline">
+                Política de Privacidade
+              </Link>
+              .
+            </p>
+          </form>
+
+          <p className="text-center text-sm text-on-surface-variant">
+            Já tem conta?{" "}
+            <Link
+              href="/login"
+              className="font-semibold text-primary hover:text-primary-dark transition-colors"
+            >
+              Faça login
+            </Link>
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
