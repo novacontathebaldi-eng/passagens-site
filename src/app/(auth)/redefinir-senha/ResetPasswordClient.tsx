@@ -38,8 +38,8 @@ export function ResetPasswordClient() {
         <p className="text-on-surface-variant text-sm mb-6">
           Sua senha foi redefinida com sucesso. Agora você pode entrar na sua conta.
         </p>
-        <a 
-          href="/login" 
+        <a
+          href="/login"
           className="inline-block bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-xl font-bold transition-colors"
         >
           Fazer Login
