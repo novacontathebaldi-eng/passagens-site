@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
+import {
+  HeroContainer,
+  FadeInUp,
+  FloatingBubbles,
+  ScrollReveal,
+  CardGrid,
+  MotionCard,
+} from "@/components/MotionWrappers";
 
 const CATEGORIES = [
   { label: "Todos", value: "" },
@@ -52,71 +60,77 @@ export default async function HomePage() {
         />
         {/* Gradient overlay (ensures readability over any image) */}
         <div className="absolute inset-0 gradient-hero opacity-90" />
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 -left-20 w-96 h-96 rounded-full bg-white/20 blur-3xl animate-pulse" />
-          <div className="absolute bottom-10 right-0 w-[500px] h-[500px] rounded-full bg-secondary/20 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/5 blur-3xl" />
-        </div>
+        <FloatingBubbles />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24 sm:pt-16 sm:pb-32 lg:pt-20 lg:pb-40">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/90 text-sm font-medium mb-6 backdrop-blur-sm">
-              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              Vagas abertas para próximas excursões
-            </div>
+          <HeroContainer className="max-w-3xl">
+            <FadeInUp>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/90 text-sm font-medium mb-6 backdrop-blur-sm">
+                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                Vagas abertas para próximas excursões
+              </div>
+            </FadeInUp>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight drop-shadow-xl">
-              Descubra destinos{" "}
-              <span className="bg-gradient-to-r from-cta-light to-cta bg-clip-text text-transparent drop-shadow-md">
-                incríveis
-              </span>{" "}
-              pelo Brasil
-            </h1>
+            <FadeInUp>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight drop-shadow-xl">
+                Descubra destinos{" "}
+                <span className="bg-gradient-to-r from-cta-light to-cta bg-clip-text text-transparent drop-shadow-md">
+                  incríveis
+                </span>{" "}
+                pelo Brasil
+              </h1>
+            </FadeInUp>
 
-            <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed max-w-2xl">
-              Excursões turísticas de ônibus com tudo incluso. Escolha seu
-              destino, garanta sua vaga e embarque na aventura!
-            </p>
+            <FadeInUp>
+              <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed max-w-2xl">
+                Excursões turísticas de ônibus com tudo incluso. Escolha seu
+                destino, garanta sua vaga e embarque na aventura!
+              </p>
+            </FadeInUp>
 
             {/* Search Bar */}
-            <div className="mt-10 flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 relative">
-                <svg
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            <FadeInUp>
+              <div className="mt-10 flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 relative">
+                  <svg
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Para onde você quer viajar?"
+                    className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white text-on-surface text-base placeholder:text-outline shadow-xl focus:ring-2 focus:ring-cta focus:outline-none transition-all"
                   />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Para onde você quer viajar?"
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white text-on-surface text-base placeholder:text-outline shadow-xl focus:ring-2 focus:ring-cta focus:outline-none transition-all"
-                />
+                </div>
+                <button className="px-8 py-4 rounded-2xl gradient-cta text-on-cta font-bold text-base shadow-xl hover:shadow-glow-cta transition-all whitespace-nowrap">
+                  Buscar
+                </button>
               </div>
-              <button className="px-8 py-4 rounded-2xl gradient-cta text-on-cta font-bold text-base shadow-xl hover:shadow-glow-cta transition-all whitespace-nowrap">
-                Buscar
-              </button>
-            </div>
+            </FadeInUp>
 
             {/* Quick Filters */}
-            <div className="mt-6 flex flex-wrap gap-2">
-              {CATEGORIES.slice(1).map((cat) => (
-                <span
-                  key={cat.value}
-                  className="px-4 py-2 rounded-full bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 cursor-pointer transition-colors backdrop-blur-sm"
-                >
-                  {cat.label}
-                </span>
-              ))}
-            </div>
-          </div>
+            <FadeInUp>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {CATEGORIES.slice(1).map((cat) => (
+                  <span
+                    key={cat.value}
+                    className="px-4 py-2 rounded-full bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 cursor-pointer transition-colors backdrop-blur-sm"
+                  >
+                    {cat.label}
+                  </span>
+                ))}
+              </div>
+            </FadeInUp>
+          </HeroContainer>
         </div>
 
         {/* Wave separator */}
@@ -137,7 +151,7 @@ export default async function HomePage() {
 
       {/* ══════════ STATS BAR ══════════ */}
       <section className="relative -mt-2 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ScrollReveal className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { number: "50+", label: "Excursões realizadas", iconPath: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
@@ -161,12 +175,12 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* ══════════ EXCURSÕES ══════════ */}
       <section id="excursoes" className="py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ScrollReveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-on-surface">
               Próximas Excursões
@@ -179,7 +193,7 @@ export default async function HomePage() {
 
           {/* Excursion Cards Grid */}
           {excursions && excursions.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <CardGrid className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {excursions.map((exc) => {
                 const pkgRaw = exc.tour_packages as unknown;
                 const pkg = (Array.isArray(pkgRaw) ? pkgRaw[0] : pkgRaw) as {
@@ -198,9 +212,9 @@ export default async function HomePage() {
                 if (!pkg) return null;
 
                 return (
-                  <article
+                  <MotionCard
                     key={exc.id}
-                    className="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                    className="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-md transition-shadow duration-300 hover:shadow-xl flex flex-col"
                   >
                     {/* Image */}
                     <div className="relative h-52 overflow-hidden">
@@ -271,10 +285,10 @@ export default async function HomePage() {
                         Ver detalhes e reservar
                       </Link>
                     </div>
-                  </article>
+                  </MotionCard>
                 );
               })}
-            </div>
+            </CardGrid>
           ) : (
             <div className="text-center py-16">
               <svg className="w-16 h-16 mx-auto text-outline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
@@ -286,12 +300,12 @@ export default async function HomePage() {
               </p>
             </div>
           )}
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* ══════════ HOW IT WORKS ══════════ */}
       <section className="py-16 bg-surface-container-low">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ScrollReveal className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-extrabold text-center text-on-surface mb-12">
             Como funciona?
           </h2>
@@ -335,12 +349,12 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* ══════════ CTA FINAL ══════════ */}
       <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <ScrollReveal className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="gradient-hero rounded-3xl p-10 sm:p-16 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-white/20 blur-3xl" />
@@ -369,7 +383,7 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
     </>
   );
