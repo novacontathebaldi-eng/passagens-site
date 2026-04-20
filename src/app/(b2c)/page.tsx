@@ -4,10 +4,10 @@ import { formatBRL, formatDate } from "@/lib/utils";
 
 const CATEGORIES = [
   { label: "Todos", value: "" },
-  { label: "🏖️ Praias", value: "Praias" },
-  { label: "⛪ Religioso", value: "Religioso" },
-  { label: "🏔️ Serra", value: "Serra" },
-  { label: "🚀 Bate-volta", value: "Bate-volta" },
+  { label: "Praias", value: "Praias" },
+  { label: "Religioso", value: "Religioso" },
+  { label: "Serra", value: "Serra" },
+  { label: "Bate-volta", value: "Bate-volta" },
 ];
 
 export default async function HomePage() {
@@ -134,16 +134,18 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: "🚌", number: "50+", label: "Excursões realizadas" },
-              { icon: "😊", number: "2.000+", label: "Viajantes felizes" },
-              { icon: "🌴", number: "15+", label: "Destinos" },
-              { icon: "⭐", number: "4.9", label: "Avaliação média" },
+              { number: "50+", label: "Excursões realizadas", iconPath: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
+              { number: "2.000+", label: "Viajantes felizes", iconPath: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
+              { number: "15+", label: "Destinos", iconPath: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" },
+              { number: "4.9", label: "Avaliação média", iconPath: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" },
             ].map((stat) => (
               <div
                 key={stat.label}
                 className="bg-surface-container-lowest rounded-2xl p-5 text-center shadow-md hover:shadow-lg transition-shadow"
               >
-                <span className="text-2xl">{stat.icon}</span>
+                <svg className="w-6 h-6 mx-auto text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={stat.iconPath} />
+                </svg>
                 <p className="text-2xl font-bold text-primary mt-1">
                   {stat.number}
                 </p>
@@ -240,11 +242,17 @@ export default async function HomePage() {
                       {/* Meta */}
                       <div className="mt-4 flex items-center gap-4 text-xs text-outline">
                         <span className="flex items-center gap-1">
-                          📅 {formatDate(exc.departure_date)}
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {formatDate(exc.departure_date)}
                         </span>
                         {vehicle && (
                           <span className="flex items-center gap-1">
-                            💺 {vehicle.capacity} vagas
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {vehicle.capacity} vagas
                           </span>
                         )}
                       </div>
@@ -263,7 +271,10 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <span className="text-5xl">🚌</span>
+              <svg className="w-16 h-16 mx-auto text-outline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
               <p className="mt-4 text-lg text-on-surface-variant">
                 Novas excursões em breve! Cadastre-se para ser avisado.
               </p>
@@ -282,19 +293,19 @@ export default async function HomePage() {
             {[
               {
                 step: "01",
-                icon: "🎯",
+                iconPath: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
                 title: "Escolha seu destino",
                 desc: "Navegue pelas excursões disponíveis e encontre a viagem perfeita para você.",
               },
               {
                 step: "02",
-                icon: "💳",
+                iconPath: "M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z",
                 title: "Pague via PIX",
                 desc: "Faça o pagamento por PIX e envie o comprovante. Confirmação em até 24h.",
               },
               {
                 step: "03",
-                icon: "🎉",
+                iconPath: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
                 title: "Embarque e aproveite!",
                 desc: "Receba seu voucher digital, vá ao ponto de embarque e aproveite a viagem!",
               },
@@ -306,7 +317,9 @@ export default async function HomePage() {
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full gradient-primary text-on-primary text-xs font-bold flex items-center justify-center shadow-md">
                   {item.step}
                 </div>
-                <span className="text-4xl block mt-2 mb-4">{item.icon}</span>
+                <svg className="w-10 h-10 mx-auto mt-2 mb-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
+                </svg>
                 <h3 className="text-lg font-bold text-on-surface">
                   {item.title}
                 </h3>

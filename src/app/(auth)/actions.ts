@@ -47,7 +47,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/painel");
 }
 
 export async function signup(formData: FormData) {
@@ -76,7 +76,7 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/?welcome=true");
+  redirect("/completar-cadastro");
 }
 
 export async function signInWithGoogle() {
@@ -156,8 +156,22 @@ export async function completeProfile(formData: FormData) {
     redirect(`/completar-cadastro?error=${encodeURIComponent(error.message)}`);
   }
 
+  // Redirect based on role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
   revalidatePath("/", "layout");
-  redirect("/");
+
+  if (profile?.role === "ADMIN" || profile?.role === "AGENT") {
+    redirect("/admin");
+  }
+  if (profile?.role === "DRIVER") {
+    redirect("/motorista");
+  }
+  redirect("/painel");
 }
 
 export async function updatePassword(formData: FormData) {

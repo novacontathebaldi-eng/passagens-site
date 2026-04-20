@@ -39,7 +39,10 @@ export default async function MotoristaLayout({
       {/* Top App Bar Mobile */}
       <header className="bg-surface-container-lowest border-b border-outline-variant/30 sticky top-0 z-40 px-4 h-14 flex items-center justify-between shadow-sm">
         <div className="font-bold text-on-surface flex items-center gap-2">
-          <span className="text-xl">🚌</span> 
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <rect width="32" height="32" rx="8" className="fill-primary" />
+            <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
           <span className="tracking-tight">Expedição ViajaEdu</span>
         </div>
         <form action={logout}>

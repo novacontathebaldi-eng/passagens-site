@@ -38,30 +38,52 @@ function LoginContent() {
 
   return (
     <main className="min-h-screen bg-surface flex">
-      {/* Left: Decorative Panel */}
-      <div className="hidden lg:flex lg:w-1/2 gradient-hero relative overflow-hidden items-center justify-center">
+      {/* Left: Image Panel */}
+      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+        {/* Dynamic background image from admin, fallback to gradient */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url('/api/settings/image?field=login_image_url')`,
+          }}
+        />
+        {/* Gradient overlay for readability */}
+        <div className="absolute inset-0 gradient-hero opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+        {/* Decorative blurs */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-20 w-72 h-72 rounded-full bg-white/20 blur-3xl" />
           <div className="absolute bottom-20 right-20 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
         </div>
-        <div className="relative z-10 text-center text-white px-12 max-w-lg">
-          <div className="text-6xl mb-6">🚌</div>
-          <h2 className="text-4xl font-extrabold font-[family-name:var(--font-display)] mb-4">
-            ViajaEdu!
+
+        {/* Content */}
+        <div className="relative z-10 h-full flex flex-col justify-end p-12 pb-16">
+          <h2 className="text-4xl font-extrabold font-[family-name:var(--font-display)] text-white mb-4">
+            Sua próxima aventura começa aqui
           </h2>
-          <p className="text-lg opacity-90 leading-relaxed">
+          <p className="text-lg text-white/80 leading-relaxed max-w-md">
             Descubra destinos incríveis com excursões turísticas de ônibus
-            premium. Sua próxima aventura começa aqui.
+            premium. Pacotes completos com guia e tudo incluso.
           </p>
-          <div className="mt-8 flex items-center justify-center gap-6 text-sm opacity-70">
+          <div className="mt-6 flex items-center gap-6 text-sm text-white/70">
             <span className="flex items-center gap-2">
-              ✓ Ônibus executivo
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Ônibus executivo
             </span>
             <span className="flex items-center gap-2">
-              ✓ Guia turístico
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Guia turístico
             </span>
             <span className="flex items-center gap-2">
-              ✓ Tudo incluso
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Tudo incluso
             </span>
           </div>
         </div>
@@ -72,10 +94,16 @@ function LoginContent() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center">
-            <span className="text-4xl">🚌</span>
-            <h1 className="text-2xl font-extrabold font-[family-name:var(--font-display)] text-primary mt-2">
-              ViajaEdu!
-            </h1>
+            <div className="inline-flex items-center gap-2">
+              <svg width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                <rect width="32" height="32" rx="8" className="fill-primary" />
+                <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 10L16 18L20 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
+              </svg>
+              <span className="text-2xl font-extrabold font-[family-name:var(--font-display)] text-primary">
+                ViajaEdu!
+              </span>
+            </div>
           </div>
 
           <div>

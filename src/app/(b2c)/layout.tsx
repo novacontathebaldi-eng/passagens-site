@@ -1,12 +1,96 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteSettings } from "@/lib/get-settings";
 
 export const metadata: Metadata = {
   title: "ViajaEdu! — Excursões Turísticas Rodoviárias",
   description:
     "Descubra destinos incríveis com excursões turísticas de ônibus premium. Pacotes completos com guia, ônibus executivo e tudo incluso.",
 };
+
+function LogoMark({ logoUrl, size = 28 }: { logoUrl?: string | null; size?: number }) {
+  if (logoUrl) {
+    return (
+      <Image
+        src={logoUrl}
+        alt="ViajaEdu!"
+        width={size}
+        height={size}
+        className="object-contain"
+        unoptimized
+      />
+    );
+  }
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect width="32" height="32" rx="8" className="fill-primary" />
+      <path
+        d="M8 10L16 24L24 10"
+        stroke="white"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 10L16 18L20 10"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.5"
+      />
+    </svg>
+  );
+}
+
+function LogoMarkWhite({ logoUrl, size = 28 }: { logoUrl?: string | null; size?: number }) {
+  if (logoUrl) {
+    return (
+      <Image
+        src={logoUrl}
+        alt="ViajaEdu!"
+        width={size}
+        height={size}
+        className="object-contain brightness-0 invert"
+        unoptimized
+      />
+    );
+  }
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect width="32" height="32" rx="8" fill="white" fillOpacity="0.15" />
+      <path
+        d="M8 10L16 24L24 10"
+        stroke="white"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 10L16 18L20 10"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.5"
+      />
+    </svg>
+  );
+}
 
 export default async function B2CLayout({
   children,
@@ -18,6 +102,8 @@ export default async function B2CLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  const settings = await getSiteSettings();
+
   return (
     <div className="min-h-screen flex flex-col" suppressHydrationWarning>
       {/* ── Navbar ── */}
@@ -25,9 +111,9 @@ export default async function B2CLayout({
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl">🚌</span>
+            <LogoMark logoUrl={settings.logo_url} size={28} />
             <span className="text-xl font-extrabold font-[family-name:var(--font-display)] text-primary group-hover:text-primary-dark transition-colors">
-              ViajaEdu!
+              {settings.company_name}
             </span>
           </Link>
 
@@ -105,9 +191,9 @@ export default async function B2CLayout({
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">🚌</span>
+                <LogoMarkWhite logoUrl={settings.logo_url} size={28} />
                 <span className="text-xl font-extrabold font-[family-name:var(--font-display)] text-white">
-                  ViajaEdu!
+                  {settings.company_name}
                 </span>
               </div>
               <p className="text-sm text-outline-variant leading-relaxed">
@@ -163,14 +249,24 @@ export default async function B2CLayout({
                 Contato
               </h3>
               <ul className="space-y-2 text-sm text-outline-variant">
-                <li>📧 suporte@othebaldi.me</li>
-                <li>📱 WhatsApp disponível no checkout</li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  suporte@othebaldi.me
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  WhatsApp disponível no checkout
+                </li>
               </ul>
             </div>
           </div>
 
           <div className="mt-12 pt-6 border-t border-outline/30 text-center text-xs text-outline">
-            © {new Date().getFullYear()} ViajaEdu! — Todos os direitos
+            © {new Date().getFullYear()} {settings.company_name} — Todos os direitos
             reservados.
           </div>
         </div>

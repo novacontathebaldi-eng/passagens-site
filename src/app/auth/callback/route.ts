@@ -23,12 +23,12 @@ export async function GET(request: Request) {
           .eq("id", user.id)
           .single();
 
-        // Google login users might not have CPF yet
-        if (profile && !profile.cpf && next === "/") {
+        // Google login users might not have CPF yet — always redirect to complete
+        if (profile && !profile.cpf && next !== "/redefinir-senha") {
           return NextResponse.redirect(`${origin}/completar-cadastro`);
         }
 
-        // Role-based redirect
+        // Role-based redirect (only when next is default)
         if (next === "/") {
           if (profile?.role === "ADMIN" || profile?.role === "AGENT") {
             return NextResponse.redirect(`${origin}/admin`);
@@ -36,6 +36,8 @@ export async function GET(request: Request) {
           if (profile?.role === "DRIVER") {
             return NextResponse.redirect(`${origin}/motorista`);
           }
+          // CLIENT goes to /painel
+          return NextResponse.redirect(`${origin}/painel`);
         }
       }
 

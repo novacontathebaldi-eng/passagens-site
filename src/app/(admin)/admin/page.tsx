@@ -87,7 +87,7 @@ export default async function AdminDashboard() {
 
   const kpis = [
     {
-      icon: "🚌",
+      icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
       label: "Excursões Ativas",
       value: publishedExcursions ?? 0,
       sub: `${totalExcursions ?? 0} total`,
@@ -162,7 +162,11 @@ export default async function AdminDashboard() {
             className={`${kpi.bgColor} rounded-2xl p-5 hover:shadow-md transition-shadow`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-2xl">{kpi.icon}</span>
+              <div className="w-9 h-9 rounded-lg bg-white/50 flex items-center justify-center">
+                <svg className={`w-5 h-5 ${kpi.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={kpi.icon} />
+                </svg>
+              </div>
             </div>
             <p
               className={`text-2xl lg:text-3xl font-bold mt-3 ${kpi.color}`}
@@ -287,25 +291,25 @@ export default async function AdminDashboard() {
         {[
           {
             href: "/admin/excursoes",
-            icon: "🚌",
+            icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
             label: "Nova Excursão",
             desc: "Criar excursão",
           },
           {
             href: "/admin/roteiros",
-            icon: "🗺️",
+            icon: "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
             label: "Novo Roteiro",
             desc: "Criar pacote",
           },
           {
             href: "/admin/frotas",
-            icon: "🪑",
+            icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
             label: "Nova Frota",
             desc: "Criar layout",
           },
           {
             href: "/admin/configuracoes",
-            icon: "⚙️",
+            icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z",
             label: "Configurações",
             desc: "PIX, WhatsApp",
           },
@@ -315,9 +319,11 @@ export default async function AdminDashboard() {
             href={action.href}
             className="bg-surface-container-lowest rounded-2xl p-5 text-center hover:shadow-md hover:-translate-y-0.5 transition-all group"
           >
-            <span className="text-3xl block group-hover:scale-110 transition-transform">
-              {action.icon}
-            </span>
+            <div className="w-10 h-10 mx-auto rounded-xl bg-primary-container/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d={action.icon} />
+              </svg>
+            </div>
             <p className="text-sm font-bold text-on-surface mt-3">
               {action.label}
             </p>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Image from "next/image";
 
 type GlobalSettings = {
   id: number;
@@ -11,14 +12,138 @@ type GlobalSettings = {
   pix_key: string;
   pix_qr_code_url: string;
   pix_instructions: string;
-  whatsapp_support_numbers: string[]; // Simplification from JSONB for UI array
+  whatsapp_support_numbers: string[];
   hold_ttl_hours: number;
+  // Dynamic images
+  logo_url: string | null;
+  hero_image_url: string | null;
+  login_image_url: string | null;
+  signup_image_url: string | null;
+  favicon_url: string | null;
+  og_image_url: string | null;
 };
+
+const IMAGE_FIELDS = [
+  { key: "logo_url" as const, label: "Logo do Site", help: "Exibido no header, footer e favicon. Recomendado: PNG/SVG com fundo transparente.", accept: "image/png,image/svg+xml,image/webp" },
+  { key: "hero_image_url" as const, label: "Imagem do Hero (Home)", help: "Fundo da seção principal da página inicial. Recomendado: 1920×1080px.", accept: "image/jpeg,image/png,image/webp" },
+  { key: "login_image_url" as const, label: "Imagem do Login", help: "Painel lateral da página de login. Recomendado: 800×1200px.", accept: "image/jpeg,image/png,image/webp" },
+  { key: "signup_image_url" as const, label: "Imagem do Cadastro", help: "Painel lateral da página de cadastro. Recomendado: 800×1200px.", accept: "image/jpeg,image/png,image/webp" },
+  { key: "favicon_url" as const, label: "Favicon", help: "Ícone da aba do navegador. Recomendado: 32×32px PNG.", accept: "image/png,image/svg+xml,image/x-icon" },
+  { key: "og_image_url" as const, label: "Imagem OG (WhatsApp/Redes)", help: "Preview ao compartilhar links. Recomendado: 1200×630px.", accept: "image/jpeg,image/png,image/webp" },
+];
+
+function ImageUploader({
+  field,
+  currentUrl,
+  onUploaded,
+}: {
+  field: (typeof IMAGE_FIELDS)[number];
+  currentUrl: string | null;
+  onUploaded: (url: string) => void;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const supabase = createClient();
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `site/${field.key}.${ext}`;
+
+    // Remove old file if exists
+    await supabase.storage.from("assets").remove([path]);
+
+    // Upload new file
+    const { error } = await supabase.storage
+      .from("assets")
+      .upload(path, file, { upsert: true, cacheControl: "3600" });
+
+    if (error) {
+      alert("Erro ao fazer upload: " + error.message);
+      setIsUploading(false);
+      return;
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from("assets")
+      .getPublicUrl(path);
+
+    // Add cache buster
+    const url = `${urlData.publicUrl}?v=${Date.now()}`;
+    onUploaded(url);
+    setIsUploading(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-2 p-4 bg-surface rounded-xl border border-outline-variant/30">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm font-semibold text-on-surface">{field.label}</p>
+          <p className="text-xs text-on-surface-variant">{field.help}</p>
+        </div>
+        {currentUrl && (
+          <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-outline-variant/30 bg-surface-container shrink-0 ml-3">
+            <Image
+              src={currentUrl}
+              alt={field.label}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 mt-1">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={field.accept}
+          className="hidden"
+          onChange={handleUpload}
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={isUploading}
+          className="text-sm font-medium px-4 py-2 rounded-xl bg-primary-container/40 text-primary hover:bg-primary-container/60 transition-all disabled:opacity-50"
+        >
+          {isUploading ? (
+            <span className="flex items-center gap-2">
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Enviando...
+            </span>
+          ) : currentUrl ? (
+            "Trocar imagem"
+          ) : (
+            "Enviar imagem"
+          )}
+        </button>
+        {currentUrl && (
+          <span className="text-xs text-green-600 flex items-center gap-1">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Configurado
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function ConfiguracoesPage() {
   const [settings, setSettings] = useState<GlobalSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<{ type: "ok" | "error"; text: string } | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -30,8 +155,7 @@ export default function ConfiguracoesPage() {
         .single();
 
       if (data) {
-        // Handle JSONB to array for whatsapp numbers
-        let numbers = [];
+        let numbers: string[] = [];
         try {
           if (Array.isArray(data.whatsapp_support_numbers)) {
              numbers = data.whatsapp_support_numbers;
@@ -40,9 +164,8 @@ export default function ConfiguracoesPage() {
           }
         } catch(e) {}
 
-        setSettings({ ...data, whatsapp_support_numbers: numbers });
+        setSettings({ ...data, whatsapp_support_numbers: numbers.length > 0 ? numbers : [""] });
       } else if (error && error.code === 'PGRST116') {
-        // Row doesn't exist, set defaults (Ideally this is seeded in DB)
         setSettings({
           id: 1,
           company_name: "ViajaEdu!",
@@ -52,7 +175,13 @@ export default function ConfiguracoesPage() {
           pix_qr_code_url: "",
           pix_instructions: "Envie o comprovante no WhatsApp",
           whatsapp_support_numbers: [""],
-          hold_ttl_hours: 24
+          hold_ttl_hours: 24,
+          logo_url: null,
+          hero_image_url: null,
+          login_image_url: null,
+          signup_image_url: null,
+          favicon_url: null,
+          og_image_url: null,
         });
       }
       setIsLoading(false);
@@ -64,13 +193,13 @@ export default function ConfiguracoesPage() {
     e.preventDefault();
     if (!settings) return;
     setIsSaving(true);
+    setSaveMsg(null);
 
     const payload = {
       ...settings,
       whatsapp_support_numbers: JSON.stringify(settings.whatsapp_support_numbers)
     };
 
-    // Upsert the record (id=1)
     const { error } = await supabase
       .from("global_settings")
       .upsert(payload, { onConflict: "id" });
@@ -78,9 +207,10 @@ export default function ConfiguracoesPage() {
     setIsSaving(false);
 
     if (error) {
-      alert("Erro ao salvar configurações: " + error.message);
+      setSaveMsg({ type: "error", text: "Erro ao salvar: " + error.message });
     } else {
-      alert("Configurações globais salvas com sucesso!");
+      setSaveMsg({ type: "ok", text: "Configurações salvas com sucesso!" });
+      setTimeout(() => setSaveMsg(null), 4000);
     }
   };
 
@@ -96,7 +226,22 @@ export default function ConfiguracoesPage() {
     setSettings({ ...settings, whatsapp_support_numbers: [...settings.whatsapp_support_numbers, ""] });
   };
 
-  if (isLoading) return <div className="p-8">Carregando configurações...</div>;
+  const handleImageUploaded = (field: keyof GlobalSettings, url: string) => {
+    if (!settings) return;
+    setSettings({ ...settings, [field]: url });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-8 flex items-center gap-3">
+        <svg className="animate-spin h-5 w-5 text-primary" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        Carregando configurações...
+      </div>
+    );
+  }
   if (!settings) return null;
 
   return (
@@ -106,15 +251,54 @@ export default function ConfiguracoesPage() {
           Configurações Globais
         </h1>
         <p className="text-on-surface-variant text-sm mt-1">
-          Gerencie chaves PIX, TTL de reservas e automações do sistema. Alterações aqui refletem no site inteiro instantaneamente.
+          Gerencie imagens, chaves PIX, TTL de reservas e automações. Alterações refletem no site instantaneamente.
         </p>
       </div>
 
+      {/* Success/Error Message */}
+      {saveMsg && (
+        <div className={`rounded-xl px-4 py-3 text-sm font-medium ${
+          saveMsg.type === "ok" 
+            ? "bg-green-50 text-green-700 border border-green-200" 
+            : "bg-red-50 text-red-700 border border-red-200"
+        }`}>
+          {saveMsg.text}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-8 bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/30">
         
+        {/* IMAGENS DO SITE */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Imagens e Branding
+          </h2>
+          <p className="text-xs text-on-surface-variant">
+            Todas as imagens são armazenadas no Supabase Storage e aparecem no site em tempo real.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {IMAGE_FIELDS.map((field) => (
+              <ImageUploader
+                key={field.key}
+                field={field}
+                currentUrl={settings[field.key]}
+                onUploaded={(url) => handleImageUploaded(field.key, url)}
+              />
+            ))}
+          </div>
+        </section>
+
         {/* IDENTIDADE E BÁSICO */}
         <section className="space-y-4">
-          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2">Identidade e Geral</h2>
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            Identidade e Geral
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">Nome da Empresa</label>
@@ -136,14 +320,19 @@ export default function ConfiguracoesPage() {
                 min="1"
                 required
               />
-              <p className="text-xs text-on-surface-variant">Tempo até a reserva "Aguardando PIX" expirar e voltar para o estoque.</p>
+              <p className="text-xs text-on-surface-variant">Tempo até a reserva "Aguardando PIX" expirar.</p>
             </div>
           </div>
         </section>
 
         {/* PAGAMENTO E PIX */}
         <section className="space-y-4">
-          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2">Pagamento B2C (PIX)</h2>
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            Pagamento B2C (PIX)
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">Chave PIX (Copia e Cola)</label>
@@ -156,7 +345,7 @@ export default function ConfiguracoesPage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-on-surface">URL do QR Code PIX Estático (Imagem)</label>
+              <label className="text-sm font-semibold text-on-surface">URL do QR Code PIX Estático</label>
               <input 
                 type="url" 
                 value={settings.pix_qr_code_url}
@@ -180,7 +369,12 @@ export default function ConfiguracoesPage() {
 
         {/* COMUNICAÇÃO E NOTIFICAÇÕES */}
         <section className="space-y-4">
-          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2">Comunicação e Notificações</h2>
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            Comunicação e Notificações
+          </h2>
           
           <div className="grid grid-cols-1 gap-6">
             <div className="flex gap-4 items-center p-4 bg-surface rounded-xl border border-outline-variant/30">
@@ -247,9 +441,19 @@ export default function ConfiguracoesPage() {
           <button 
             type="submit" 
             disabled={isSaving}
-            className="bg-primary hover:bg-primary-dark text-on-primary px-8 py-3 rounded-full font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+            className="bg-primary hover:bg-primary-dark text-on-primary px-8 py-3 rounded-full font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
           >
-            {isSaving ? "Salvando..." : "Salvar Configurações"}
+            {isSaving ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Salvando...
+              </>
+            ) : (
+              "Salvar Configurações"
+            )}
           </button>
         </div>
       </form>

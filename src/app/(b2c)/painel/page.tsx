@@ -136,7 +136,10 @@ export default async function PainelClientePage() {
               </div>
             ) : (
               <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-8 text-center shadow-sm">
-                <span className="text-4xl">🚌</span>
+                <svg className="w-12 h-12 mx-auto text-outline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
                 <h3 className="mt-4 text-lg font-bold text-on-surface">Você ainda não possui viagens</h3>
                 <p className="mt-2 text-sm text-on-surface-variant">Que tal planejar sua próxima aventura hoje mesmo?</p>
                 <Link href="/#excursoes" className="mt-6 inline-block px-6 py-2 rounded-xl gradient-cta text-on-cta font-bold shadow-sm hover:shadow-glow-cta transition-all">
