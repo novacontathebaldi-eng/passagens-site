@@ -53,11 +53,11 @@ function CadastroContent() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 h-full flex flex-col justify-end p-12 pb-16">
-          <h2 className="text-4xl font-extrabold font-[family-name:var(--font-display)] text-white mb-4">
+        <div className="relative z-10 h-full flex flex-col justify-center p-12">
+          <h2 className="text-4xl font-extrabold font-[family-name:var(--font-display)] text-white mb-4 drop-shadow-xl">
             Garanta sua vaga!
           </h2>
-          <p className="text-lg text-white/80 leading-relaxed max-w-md">
+          <p className="text-lg text-white/90 leading-relaxed max-w-md drop-shadow-md font-medium">
             Crie sua conta gratuita e descubra excursões incríveis para os
             melhores destinos do Brasil.
           </p>

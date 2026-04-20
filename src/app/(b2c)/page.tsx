@@ -65,9 +65,9 @@ export default async function HomePage() {
               Vagas abertas para próximas excursões
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight drop-shadow-xl">
               Descubra destinos{" "}
-              <span className="bg-gradient-to-r from-cta-light to-cta bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cta-light to-cta bg-clip-text text-transparent drop-shadow-md">
                 incríveis
               </span>{" "}
               pelo Brasil

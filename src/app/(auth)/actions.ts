@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { sendConfirmationEmail } from "@/lib/auth-emails";
+import { addContactToBrevo } from "@/lib/brevo";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -58,7 +60,7 @@ export async function signup(formData: FormData) {
   const fullName = formData.get("full_name") as string;
   const acceptsMarketing = formData.get("accepts_marketing") === "on";
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -73,6 +75,19 @@ export async function signup(formData: FormData) {
     const searchParams = new URLSearchParams();
     searchParams.set("error", error.message);
     redirect(`/cadastro?${searchParams.toString()}`);
+  }
+
+  // Send confirmation email
+  if (data?.user?.id && data?.user?.email) {
+    try {
+      await sendConfirmationEmail(data.user.id, data.user.email);
+      
+      if (acceptsMarketing) {
+        await addContactToBrevo(data.user.email, { NOME: fullName });
+      }
+    } catch (e) {
+      console.error("Failed to send welcome/confirmation email or add to Brevo:", e);
+    }
   }
 
   revalidatePath("/", "layout");

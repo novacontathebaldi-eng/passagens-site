@@ -58,15 +58,15 @@ function LoginContent() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 h-full flex flex-col justify-end p-12 pb-16">
-          <h2 className="text-4xl font-extrabold font-[family-name:var(--font-display)] text-white mb-4">
+        <div className="relative z-10 h-full flex flex-col justify-center p-12">
+          <h2 className="text-4xl font-extrabold font-[family-name:var(--font-display)] text-white mb-4 drop-shadow-xl">
             Sua próxima aventura começa aqui
           </h2>
-          <p className="text-lg text-white/80 leading-relaxed max-w-md">
+          <p className="text-lg text-white/90 leading-relaxed max-w-md drop-shadow-md font-medium">
             Descubra destinos incríveis com excursões turísticas de ônibus
             premium. Pacotes completos com guia e tudo incluso.
           </p>
-          <div className="mt-6 flex items-center gap-6 text-sm text-white/70">
+          <div className="mt-6 flex items-center gap-6 text-sm text-white font-medium drop-shadow">
             <span className="flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
