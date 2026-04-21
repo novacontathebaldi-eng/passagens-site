@@ -21,9 +21,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient();
   const { data: settings } = await supabase
     .from("global_settings")
-    .select("company_name, favicon_url, og_image_url")
+    .select("company_name, favicon_url, og_image_url, updated_at")
     .eq("id", 1)
     .single();
+
+  const v = settings?.updated_at ? new Date(settings.updated_at).getTime() : Date.now();
 
   const title = settings?.company_name 
     ? `${settings.company_name} — Excursões Turísticas Rodoviárias`
@@ -47,8 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     authors: [{ name: settings?.company_name || "ViajaEdu!" }],
     icons: settings?.favicon_url ? [
-      { rel: "icon", url: settings.favicon_url },
-      { rel: "apple-touch-icon", url: settings.favicon_url },
+      { rel: "icon", url: `${settings.favicon_url}?v=${v}` },
+      { rel: "apple-touch-icon", url: `${settings.favicon_url}?v=${v}` },
     ] : undefined,
     openGraph: {
       type: "website",
@@ -59,7 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Descubra destinos incríveis com excursões turísticas de ônibus premium.",
       images: settings?.og_image_url ? [
         {
-          url: settings.og_image_url,
+          url: `${settings.og_image_url}?v=${v}`,
           width: 1200,
           height: 630,
           alt: settings?.company_name || "ViajaEdu!",

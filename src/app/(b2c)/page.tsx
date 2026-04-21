@@ -5,10 +5,13 @@ import { getCoverImage } from "@/lib/tour-images";
 import { HeroSearchBar } from "@/components/HeroSearchBar";
 import { ExcursionGrid } from "@/components/ExcursionGrid";
 import { CategoryPills, HeroCategoryPills } from "@/components/CategoryPills";
+import { getSiteSettings } from "@/lib/get-settings";
 import type { ExcursionItem } from "@/lib/search-utils";
 
 export default async function HomePage() {
   const supabase = await createClient();
+  const settings = await getSiteSettings();
+  const v = new Date(settings.updated_at).getTime();
 
   const { data: excursionsRaw } = await supabase
     .from("excursions")
@@ -102,7 +105,7 @@ export default async function HomePage() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url('/api/settings/image?field=hero_image_url')`,
+            backgroundImage: `url('/api/settings/image?field=hero_image_url&v=${v}')`,
           }}
         />
         {/* Gradient overlay (ensures readability over any image) */}

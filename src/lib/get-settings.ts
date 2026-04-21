@@ -13,6 +13,7 @@ export type SiteSettings = {
   whatsapp_support_numbers: string[] | null;
   cancellation_policy_text: string | null;
   social_links: Record<string, string> | null;
+  updated_at: string;
 };
 
 const SETTINGS_FIELDS = `
@@ -27,7 +28,8 @@ const SETTINGS_FIELDS = `
   pix_instructions,
   whatsapp_support_numbers,
   cancellation_policy_text,
-  social_links
+  social_links,
+  updated_at
 `;
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -52,5 +54,6 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     whatsapp_support_numbers: null,
     cancellation_policy_text: null,
     social_links: null,
+    updated_at: new Date().toISOString(),
   };
 }
