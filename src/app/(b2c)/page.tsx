@@ -1,14 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
-import {
-  HeroContainer,
-  FadeInUp,
-  FloatingBubbles,
-  ScrollReveal,
-  CardGrid,
-  MotionCard,
-} from "@/components/MotionWrappers";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 
 const CATEGORIES = [
@@ -61,18 +53,22 @@ export default async function HomePage() {
         />
         {/* Gradient overlay (ensures readability over any image) */}
         <div className="absolute inset-0 gradient-hero opacity-90" />
-        <FloatingBubbles />
+        {/* Decorative background glow (static, CSS-only) */}
+        <div className="absolute inset-0 opacity-[0.07] pointer-events-none overflow-hidden">
+          <div className="absolute top-20 -left-20 w-72 h-72 rounded-full bg-white/30 blur-2xl" />
+          <div className="absolute bottom-10 right-0 w-80 h-80 rounded-full bg-secondary/20 blur-2xl" />
+        </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24 sm:pt-16 sm:pb-32 lg:pt-20 lg:pb-40">
-          <HeroContainer className="max-w-3xl">
-            <FadeInUp>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white/90 text-sm font-medium mb-6 lg:backdrop-blur-sm">
+          <div className="max-w-3xl">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/90 text-sm font-medium mb-6 backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 Vagas abertas para próximas excursões
               </div>
-            </FadeInUp>
+            </div>
 
-            <FadeInUp>
+            <div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight drop-shadow-xl">
                 Descubra destinos{" "}
                 <span className="bg-gradient-to-r from-cta-light to-cta bg-clip-text text-transparent drop-shadow-md">
@@ -80,17 +76,17 @@ export default async function HomePage() {
                 </span>{" "}
                 pelo Brasil
               </h1>
-            </FadeInUp>
+            </div>
 
-            <FadeInUp>
+            <div>
               <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed max-w-2xl">
                 Excursões turísticas de ônibus com tudo incluso. Escolha seu
                 destino, garanta sua vaga e embarque na aventura!
               </p>
-            </FadeInUp>
+            </div>
 
             {/* Search Bar */}
-            <FadeInUp>
+            <div>
               <div className="mt-10 flex flex-col sm:flex-row gap-3">
                 <div className="flex-1 relative">
                   <svg
@@ -116,22 +112,22 @@ export default async function HomePage() {
                   Buscar
                 </button>
               </div>
-            </FadeInUp>
+            </div>
 
             {/* Quick Filters */}
-            <FadeInUp>
+            <div>
               <div className="mt-6 flex flex-wrap gap-2">
                 {CATEGORIES.slice(1).map((cat) => (
                   <span
                     key={cat.value}
-                    className="px-4 py-2 rounded-full bg-white/15 text-white/80 text-sm font-medium hover:bg-white/20 cursor-pointer transition-colors lg:backdrop-blur-sm"
+                    className="px-4 py-2 rounded-full bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 cursor-pointer transition-colors backdrop-blur-sm"
                   >
                     {cat.label}
                   </span>
                 ))}
               </div>
-            </FadeInUp>
-          </HeroContainer>
+            </div>
+          </div>
         </div>
 
         {/* Wave separator */}
@@ -152,7 +148,7 @@ export default async function HomePage() {
 
       {/* ══════════ STATS BAR ══════════ */}
       <section className="relative -mt-2 z-10">
-        <ScrollReveal className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { number: "50+", label: "Excursões realizadas", iconPath: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
@@ -176,12 +172,12 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-        </ScrollReveal>
+        </div>
       </section>
 
       {/* ══════════ EXCURSÕES ══════════ */}
       <section id="excursoes" className="py-16 sm:py-20">
-        <ScrollReveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-on-surface">
               Próximas Excursões
@@ -194,7 +190,7 @@ export default async function HomePage() {
 
           {/* Excursion Cards Grid */}
           {excursions && excursions.length > 0 ? (
-            <CardGrid className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {excursions.map((exc) => {
                 const pkgRaw = exc.tour_packages as unknown;
                 const pkg = (Array.isArray(pkgRaw) ? pkgRaw[0] : pkgRaw) as {
@@ -213,7 +209,7 @@ export default async function HomePage() {
                 if (!pkg) return null;
 
                 return (
-                  <MotionCard
+                  <article
                     key={exc.id}
                     className="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-md transition-shadow duration-300 hover:shadow-xl flex flex-col"
                   >
@@ -286,10 +282,10 @@ export default async function HomePage() {
                         Ver detalhes e reservar
                       </Link>
                     </div>
-                  </MotionCard>
+                  </article>
                 );
               })}
-            </CardGrid>
+            </div>
           ) : (
             <div className="text-center py-16">
               <svg className="w-16 h-16 mx-auto text-outline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
@@ -301,12 +297,12 @@ export default async function HomePage() {
               </p>
             </div>
           )}
-        </ScrollReveal>
+        </div>
       </section>
 
       {/* ══════════ HOW IT WORKS ══════════ */}
       <section className="py-16 bg-surface-container-low">
-        <ScrollReveal className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-extrabold text-center text-on-surface mb-12">
             Como funciona?
           </h2>
@@ -350,12 +346,12 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-        </ScrollReveal>
+        </div>
       </section>
 
       {/* ══════════ CTA FINAL ══════════ */}
       <section className="py-16">
-        <ScrollReveal className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="gradient-hero rounded-3xl p-10 sm:p-16 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-white/20 blur-3xl" />
@@ -377,14 +373,14 @@ export default async function HomePage() {
                 </Link>
                 <SmoothScrollLink
                   href="/#excursoes"
-                  className="px-8 py-4 rounded-2xl bg-white/15 text-white font-semibold text-base hover:bg-white/20 transition-colors lg:backdrop-blur-sm"
+                  className="px-8 py-4 rounded-2xl bg-white/10 text-white font-semibold text-base hover:bg-white/20 transition-colors backdrop-blur-sm"
                 >
                   Ver excursões
                 </SmoothScrollLink>
               </div>
             </div>
           </div>
-        </ScrollReveal>
+        </div>
       </section>
     </>
   );
