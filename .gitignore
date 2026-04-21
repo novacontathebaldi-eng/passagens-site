@@ -40,3 +40,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 PLAN-polish-and-checkout.md
+docs/PLAN-realtime-updates.md
