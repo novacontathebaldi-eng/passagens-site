@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
+import { getCoverImage } from "@/lib/tour-images";
 
 const CATEGORIES = [
   { label: "Todos", value: "" },
@@ -31,8 +32,12 @@ export default async function HomePage() {
         title,
         slug,
         short_description,
-        images,
-        category
+        category,
+        tour_package_images (
+          url,
+          is_cover,
+          position
+        )
       ),
       vehicle_layouts (
         capacity
@@ -198,8 +203,8 @@ export default async function HomePage() {
                   title: string;
                   slug: string;
                   short_description: string;
-                  images: string[];
                   category: string;
+                  tour_package_images: { url: string; is_cover: boolean; position: number }[];
                 } | null;
                 const vehRaw = exc.vehicle_layouts as unknown;
                 const vehicle = (Array.isArray(vehRaw) ? vehRaw[0] : vehRaw) as {
@@ -216,7 +221,7 @@ export default async function HomePage() {
                     {/* Image */}
                     <div className="relative h-52 overflow-hidden">
                       <img
-                        src={pkg.images?.[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800"}
+                        src={getCoverImage(pkg.tour_package_images)}
                         alt={pkg.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />

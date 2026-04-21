@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 import { CalendarDays, Bus, Clock, CheckCircle2, XCircle, Users } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
+import { getCoverImage } from "@/lib/tour-images";
 
 import { ConfirmEmailBanner } from "./ConfirmEmailBanner";
 
@@ -39,7 +40,14 @@ export default async function PainelClientePage({
       excursions (
         departure_date,
         return_date,
-        tour_packages (title, images)
+        tour_packages (
+          title,
+          tour_package_images (
+            url,
+            is_cover,
+            position
+          )
+        )
       ),
       passenger_tickets (id, full_name, seat_code)
     `)
@@ -123,7 +131,7 @@ export default async function PainelClientePage({
                 {reservations.map((res: any) => {
                   const pkg = Array.isArray(res.excursions?.tour_packages) ? res.excursions.tour_packages[0] : res.excursions?.tour_packages;
                   const date = res.excursions?.departure_date;
-                  const image = pkg?.images?.[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800";
+                  const image = getCoverImage(pkg?.tour_package_images);
                   
                   return (
                     <div key={res.id} className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row">

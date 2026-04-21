@@ -6,6 +6,7 @@ import { CheckCircle2, CalendarDays, Bus, ShieldCheck } from "lucide-react";
 import WaitlistButton from "./WaitlistButton";
 import LightboxGallery from "./LightboxGallery";
 import StickyExcursionTitle from "@/components/StickyExcursionTitle";
+import { getCoverImage, getGalleryImages } from "@/lib/tour-images";
 
 type Params = Promise<{ slug: string }>;
 
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: { params: Params }) {
 
   const { data: pkg } = await supabase
     .from("tour_packages")
-    .select("title, short_description, images")
+    .select("title, short_description, tour_package_images(url, is_cover, position)")
     .eq("slug", slug)
     .single();
 
@@ -26,7 +27,9 @@ export async function generateMetadata({ params }: { params: Params }) {
     title: `${pkg.title} | ViajaEdu!`,
     description: pkg.short_description,
     openGraph: {
-      images: pkg.images && pkg.images.length > 0 ? [pkg.images[0]] : [],
+      images: pkg.tour_package_images?.length > 0
+        ? [getCoverImage(pkg.tour_package_images)]
+        : [],
     },
   };
 }
@@ -41,6 +44,13 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
     .from("tour_packages")
     .select(`
       *,
+      tour_package_images (
+        id,
+        url,
+        alt_text,
+        is_cover,
+        position
+      ),
       excursions (
         id,
         price_per_seat,
@@ -68,7 +78,8 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const heroImage = pkg.images?.[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200";
+  const heroImage = getCoverImage(pkg.tour_package_images);
+  const galleryImages = getGalleryImages(pkg.tour_package_images, true);
 
   return (
     <div className="min-h-screen bg-surface">
@@ -138,10 +149,10 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
             )}
 
             {/* Galeria de Fotos */}
-            {pkg.images && pkg.images.length > 1 && (
+            {galleryImages.length > 0 && (
               <section className="space-y-4">
                 <h2 className="text-2xl font-bold text-on-surface">Galeria de Fotos</h2>
-                <LightboxGallery images={pkg.images.slice(1)} title={pkg.title} />
+                <LightboxGallery images={galleryImages.map(img => img.url)} title={pkg.title} />
               </section>
             )}
 

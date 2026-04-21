@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { CalendarDays, MapPin, Users, Search } from "lucide-react";
+import { getCoverImage } from "@/lib/tour-images";
 
 // Forcing dynamic so we can read search params if needed
 export const dynamic = "force-dynamic";
@@ -29,8 +30,12 @@ export default async function CatalogoPage({
         title,
         slug,
         short_description,
-        images,
-        category
+        category,
+        tour_package_images (
+          url,
+          is_cover,
+          position
+        )
       ),
       vehicle_layouts (
         capacity
@@ -115,8 +120,8 @@ export default async function CatalogoPage({
                     title: string;
                     slug: string;
                     short_description: string;
-                    images: string[];
                     category: string;
+                    tour_package_images: { url: string; is_cover: boolean; position: number }[];
                   } | null;
 
                   if (!pkg) return null;
@@ -125,7 +130,7 @@ export default async function CatalogoPage({
                     <article key={exc.id} className="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col border border-outline-variant/30">
                       <div className="relative h-48 overflow-hidden">
                         <img
-                          src={pkg.images?.[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800"}
+                          src={getCoverImage(pkg.tour_package_images)}
                           alt={pkg.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
