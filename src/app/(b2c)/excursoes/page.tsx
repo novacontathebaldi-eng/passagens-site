@@ -223,8 +223,16 @@ export default async function CatalogoPage({
                   return (
                     <article
                       key={exc.id}
-                      className="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col border border-outline-variant/30"
+                      className="group relative bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col border border-outline-variant/30 cursor-pointer"
                     >
+                      {/* Stretched link — makes the entire card clickable */}
+                      <Link
+                        href={`/excursao/${pkg.slug}`}
+                        className="absolute inset-0 z-[1]"
+                        aria-label={`Ver detalhes de ${pkg.title}`}
+                        tabIndex={-1}
+                      />
+
                       <div className="relative h-48 overflow-hidden">
                         <img
                           src={getCoverImage(pkg.tour_package_images)}
@@ -241,7 +249,7 @@ export default async function CatalogoPage({
                         )}
                       </div>
                       <div className="p-5 flex flex-col flex-grow">
-                        <h3 className="text-lg font-bold text-on-surface mb-2 leading-tight">
+                        <h3 className="text-lg font-bold text-on-surface mb-2 leading-tight group-hover:text-primary transition-colors">
                           {pkg.title}
                         </h3>
 
@@ -261,9 +269,10 @@ export default async function CatalogoPage({
                               {formatBRL(exc.price_per_seat)}
                             </span>
                           </div>
+                          {/* CTA — positioned above the stretched link */}
                           <Link
                             href={`/excursao/${pkg.slug}`}
-                            className="bg-primary/10 text-primary font-bold px-4 py-2 rounded-xl hover:bg-primary hover:text-on-primary transition-colors text-sm"
+                            className="relative z-[2] bg-primary/10 text-primary font-bold px-4 py-2 rounded-xl hover:bg-primary hover:text-on-primary transition-colors text-sm"
                           >
                             Ver Detalhes
                           </Link>

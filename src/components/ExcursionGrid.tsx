@@ -84,8 +84,16 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
             {filtered.map((exc) => (
               <article
                 key={exc.id}
-                className="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-md transition-shadow duration-300 hover:shadow-xl flex flex-col"
+                className="group relative bg-surface-container-lowest rounded-2xl overflow-hidden shadow-md transition-shadow duration-300 hover:shadow-xl flex flex-col cursor-pointer"
               >
+                {/* Stretched link — makes the entire card clickable */}
+                <Link
+                  href={`/excursao/${exc.tour_package.slug}`}
+                  className="absolute inset-0 z-[1]"
+                  aria-label={`Ver detalhes de ${exc.tour_package.title}`}
+                  tabIndex={-1}
+                />
+
                 {/* Image */}
                 <div className="relative h-52 overflow-hidden">
                   <img
@@ -167,10 +175,10 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
                     )}
                   </div>
 
-                  {/* CTA */}
+                  {/* CTA — positioned above the stretched link */}
                   <Link
                     href={`/excursao/${exc.tour_package.slug}`}
-                    className="mt-4 block text-center py-3 rounded-xl gradient-cta text-on-cta font-semibold text-sm shadow-sm hover:shadow-glow-cta transition-all"
+                    className="relative z-[2] mt-4 block text-center py-3 rounded-xl gradient-cta text-on-cta font-semibold text-sm shadow-sm hover:shadow-glow-cta transition-all"
                   >
                     Ver detalhes e reservar
                   </Link>
