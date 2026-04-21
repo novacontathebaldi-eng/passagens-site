@@ -12,6 +12,7 @@ interface CheckoutClientProps {
 }
 
 import Cookies from "js-cookie";
+import { useRealtimeSeats } from "@/hooks/useRealtimeSeats";
 
 export default function CheckoutClient({ excursion, user, occupiedSeats }: CheckoutClientProps) {
   const router = useRouter();
@@ -22,9 +23,11 @@ export default function CheckoutClient({ excursion, user, occupiedSeats }: Check
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const liveOccupiedSeats = useRealtimeSeats(excursion.id, occupiedSeats);
+
   const totalAmount = quantity * excursion.price_per_seat;
   const capacity = excursion.vehicle_layouts?.capacity || 0;
-  const availableCount = capacity - occupiedSeats.length;
+  const availableCount = capacity - liveOccupiedSeats.length;
 
   const handleNextStep = () => {
     setError(null);
@@ -211,7 +214,7 @@ export default function CheckoutClient({ excursion, user, occupiedSeats }: Check
                   <div className="grid grid-cols-4 gap-2">
                     {Array.from({length: 20}).map((_, i) => {
                       const code = `P${i+1}`;
-                      const isOccupied = occupiedSeats.includes(code);
+                      const isOccupied = liveOccupiedSeats.includes(code);
                       const isSelected = selectedSeats.includes(code);
                       return (
                         <button

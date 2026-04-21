@@ -4,6 +4,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteSettings } from "@/lib/get-settings";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
+import { GlobalRealtimeProvider } from "@/components/providers/GlobalRealtimeProvider";
 
 export const metadata: Metadata = {
   title: "ViajaEdu! — Excursões Turísticas Rodoviárias",
@@ -106,7 +107,8 @@ export default async function B2CLayout({
   const settings = await getSiteSettings();
 
   return (
-    <div className="min-h-screen flex flex-col" suppressHydrationWarning>
+    <GlobalRealtimeProvider>
+      <div className="min-h-screen flex flex-col" suppressHydrationWarning>
       {/* ── Navbar ── */}
       <header className="sticky top-0 z-50 glass border-b border-outline-variant/30">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -273,5 +275,6 @@ export default async function B2CLayout({
         </div>
       </footer>
     </div>
+    </GlobalRealtimeProvider>
   );
 }

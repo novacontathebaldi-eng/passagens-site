@@ -3,18 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useSearchParams, useRouter } from "next/navigation";
-
-type Reservation = {
-  id: string;
-  total_amount: number;
-  status: "PENDING_PIX" | "AWAITING_MANUAL_CHECK" | "APPROVED" | "REFUNDED" | "CANCELLED" | "EXPIRED";
-  created_at: string;
-  profiles: { full_name: string; phone: string } | null;
-  excursions: { 
-    departure_date: string;
-    tour_packages: { title: string } | null;
-  } | null;
-};
+import { useRealtimeReservations, Reservation } from "@/hooks/useRealtimeReservations";
 
 type ExcursionOption = {
   id: string;
@@ -31,14 +20,15 @@ const COLUMNS = [
 ];
 
 export default function KanbanReservasPage() {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [excursions, setExcursions] = useState<ExcursionOption[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
   const searchParams = useSearchParams();
   const router = useRouter();
   
   const selectedExcursionId = searchParams.get("excursion_id") || "ALL";
+
+  // Using the new real-time custom hook
+  const { reservations, isLoading, updateStatus } = useRealtimeReservations(selectedExcursionId);
 
   useEffect(() => {
     async function loadExcursions() {
@@ -51,71 +41,10 @@ export default function KanbanReservasPage() {
     loadExcursions();
   }, [supabase]);
 
-  useEffect(() => {
-    async function fetchReservations() {
-      setIsLoading(true);
-      let query = supabase
-        .from("reservations")
-        .select(`
-          id,
-          total_amount,
-          status,
-          created_at,
-          profiles ( full_name, phone ),
-          excursions ( 
-            departure_date,
-            tour_packages ( title )
-          )
-        `)
-        .order("created_at", { ascending: false });
-
-      if (selectedExcursionId !== "ALL") {
-        query = query.eq("excursion_id", selectedExcursionId);
-      }
-
-      const { data } = await query;
-      if (data) {
-        setReservations(data as unknown as Reservation[]);
-      }
-      setIsLoading(false);
-    }
-
-    fetchReservations();
-
-    // Set up Real-time Subscription
-    const channel = supabase
-      .channel('public:reservations')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'reservations' },
-        (payload) => {
-          fetchReservations();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [supabase, selectedExcursionId]);
-
   async function handleStatusChange(id: string, newStatus: Reservation["status"]) {
-    // Optimistic update
-    setReservations(prev => prev.map(res => res.id === id ? { ...res, status: newStatus } : res));
-
-    // Persist to DB
-    const { error } = await supabase
-      .from("reservations")
-      .update({ status: newStatus })
-      .eq("id", id);
-
+    const { error } = await updateStatus(id, newStatus);
     if (error) {
       alert("Erro ao atualizar status: " + error.message);
-      // Fallback: reload state from db if error
-      const { data } = await supabase.from("reservations").select("*, profiles(*), excursions(*, tour_packages(*))").eq("id", id).single();
-      if (data) {
-        setReservations(prev => prev.map(res => res.id === id ? (data as unknown as Reservation) : res));
-      }
     }
   }
 
