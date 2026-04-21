@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Proxy: fetch image bytes from Supabase Storage and stream them back
-    const imageResponse = await fetch(cleanUrl, { next: { revalidate: 300 } });
+    const imageResponse = await fetch(cleanUrl, { cache: "no-store" });
 
     if (!imageResponse.ok) {
       return new NextResponse(TRANSPARENT_PIXEL, {
