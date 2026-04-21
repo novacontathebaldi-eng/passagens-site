@@ -442,6 +442,59 @@ export type Database = {
           },
         ]
       }
+      tour_package_images: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          file_size: number | null
+          height: number | null
+          id: string
+          is_cover: boolean
+          mime_type: string | null
+          package_id: string
+          position: number
+          storage_path: string
+          url: string
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          file_size?: number | null
+          height?: number | null
+          id?: string
+          is_cover?: boolean
+          mime_type?: string | null
+          package_id: string
+          position?: number
+          storage_path: string
+          url: string
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          file_size?: number | null
+          height?: number | null
+          id?: string
+          is_cover?: boolean
+          mime_type?: string | null
+          package_id?: string
+          position?: number
+          storage_path?: string
+          url?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_package_images_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "tour_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tour_packages: {
         Row: {
           category: string | null

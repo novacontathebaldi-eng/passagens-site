@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import TourImageManager from "@/components/admin/TourImageManager";
 
 export default function EditarRoteiroPage() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function EditarRoteiroPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [saveMsg, setSaveMsg] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -51,6 +53,7 @@ export default function EditarRoteiroPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSaveMsg(null);
 
     const { error: updateError } = await supabase
       .from("tour_packages")
@@ -68,8 +71,8 @@ export default function EditarRoteiroPage() {
     if (updateError) {
       setError(updateError.message);
     } else {
-      router.push("/admin/roteiros");
-      router.refresh();
+      setSaveMsg("Roteiro salvo com sucesso!");
+      setTimeout(() => setSaveMsg(null), 4000);
     }
   }
 
@@ -94,6 +97,17 @@ export default function EditarRoteiroPage() {
         </h1>
       </div>
 
+      {/* Success message */}
+      {saveMsg && (
+        <div className="p-4 bg-green-50 text-green-700 rounded-xl text-sm border border-green-200 flex items-center gap-2">
+          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          {saveMsg}
+        </div>
+      )}
+
+      {/* Formulário de dados textuais */}
       <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-6 sm:p-8">
         {error && (
           <div className="mb-6 p-4 bg-error-light text-error rounded-xl text-sm border border-error/20">{error}</div>
@@ -124,6 +138,7 @@ export default function EditarRoteiroPage() {
                 <option value="Cultural">Cultural</option>
                 <option value="Ecoturismo">Ecoturismo</option>
                 <option value="Religioso">Religioso</option>
+                <option value="Serra">Serra</option>
               </select>
             </div>
 
@@ -148,6 +163,14 @@ export default function EditarRoteiroPage() {
           </form>
         )}
       </div>
+
+      {/* Gerenciador de Imagens */}
+      {!isFetching && !error && (
+        <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-6 sm:p-8">
+          <TourImageManager packageId={id} />
+        </div>
+      )}
     </div>
   );
 }
+
