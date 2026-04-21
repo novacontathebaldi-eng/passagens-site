@@ -203,6 +203,25 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
             </p>
           </div>
         )}
+
+        {/* View all button */}
+        <div className="mt-12 text-center flex justify-center">
+          <Link
+            href="/excursoes"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-outline-variant text-on-surface hover:bg-surface-container hover:text-primary font-semibold transition-all duration-200"
+          >
+            Ver todas as excursões
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
       </div>
     </section>
   );
