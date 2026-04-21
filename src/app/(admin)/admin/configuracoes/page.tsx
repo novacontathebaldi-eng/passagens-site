@@ -207,7 +207,8 @@ export default function ConfiguracoesPage() {
 
     const payload = {
       ...settings,
-      whatsapp_support_numbers: JSON.stringify(settings.whatsapp_support_numbers)
+      whatsapp_support_numbers: JSON.stringify(settings.whatsapp_support_numbers),
+      updated_at: new Date().toISOString()
     };
 
     const { error } = await supabase
