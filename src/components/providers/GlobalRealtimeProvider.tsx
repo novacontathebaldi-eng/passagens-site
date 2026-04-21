@@ -23,7 +23,9 @@ export function GlobalRealtimeProvider({ children }: { children: React.ReactNode
     channel
       .on('postgres_changes', { event: '*', schema: 'public', table: 'global_settings' }, handlePayload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tour_packages' }, handlePayload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tour_package_images' }, handlePayload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'excursions' }, handlePayload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicle_layouts' }, handlePayload)
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           console.log('Global Realtime Subscribed!');
