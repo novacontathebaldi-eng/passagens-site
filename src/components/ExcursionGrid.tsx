@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ExcursionItem } from "@/lib/search-utils";
-import { CategoryPills, filterExcursions } from "@/components/CategoryPills";
+import { filterExcursions } from "@/components/CategoryPills";
 import { formatBRL, formatDate } from "@/lib/utils";
 
 interface ExcursionGridProps {
@@ -13,6 +13,12 @@ interface ExcursionGridProps {
 
 export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
   const [activeCategory, setActiveCategory] = useState("");
+
+  useEffect(() => {
+    const handleCategory = (e: CustomEvent<string>) => setActiveCategory(e.detail);
+    window.addEventListener("setCategory", handleCategory as EventListener);
+    return () => window.removeEventListener("setCategory", handleCategory as EventListener);
+  }, []);
 
   const { filtered, fallback, fallbackMessage } = filterExcursions(
     excursions,
