@@ -212,7 +212,8 @@ export default function ConfiguracoesPage() {
 
     const { error } = await supabase
       .from("global_settings")
-      .upsert(payload, { onConflict: "id" });
+      .update(payload)
+      .eq("id", 1);
 
     setIsSaving(false);
 

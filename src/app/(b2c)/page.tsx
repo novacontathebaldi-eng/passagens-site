@@ -4,7 +4,7 @@ import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 import { getCoverImage } from "@/lib/tour-images";
 import { HeroSearchBar } from "@/components/HeroSearchBar";
 import { ExcursionGrid } from "@/components/ExcursionGrid";
-import { CategoryPills, HeroCategoryPills } from "@/components/CategoryPills";
+import { CategoryPills } from "@/components/CategoryPills";
 import type { ExcursionItem } from "@/lib/search-utils";
 
 export default async function HomePage() {
@@ -330,4 +330,21 @@ export default async function HomePage() {
   );
 }
 
+/** Hero-specific category pills (white/glass style for dark hero bg) */
+function HeroCategoryPills({ categories }: { categories: string[] }) {
+  if (categories.length === 0) return null;
 
+  return (
+    <div className="flex flex-wrap gap-2">
+      {categories.map((cat) => (
+        <a
+          key={cat}
+          href={`/excursoes?cat=${encodeURIComponent(cat)}`}
+          className="px-4 py-2 rounded-full bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 cursor-pointer transition-colors backdrop-blur-sm"
+        >
+          {cat}
+        </a>
+      ))}
+    </div>
+  );
+}

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ExcursionItem } from "@/lib/search-utils";
-import { filterExcursions } from "@/components/CategoryPills";
+import { CategoryPills, filterExcursions } from "@/components/CategoryPills";
 import { formatBRL, formatDate } from "@/lib/utils";
 
 interface ExcursionGridProps {
@@ -13,12 +13,6 @@ interface ExcursionGridProps {
 
 export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
   const [activeCategory, setActiveCategory] = useState("");
-
-  useEffect(() => {
-    const handleCategory = (e: CustomEvent<string>) => setActiveCategory(e.detail);
-    window.addEventListener("setCategory", handleCategory as EventListener);
-    return () => window.removeEventListener("setCategory", handleCategory as EventListener);
-  }, []);
 
   const { filtered, fallback, fallbackMessage } = filterExcursions(
     excursions,
@@ -57,11 +51,10 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
                   onClick={() => {
                     setActiveCategory(activeCategory === cat ? "" : cat);
                   }}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    activeCategory === cat
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${activeCategory === cat
                       ? "gradient-primary text-on-primary shadow-md"
                       : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>

@@ -38,33 +38,10 @@ export function CategoryPills({
         <button
           key={cat}
           onClick={() => handleClick(cat)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-            activeCategory === cat
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${activeCategory === cat
               ? "bg-white text-on-surface shadow-md"
               : "bg-white/10 text-white/80 hover:bg-white/20 backdrop-blur-sm"
-          }`}
-        >
-          {cat}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/** Hero-specific category pills (white/glass style for dark hero bg) */
-export function HeroCategoryPills({ categories }: { categories: string[] }) {
-  if (categories.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {categories.map((cat) => (
-        <button
-          key={cat}
-          onClick={() => {
-            window.dispatchEvent(new CustomEvent('setCategory', { detail: cat }));
-            document.getElementById('excursoes')?.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className="px-4 py-2 rounded-full bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 cursor-pointer transition-colors backdrop-blur-sm"
+            }`}
         >
           {cat}
         </button>
