@@ -41,12 +41,11 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // Strip cache buster from URL for fetching
-  const cleanUrl = rawUrl.split("?")[0];
+  // Use rawUrl directly to preserve the cache buster for Supabase CDN
 
   try {
     // Proxy: fetch image bytes from Supabase Storage and stream them back
-    const imageResponse = await fetch(cleanUrl, { cache: "no-store" });
+    const imageResponse = await fetch(rawUrl, { cache: "no-store" });
 
     if (!imageResponse.ok) {
       return new NextResponse(TRANSPARENT_PIXEL, {

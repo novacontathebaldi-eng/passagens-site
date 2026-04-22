@@ -73,6 +73,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 import { RefCatcher } from "@/components/RefCatcher";
 import { Suspense } from "react";
+import { GlobalRealtimeProvider } from "@/components/providers/GlobalRealtimeProvider";
 
 export default function RootLayout({
   children,
@@ -85,10 +86,12 @@ export default function RootLayout({
         className={`${plusJakarta.variable} ${beVietnam.variable} antialiased`}
         suppressHydrationWarning
       >
-        <Suspense fallback={null}>
-          <RefCatcher />
-        </Suspense>
-        {children}
+        <GlobalRealtimeProvider>
+          <Suspense fallback={null}>
+            <RefCatcher />
+          </Suspense>
+          {children}
+        </GlobalRealtimeProvider>
       </body>
     </html>
   );
