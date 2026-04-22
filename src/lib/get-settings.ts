@@ -32,6 +32,9 @@ export type SiteSettings = {
   // Other
   hold_ttl_hours: number;
   whatsapp_support_numbers: string[] | null;
+  contact_email: string | null;
+  operating_hours: string | null;
+  administrative_address: string | null;
   cancellation_policy_text: string | null;
   social_links: Record<string, string> | null;
   updated_at: string;
@@ -59,6 +62,9 @@ const SETTINGS_FIELDS = `
   bank_transfer_instructions,
   hold_ttl_hours,
   whatsapp_support_numbers,
+  contact_email,
+  operating_hours,
+  administrative_address,
   cancellation_policy_text,
   social_links,
   updated_at
@@ -96,6 +102,9 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     bank_transfer_instructions: null,
     hold_ttl_hours: 24,
     whatsapp_support_numbers: null,
+    contact_email: null,
+    operating_hours: null,
+    administrative_address: null,
     cancellation_policy_text: null,
     social_links: null,
     updated_at: new Date().toISOString(),

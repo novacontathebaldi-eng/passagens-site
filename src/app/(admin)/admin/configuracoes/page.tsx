@@ -37,6 +37,9 @@ type GlobalSettings = {
   // Other
   cancellation_policy_text: string;
   whatsapp_support_numbers: string[];
+  contact_email: string;
+  operating_hours: string;
+  administrative_address: string;
   hold_ttl_hours: number;
   // Dynamic images
   logo_url: string | null;
@@ -222,6 +225,9 @@ export default function ConfiguracoesPage() {
           bank_account: data.bank_account ?? "",
           bank_transfer_instructions: data.bank_transfer_instructions ?? "",
           cancellation_policy_text: data.cancellation_policy_text ?? "",
+          contact_email: data.contact_email ?? "",
+          operating_hours: data.operating_hours ?? "",
+          administrative_address: data.administrative_address ?? "",
         });
       } else if (error && error.code === 'PGRST116') {
         setSettings({
@@ -242,6 +248,9 @@ export default function ConfiguracoesPage() {
           bank_account: "",
           bank_transfer_instructions: "",
           cancellation_policy_text: "",
+          contact_email: "",
+          operating_hours: "",
+          administrative_address: "",
           whatsapp_support_numbers: [""],
           hold_ttl_hours: 24,
           logo_url: null,
@@ -645,7 +654,42 @@ export default function ConfiguracoesPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-on-surface">E-mail de Contato</label>
+                <input 
+                  type="email" 
+                  value={settings.contact_email}
+                  onChange={(e) => setSettings({...settings, contact_email: e.target.value})}
+                  className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                  placeholder="Ex: contato@viajaedu.com.br"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-on-surface">Endereço (Sede Administrativa)</label>
+                <input 
+                  type="text" 
+                  value={settings.administrative_address}
+                  onChange={(e) => setSettings({...settings, administrative_address: e.target.value})}
+                  className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                  placeholder="Ex: Vitória - ES"
+                />
+              </div>
+              
+              <div className="flex flex-col gap-1.5 sm:col-span-2">
+                <label className="text-sm font-semibold text-on-surface">Horário de Atendimento</label>
+                <textarea 
+                  value={settings.operating_hours}
+                  onChange={(e) => setSettings({...settings, operating_hours: e.target.value})}
+                  rows={2}
+                  className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-sm"
+                  placeholder="Ex: Segunda a Sexta: 09h às 18h"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 mt-4">
               <label className="text-sm font-semibold text-on-surface">Números de Suporte WhatsApp (Contato)</label>
               <div className="space-y-2">
                 {settings.whatsapp_support_numbers.map((num, i) => (
