@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { unstable_noStore as noStore } from "next/cache";
 
 export type SiteSettings = {
   company_name: string;
@@ -33,6 +34,7 @@ const SETTINGS_FIELDS = `
 `;
 
 export async function getSiteSettings(): Promise<SiteSettings> {
+  noStore();
   const supabase = await createClient();
 
   const { data } = await supabase
