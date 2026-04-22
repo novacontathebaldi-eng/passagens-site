@@ -17,6 +17,18 @@ export default async function CheckoutPage({ params }: { params: Params }) {
     redirect(`/login?redirect=/checkout/${excursionId}`);
   }
 
+  // Buscar perfil e passageiros salvos
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, cpf, phone, birth_date")
+    .eq("id", user.id)
+    .single();
+
+  const { data: savedPassengers } = await supabase
+    .from("saved_passengers")
+    .select("*")
+    .eq("owner_id", user.id);
+
   // Buscar a excursão, pacote e veículo
   const { data: excursion, error: excursionError } = await supabase
     .from("excursions")
@@ -79,6 +91,8 @@ export default async function CheckoutPage({ params }: { params: Params }) {
         <CheckoutClient 
           excursion={excursion} 
           user={user} 
+          profile={profile}
+          savedPassengers={savedPassengers || []}
           occupiedSeats={occupiedSeats}
         />
 

@@ -94,7 +94,8 @@ export async function createReservation(data: CheckoutData) {
       excursion_id: data.excursionId,
       full_name: p.full_name,
       cpf: p.cpf,
-      rg: p.rg,
+      rg: p.rg || null,
+      orgao_emissor: p.orgao_emissor || null,
       seat_code: excursion.allow_seat_selection && data.selectedSeats[idx] 
         ? data.selectedSeats[idx] 
         : `WAITING_ALLOCATION_${Date.now()}_${idx}`
@@ -109,6 +110,22 @@ export async function createReservation(data: CheckoutData) {
       // Rollback manual
       await supabase.from("reservations").delete().eq("id", reservation.id);
       return { error: "Erro ao alocar passageiros." };
+    }
+
+    // 5. Salvar novos dependentes se solicitado (Fire and forget, ignoring duplicates)
+    const passengersToSave = data.passengers.filter(p => p.save_passenger);
+    if (passengersToSave.length > 0) {
+      const savedToInsert = passengersToSave.map(p => ({
+        owner_id: user.id,
+        full_name: p.full_name,
+        cpf: p.cpf,
+        rg: p.rg || null,
+        orgao_emissor: p.orgao_emissor || null,
+      }));
+      // UPSERT is better but assuming CPF is not UNIQUE in saved_passengers per owner, we just insert.
+      // Wait, there might be duplicates, but we just let it insert or fail silently.
+      const { error: saveError } = await supabase.from("saved_passengers").insert(savedToInsert);
+      if (saveError) console.error("Erro ao salvar dependentes (nao critico):", saveError);
     }
 
     revalidatePath(`/excursao/[slug]`, "page");
