@@ -111,23 +111,28 @@ export default async function SucessoPage({ params }: { params: Params }) {
         {isPending && (
           <div className="space-y-6">
             {/* Trip Summary Card */}
-            <div className="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 flex flex-col sm:flex-row justify-between items-center gap-6 relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left w-full sm:w-auto">
-                <img src={coverImage} alt={tripTitle} className="w-20 h-20 sm:w-16 sm:h-16 rounded-2xl object-cover shadow-sm" />
-                <div>
-                  <p className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-1">Pedido #{shortId}</p>
-                  <h2 className="text-xl font-bold text-on-surface">{tripTitle}</h2>
-                  <p className="text-sm text-on-surface-variant flex items-center justify-center sm:justify-start gap-1 mt-1">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    {departureDate}
-                  </p>
+            <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/30 overflow-hidden shadow-sm">
+              <div className="h-32 sm:h-48 w-full relative">
+                <img src={coverImage} alt={tripTitle} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                <div className="absolute bottom-4 left-4 sm:left-6 right-4 sm:right-6 text-white flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider mb-1 text-white/80 drop-shadow-md">Pedido #{shortId}</p>
+                    <h2 className="text-xl sm:text-2xl font-bold drop-shadow-md">{tripTitle}</h2>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <p className="text-sm flex items-center gap-1 sm:justify-end text-white/90 drop-shadow-md">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      {departureDate}
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-on-surface-variant mb-1">Valor Total</p>
+              <div className="p-4 sm:p-6 bg-surface-container-lowest flex justify-between items-center">
+                <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Valor Total</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-extrabold text-on-surface">{formatBRL(reservation.total_amount)}</span>
-                  <CopyButton textToCopy={reservation.total_amount.toString()} iconOnly className="text-primary hover:text-primary-dark p-1" label="Copiar Valor Exato" />
+                  <span className="text-2xl sm:text-3xl font-extrabold text-on-surface">{formatBRL(reservation.total_amount)}</span>
+                  <CopyButton textToCopy={reservation.total_amount.toString()} iconOnly className="text-primary hover:text-primary-dark p-2 bg-primary/10 rounded-lg transition-colors" label="Copiar Valor Exato" />
                 </div>
               </div>
             </div>
