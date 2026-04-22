@@ -132,11 +132,27 @@ export default async function PainelClientePage({
                   const pkg = Array.isArray(res.excursions?.tour_packages) ? res.excursions.tour_packages[0] : res.excursions?.tour_packages;
                   const date = res.excursions?.departure_date;
                   const image = getCoverImage(pkg?.tour_package_images);
-                  
-                  return (
-                    <div key={res.id} className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row">
-                      <div className="w-full sm:w-48 h-32 sm:h-auto relative">
-                        <img src={image} alt={pkg?.title} className="w-full h-full object-cover" />
+                                     // Determine the card's destination URL based on status
+                    const cardHref = res.status === 'PENDING_PIX'
+                      ? `/sucesso/${res.id}`
+                      : res.status === 'APPROVED'
+                        ? `/sucesso/${res.id}`
+                        : null;
+
+                    return (
+                    <div key={res.id} className={`group relative bg-surface-container-lowest border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row ${cardHref ? 'cursor-pointer' : ''}`}>
+                      {/* Stretched link — makes the entire card clickable */}
+                      {cardHref && (
+                        <Link
+                          href={cardHref}
+                          className="absolute inset-0 z-[1]"
+                          aria-label={`${res.status === 'PENDING_PIX' ? 'Concluir pagamento de' : 'Ver detalhes de'} ${pkg?.title}`}
+                          tabIndex={-1}
+                        />
+                      )}
+
+                      <div className="w-full sm:w-48 h-32 sm:h-auto relative overflow-hidden">
+                        <img src={image} alt={pkg?.title} className={`w-full h-full object-cover ${cardHref ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
                         <div className="absolute top-2 left-2">
                           {getStatusBadge(res.status)}
                         </div>
@@ -144,7 +160,7 @@ export default async function PainelClientePage({
                       
                       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                         <div>
-                          <h3 className="font-bold text-lg text-on-surface leading-tight">{pkg?.title}</h3>
+                          <h3 className={`font-bold text-lg text-on-surface leading-tight ${cardHref ? 'group-hover:text-primary transition-colors' : ''}`}>{pkg?.title}</h3>
                           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-on-surface-variant">
                             <span className="flex items-center gap-1"><CalendarDays className="w-4 h-4" /> {formatDate(date)}</span>
                             <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {res.passenger_tickets?.length} Passageiro(s)</span>
@@ -155,12 +171,12 @@ export default async function PainelClientePage({
                           <span className="font-extrabold text-primary">{formatBRL(res.total_amount)}</span>
                           
                           {res.status === 'PENDING_PIX' && (
-                            <Link href={`/sucesso/${res.id}`} className="text-xs font-bold text-on-cta bg-cta px-3 py-1.5 rounded-lg shadow-sm hover:shadow-glow-cta transition-all">
+                            <Link href={`/sucesso/${res.id}`} className="relative z-[2] text-xs font-bold text-on-cta bg-cta px-3 py-1.5 rounded-lg shadow-sm hover:shadow-glow-cta transition-all">
                               Concluir Pagamento
                             </Link>
                           )}
                           {res.status === 'APPROVED' && (
-                            <button className="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all">
+                            <button className="relative z-[2] text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all">
                               Ver Voucher
                             </button>
                           )}
