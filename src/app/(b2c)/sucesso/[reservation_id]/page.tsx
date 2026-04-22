@@ -26,7 +26,10 @@ export default async function SucessoPage({ params }: { params: Params }) {
       *,
       excursions (
         departure_date,
-        tour_packages (title)
+        tour_packages (
+          title,
+          tour_package_images (url, is_cover)
+        )
       )
     `)
     .eq("id", reservationId)
@@ -48,6 +51,11 @@ export default async function SucessoPage({ params }: { params: Params }) {
     ? new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(reservation.excursions.departure_date))
     : "Data a definir";
   
+  const images = reservation.excursions?.tour_packages?.tour_package_images || [];
+  const coverImage = (Array.isArray(images) && images.length > 0) 
+    ? (images.find((img: any) => img.is_cover)?.url || images[0]?.url) 
+    : "/placeholder-trip.jpg";
+
   const shortId = reservationId.split("-")[0].toUpperCase();
   const rawNumber = settings.whatsapp_support_numbers?.[0] ? settings.whatsapp_support_numbers[0].replace(/\D/g, "") : "";
   const whatsappNumber = rawNumber.startsWith("55") ? rawNumber : `55${rawNumber}`;
@@ -56,6 +64,11 @@ export default async function SucessoPage({ params }: { params: Params }) {
     `Olá! Gostaria de confirmar meu pagamento.\n\nPedido: #${shortId}\nDestino: ${tripTitle}\nData: ${departureDate}\nValor: ${formatBRL(reservation.total_amount)}`
   );
   const whatsappUrl = whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${zapMessage}` : "#";
+
+  const helpMessage = encodeURIComponent(
+    `Olá! Preciso de ajuda com a minha reserva.\n\nPedido: #${shortId}`
+  );
+  const whatsappHelpUrl = whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${helpMessage}` : "#";
 
   return (
     <div className="min-h-screen bg-surface py-12">
@@ -98,14 +111,17 @@ export default async function SucessoPage({ params }: { params: Params }) {
         {isPending && (
           <div className="space-y-6">
             {/* Trip Summary Card */}
-            <div className="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div>
-                <p className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-1">Pedido #{shortId}</p>
-                <h2 className="text-xl font-bold text-on-surface">{tripTitle}</h2>
-                <p className="text-sm text-on-surface-variant flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                  {departureDate}
-                </p>
+            <div className="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 flex flex-col sm:flex-row justify-between items-center gap-6 relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left w-full sm:w-auto">
+                <img src={coverImage} alt={tripTitle} className="w-20 h-20 sm:w-16 sm:h-16 rounded-2xl object-cover shadow-sm" />
+                <div>
+                  <p className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-1">Pedido #{shortId}</p>
+                  <h2 className="text-xl font-bold text-on-surface">{tripTitle}</h2>
+                  <p className="text-sm text-on-surface-variant flex items-center justify-center sm:justify-start gap-1 mt-1">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    {departureDate}
+                  </p>
+                </div>
               </div>
               <div className="text-right">
                 <p className="text-sm text-on-surface-variant mb-1">Valor Total</p>
@@ -132,17 +148,17 @@ export default async function SucessoPage({ params }: { params: Params }) {
                     <h2 className="text-2xl font-bold text-on-surface">Pague via PIX</h2>
                   </div>
 
-                  <div className="flex flex-col md:flex-row gap-8">
+                  <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
                     {/* QR Code */}
                     {settings.pix_qr_code_url && (
-                      <div className="flex-shrink-0 flex flex-col items-center">
-                        <img src={settings.pix_qr_code_url} alt="QR Code PIX" className="w-48 h-48 rounded-2xl bg-white p-3 border border-outline-variant/30 mb-2" />
-                        <span className="text-xs font-bold text-on-surface-variant uppercase">Escaneie o QR Code</span>
+                      <div className="w-full sm:w-auto flex flex-col items-center">
+                        <img src={settings.pix_qr_code_url} alt="QR Code PIX" className="w-40 h-40 sm:w-48 sm:h-48 rounded-2xl bg-white p-3 border border-outline-variant/30 mb-2" />
+                        <span className="text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase">Escaneie o QR Code</span>
                       </div>
                     )}
                     
                     {/* Keys */}
-                    <div className="flex-1 space-y-4">
+                    <div className="flex-1 w-full space-y-4">
                       {settings.pix_instructions && (
                         <p className="text-sm text-on-surface-variant bg-surface-container p-3 rounded-xl">
                           {settings.pix_instructions}
@@ -241,10 +257,10 @@ export default async function SucessoPage({ params }: { params: Params }) {
                     Problemas com o pagamento ou dúvidas sobre a reserva? Nossa equipe está pronta para ajudar.
                   </p>
                   <a 
-                    href={whatsappUrl}
+                    href={whatsappHelpUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-2.5 rounded-xl border border-outline-variant/50 hover:bg-surface-container transition-colors text-sm font-semibold text-on-surface flex justify-center items-center gap-2"
+                    className="w-full py-3 rounded-xl border border-outline-variant/50 hover:bg-surface-container transition-colors text-sm font-semibold text-on-surface flex justify-center items-center gap-2"
                   >
                     Falar com Suporte
                   </a>

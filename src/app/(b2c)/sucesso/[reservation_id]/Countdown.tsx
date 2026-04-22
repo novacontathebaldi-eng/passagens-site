@@ -37,18 +37,18 @@ export default function Countdown({ expiresAt }: { expiresAt: string }) {
   }
 
   return (
-    <div className="flex gap-4">
-      <div className="bg-surface p-4 rounded-2xl shadow-sm text-center min-w-[80px] border border-outline-variant/30">
-        <span className="text-3xl font-extrabold text-primary">{String(timeLeft.hours).padStart(2, '0')}</span>
-        <span className="block text-xs font-bold text-on-surface-variant uppercase mt-1">Horas</span>
+    <div className="flex gap-2 sm:gap-4 justify-center">
+      <div className="bg-surface p-2 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm text-center min-w-[60px] sm:min-w-[80px] border border-outline-variant/30 flex-1 sm:flex-none">
+        <span className="text-2xl sm:text-3xl font-extrabold text-primary">{String(timeLeft.hours).padStart(2, '0')}</span>
+        <span className="block text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase mt-1">Horas</span>
       </div>
-      <div className="bg-surface p-4 rounded-2xl shadow-sm text-center min-w-[80px] border border-outline-variant/30">
-        <span className="text-3xl font-extrabold text-primary">{String(timeLeft.minutes).padStart(2, '0')}</span>
-        <span className="block text-xs font-bold text-on-surface-variant uppercase mt-1">Min</span>
+      <div className="bg-surface p-2 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm text-center min-w-[60px] sm:min-w-[80px] border border-outline-variant/30 flex-1 sm:flex-none">
+        <span className="text-2xl sm:text-3xl font-extrabold text-primary">{String(timeLeft.minutes).padStart(2, '0')}</span>
+        <span className="block text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase mt-1">Min</span>
       </div>
-      <div className="bg-surface p-4 rounded-2xl shadow-sm text-center min-w-[80px] border border-outline-variant/30">
-        <span className="text-3xl font-extrabold text-error">{String(timeLeft.seconds).padStart(2, '0')}</span>
-        <span className="block text-xs font-bold text-error uppercase mt-1">Seg</span>
+      <div className="bg-surface p-2 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm text-center min-w-[60px] sm:min-w-[80px] border border-outline-variant/30 flex-1 sm:flex-none">
+        <span className="text-2xl sm:text-3xl font-extrabold text-error">{String(timeLeft.seconds).padStart(2, '0')}</span>
+        <span className="block text-[10px] sm:text-xs font-bold text-error uppercase mt-1">Seg</span>
       </div>
     </div>
   );
