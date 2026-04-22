@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
 import CheckoutClient from "./CheckoutClient";
 
 type Params = Promise<{ excursion_id: string }>;
@@ -68,23 +67,13 @@ export default async function CheckoutPage({ params }: { params: Params }) {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Cabecalho Simplificado */}
-        <div className="flex items-center gap-4 mb-8 border-b border-outline-variant/30 pb-6">
-          <Link
-            href={backHref}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low hover:bg-surface-container transition-colors text-on-surface"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-on-surface font-[family-name:var(--font-display)]">Checkout</h1>
-            <p className="text-sm text-on-surface-variant flex items-center gap-2">
-              <span className="font-semibold text-primary">{excursion.tour_packages?.title}</span>
-              <span className="w-1 h-1 rounded-full bg-outline"></span>
-              <span>{new Date(excursion.departure_date).toLocaleDateString("pt-BR")}</span>
-            </p>
-          </div>
+        <div className="mb-8 border-b border-outline-variant/30 pb-6">
+          <h1 className="text-2xl font-bold text-on-surface font-[family-name:var(--font-display)]">Checkout</h1>
+          <p className="text-sm text-on-surface-variant flex items-center gap-2 mt-1">
+            <span className="font-semibold text-primary">{excursion.tour_packages?.title}</span>
+            <span className="w-1 h-1 rounded-full bg-outline"></span>
+            <span>{new Date(excursion.departure_date).toLocaleDateString("pt-BR")}</span>
+          </p>
         </div>
 
         {/* Client Component */}
@@ -94,6 +83,7 @@ export default async function CheckoutPage({ params }: { params: Params }) {
           profile={profile}
           savedPassengers={savedPassengers || []}
           occupiedSeats={occupiedSeats}
+          backHref={backHref}
         />
 
       </div>

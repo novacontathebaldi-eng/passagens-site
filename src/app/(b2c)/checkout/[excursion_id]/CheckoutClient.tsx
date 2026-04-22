@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Cookies from "js-cookie";
-import { User, ShieldCheck } from "lucide-react";
+import { User, Pencil, ChevronLeft } from "lucide-react";
 
 import { formatBRL, formatCPF, validateCPF } from "@/lib/utils";
 import { createReservation } from "./actions";
@@ -26,6 +26,7 @@ interface CheckoutClientProps {
   profile: any;
   savedPassengers: Passenger[];
   occupiedSeats: string[];
+  backHref: string;
 }
 
 const passengerSchema = z.object({
@@ -43,13 +44,14 @@ const checkoutSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
-export default function CheckoutClient({ excursion, user, profile, savedPassengers, occupiedSeats }: CheckoutClientProps) {
+export default function CheckoutClient({ excursion, user, profile, savedPassengers, occupiedSeats, backHref }: CheckoutClientProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [quantity, setQuantity] = useState(1);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [editFromReview, setEditFromReview] = useState(false);
 
   const liveOccupiedSeats = useRealtimeSeats(excursion.id, occupiedSeats);
   const totalAmount = quantity * excursion.price_per_seat;
@@ -140,6 +142,13 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
         return;
       }
 
+      // If editing from review, go straight back to review
+      if (editFromReview) {
+        setEditFromReview(false);
+        setStep(4);
+        return;
+      }
+
       if (!excursion.allow_seat_selection) {
         setStep(4);
         return;
@@ -151,9 +160,36 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
         setGlobalError(`Você precisa selecionar exatamente ${quantity} poltrona(s).`);
         return;
       }
+
+      // If editing from review, go straight back to review
+      if (editFromReview) {
+        setEditFromReview(false);
+        setStep(4);
+        return;
+      }
     }
 
     setStep(s => s + 1);
+  };
+
+  const handleBack = () => {
+    setGlobalError(null);
+    if (step === 1) {
+      router.push(backHref);
+      return;
+    }
+    // Step 4 going back: skip step 3 if seat selection is disabled
+    if (step === 4 && !excursion.allow_seat_selection) {
+      setStep(2);
+      return;
+    }
+    setStep(s => s - 1);
+  };
+
+  const goToStepFromReview = (targetStep: number) => {
+    setEditFromReview(true);
+    setGlobalError(null);
+    setStep(targetStep);
   };
 
   const handleFinalize = async () => {
@@ -311,13 +347,7 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
                           );
                         })}
                       </div>
-                      
-                      {(isProfile || isSaved) && (
-                        <div className="mb-5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/50 px-3 py-2.5 rounded-xl flex items-start gap-2">
-                          <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" />
-                          <span>Alterações feitas aqui valem <strong>apenas para este pedido</strong> e não afetam os dados originais do perfil.</span>
-                        </div>
-                      )}
+
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Nome */}
@@ -453,6 +483,16 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
                   <span className="font-bold text-on-surface">Resumo da Viagem</span>
                 </div>
                 <div className="p-4 space-y-3 text-sm text-on-surface-variant">
+                  {/* Quantidade */}
+                  <div className="flex justify-between items-center">
+                    <span>Quantidade:</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-on-surface">{quantity} x {formatBRL(excursion.price_per_seat)}</span>
+                      <button onClick={() => goToStepFromReview(1)} className="text-primary hover:text-primary/80 transition-colors" title="Editar quantidade">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
                   <div className="flex justify-between">
                     <span>Destino:</span>
                     <span className="font-semibold text-on-surface text-right max-w-[200px] sm:max-w-xs">{excursion.tour_packages?.title}</span>
@@ -461,18 +501,24 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
                     <span>Data de Saída:</span>
                     <span className="font-semibold text-on-surface">{new Date(excursion.departure_date).toLocaleDateString("pt-BR")}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Quantidade:</span>
-                    <span className="font-semibold text-on-surface">{quantity} x {formatBRL(excursion.price_per_seat)}</span>
-                  </div>
                   {excursion.allow_seat_selection && (
-                    <div className="flex justify-between">
-                      <span>Poltronas Selecionadas:</span>
-                      <span className="font-semibold text-on-surface">{selectedSeats.join(", ") || "Nenhuma"}</span>
+                    <div className="flex justify-between items-center">
+                      <span>Poltronas:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-on-surface">{selectedSeats.join(", ") || "Nenhuma"}</span>
+                        <button onClick={() => goToStepFromReview(3)} className="text-primary hover:text-primary/80 transition-colors" title="Editar poltronas">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   )}
                   <div className="pt-3 mt-3 border-t border-outline-variant/30">
-                    <span className="block mb-2 font-semibold">Viajantes:</span>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold">Viajantes:</span>
+                      <button onClick={() => goToStepFromReview(2)} className="text-primary hover:text-primary/80 text-xs font-medium flex items-center gap-1 transition-colors">
+                        <Pencil className="w-3 h-3" /> Editar
+                      </button>
+                    </div>
                     {watchedPassengers.map((p, i) => (
                       <div key={i} className="text-sm font-medium text-on-surface bg-surface-container px-3 py-2.5 rounded-lg mb-2 flex justify-between items-center">
                         <span className="truncate pr-4">{p.full_name}</span>
@@ -490,22 +536,21 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
 
         {/* Action Buttons */}
         <div className="mt-6 flex items-center justify-between">
-          {step > 1 ? (
-            <button 
-              onClick={() => setStep(s => s - 1)}
-              disabled={isLoading}
-              className="px-6 py-3 rounded-xl text-on-surface font-semibold hover:bg-surface-container transition-colors disabled:opacity-50"
-            >
-              Voltar
-            </button>
-          ) : <div />}
+          <button 
+            onClick={handleBack}
+            disabled={isLoading}
+            className="px-6 py-3 rounded-xl text-on-surface font-semibold hover:bg-surface-container transition-colors disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            {step === 1 ? "Sair" : "Voltar"}
+          </button>
           
           {step < 4 ? (
             <button 
               onClick={handleNextStep}
               className="px-8 py-3 rounded-xl gradient-cta text-on-cta font-bold shadow-md hover:shadow-glow-cta transition-all"
             >
-              Continuar
+              {editFromReview ? "Confirmar" : "Continuar"}
             </button>
           ) : (
             <button 
