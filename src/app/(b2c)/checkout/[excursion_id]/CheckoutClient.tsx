@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Cookies from "js-cookie";
-import { User, Pencil, ChevronLeft } from "lucide-react";
+import { User, Pencil, ChevronLeft, LogOut, X } from "lucide-react";
 
 import { formatBRL, formatCPF, validateCPF } from "@/lib/utils";
 import { createReservation } from "./actions";
@@ -52,6 +52,7 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
   const [isLoading, setIsLoading] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [editFromReview, setEditFromReview] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const liveOccupiedSeats = useRealtimeSeats(excursion.id, occupiedSeats);
   const totalAmount = quantity * excursion.price_per_seat;
@@ -175,7 +176,7 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
   const handleBack = () => {
     setGlobalError(null);
     if (step === 1) {
-      router.push(backHref);
+      setShowExitConfirm(true);
       return;
     }
     // Step 4 going back: skip step 3 if seat selection is disabled
@@ -592,7 +593,44 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
 
         </div>
       </div>
+
+      {/* Exit Confirmation Modal */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowExitConfirm(false)} />
+          <div className="relative bg-surface-container-lowest rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-xl border border-outline-variant/30 animate-in fade-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setShowExitConfirm(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                <LogOut className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-on-surface">Sair do checkout?</h3>
+            </div>
+            <p className="text-sm text-on-surface-variant mb-6">
+              Seu progresso será salvo automaticamente. Você pode retomar a compra a qualquer momento.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowExitConfirm(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-on-surface bg-surface-container hover:bg-surface-container-high transition-colors text-sm"
+              >
+                Continuar comprando
+              </button>
+              <button
+                onClick={() => router.push(backHref)}
+                className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-error bg-error/10 hover:bg-error/20 transition-colors text-sm"
+              >
+                Sair
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
