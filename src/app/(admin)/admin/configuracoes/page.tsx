@@ -5,14 +5,37 @@ import { createClient } from "@/lib/supabase/client";
 import { convertToWebP, getExtForType, getOldFilePaths } from "@/lib/image-utils";
 import Image from "next/image";
 
+type PixKeyEntry = { type: string; key: string; label: string };
+
+const PIX_KEY_TYPES = [
+  { value: "TELEFONE", label: "Telefone" },
+  { value: "CPF", label: "CPF" },
+  { value: "CNPJ", label: "CNPJ" },
+  { value: "EMAIL", label: "E-mail" },
+  { value: "CHAVE_ALEATORIA", label: "Chave Aleatória" },
+];
+
 type GlobalSettings = {
   id: number;
   company_name: string;
   enable_whatsapp_notifications: boolean;
   enable_email_marketing_sync: boolean;
+  // PIX
   pix_key: string;
+  pix_key_type: string;
+  pix_keys: PixKeyEntry[];
+  pix_copy_paste: string;
   pix_qr_code_url: string;
   pix_instructions: string;
+  // Bank
+  bank_name: string;
+  bank_account_holder: string;
+  bank_cpf: string;
+  bank_agency: string;
+  bank_account: string;
+  bank_transfer_instructions: string;
+  // Other
+  cancellation_policy_text: string;
   whatsapp_support_numbers: string[];
   hold_ttl_hours: number;
   // Dynamic images
@@ -174,7 +197,32 @@ export default function ConfiguracoesPage() {
           }
         } catch(e) {}
 
-        setSettings({ ...data, whatsapp_support_numbers: numbers.length > 0 ? numbers : [""] });
+        let pixKeys: PixKeyEntry[] = [];
+        try {
+          if (Array.isArray(data.pix_keys)) {
+            pixKeys = data.pix_keys as PixKeyEntry[];
+          } else if (typeof data.pix_keys === 'string') {
+            pixKeys = JSON.parse(data.pix_keys);
+          }
+        } catch(e) {}
+
+        setSettings({
+          ...data,
+          whatsapp_support_numbers: numbers.length > 0 ? numbers : [""],
+          pix_keys: pixKeys,
+          pix_key: data.pix_key ?? "",
+          pix_key_type: data.pix_key_type ?? "TELEFONE",
+          pix_copy_paste: data.pix_copy_paste ?? "",
+          pix_qr_code_url: data.pix_qr_code_url ?? "",
+          pix_instructions: data.pix_instructions ?? "",
+          bank_name: data.bank_name ?? "",
+          bank_account_holder: data.bank_account_holder ?? "",
+          bank_cpf: data.bank_cpf ?? "",
+          bank_agency: data.bank_agency ?? "",
+          bank_account: data.bank_account ?? "",
+          bank_transfer_instructions: data.bank_transfer_instructions ?? "",
+          cancellation_policy_text: data.cancellation_policy_text ?? "",
+        });
       } else if (error && error.code === 'PGRST116') {
         setSettings({
           id: 1,
@@ -182,8 +230,18 @@ export default function ConfiguracoesPage() {
           enable_whatsapp_notifications: true,
           enable_email_marketing_sync: true,
           pix_key: "",
+          pix_key_type: "TELEFONE",
+          pix_keys: [],
+          pix_copy_paste: "",
           pix_qr_code_url: "",
           pix_instructions: "Envie o comprovante no WhatsApp",
+          bank_name: "",
+          bank_account_holder: "",
+          bank_cpf: "",
+          bank_agency: "",
+          bank_account: "",
+          bank_transfer_instructions: "",
+          cancellation_policy_text: "",
           whatsapp_support_numbers: [""],
           hold_ttl_hours: 24,
           logo_url: null,
@@ -208,6 +266,7 @@ export default function ConfiguracoesPage() {
     const payload = {
       ...settings,
       whatsapp_support_numbers: JSON.stringify(settings.whatsapp_support_numbers),
+      pix_keys: JSON.stringify(settings.pix_keys),
       updated_at: new Date().toISOString()
     };
 
@@ -236,6 +295,53 @@ export default function ConfiguracoesPage() {
   const addWhatsappNumber = () => {
     if (!settings) return;
     setSettings({ ...settings, whatsapp_support_numbers: [...settings.whatsapp_support_numbers, ""] });
+  };
+
+  // PIX Keys handlers
+  const addPixKey = () => {
+    if (!settings) return;
+    setSettings({ ...settings, pix_keys: [...settings.pix_keys, { type: "TELEFONE", key: "", label: "Telefone" }] });
+  };
+
+  const updatePixKey = (index: number, field: keyof PixKeyEntry, value: string) => {
+    if (!settings) return;
+    const newKeys = [...settings.pix_keys];
+    newKeys[index] = { ...newKeys[index], [field]: value };
+    if (field === "type") {
+      newKeys[index].label = PIX_KEY_TYPES.find(t => t.value === value)?.label ?? value;
+    }
+    setSettings({ ...settings, pix_keys: newKeys });
+  };
+
+  const removePixKey = (index: number) => {
+    if (!settings) return;
+    setSettings({ ...settings, pix_keys: settings.pix_keys.filter((_, i) => i !== index) });
+  };
+
+  // QR Code image upload
+  const qrInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingQr, setIsUploadingQr] = useState(false);
+
+  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !settings) return;
+    setIsUploadingQr(true);
+    try {
+      const processed = await convertToWebP(file);
+      const ext = getExtForType(processed);
+      const path = `site/pix_qr_code.${ext}`;
+      const oldPaths = getOldFilePaths("pix_qr_code");
+      await supabase.storage.from("assets").remove(oldPaths);
+      const { error } = await supabase.storage.from("assets").upload(path, processed, { upsert: true, cacheControl: "3600" });
+      if (error) { alert("Erro: " + error.message); return; }
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      setSettings({ ...settings, pix_qr_code_url: `${urlData.publicUrl}?v=${Date.now()}` });
+    } catch (err) {
+      alert("Erro ao processar: " + (err instanceof Error ? err.message : "Erro"));
+    } finally {
+      setIsUploadingQr(false);
+      if (qrInputRef.current) qrInputRef.current.value = "";
+    }
   };
 
   const handleImageUploaded = (field: keyof GlobalSettings, url: string) => {
@@ -346,36 +452,150 @@ export default function ConfiguracoesPage() {
             Pagamento B2C (PIX)
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            {/* Chaves PIX */}
+            <div className="sm:col-span-2 space-y-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-semibold text-on-surface">Chaves PIX Disponíveis</label>
+                <button type="button" onClick={addPixKey} className="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors">
+                  + Adicionar Chave
+                </button>
+              </div>
+              
+              {settings.pix_keys.length === 0 && (
+                <p className="text-xs text-on-surface-variant italic">Nenhuma chave PIX configurada. Adicione pelo menos uma para vendas B2C.</p>
+              )}
+
+              {settings.pix_keys.map((pix, i) => (
+                <div key={i} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                  <select 
+                    value={pix.type}
+                    onChange={(e) => updatePixKey(i, "type", e.target.value)}
+                    className="bg-surface border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  >
+                    {PIX_KEY_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                  <input 
+                    type="text" 
+                    value={pix.key}
+                    onChange={(e) => updatePixKey(i, "key", e.target.value)}
+                    placeholder="Chave (ex: 123.456.789-00)"
+                    className="flex-1 w-full bg-surface border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  />
+                  <input 
+                    type="text" 
+                    value={pix.label}
+                    onChange={(e) => updatePixKey(i, "label", e.target.value)}
+                    placeholder="Rótulo (ex: CPF do Eduardo)"
+                    className="flex-1 w-full bg-surface border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  />
+                  <button type="button" onClick={() => removePixKey(i)} className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors" title="Remover chave">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-on-surface">Chave PIX (Copia e Cola)</label>
-              <input 
-                type="text" 
-                value={settings.pix_key}
-                onChange={(e) => setSettings({...settings, pix_key: e.target.value})}
-                className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                placeholder="Ex: 12.345.678/0001-90"
+              <label className="text-sm font-semibold text-on-surface">Código Copia e Cola (Opcional)</label>
+              <textarea 
+                value={settings.pix_copy_paste}
+                onChange={(e) => setSettings({...settings, pix_copy_paste: e.target.value})}
+                className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-xs font-mono"
+                placeholder="00020126580014br.gov.bcb.pix..."
+                rows={3}
               />
             </div>
+            
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-on-surface">URL do QR Code PIX Estático</label>
-              <input 
-                type="url" 
-                value={settings.pix_qr_code_url}
-                onChange={(e) => setSettings({...settings, pix_qr_code_url: e.target.value})}
-                className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                placeholder="https://..."
-              />
+              <label className="text-sm font-semibold text-on-surface">QR Code Estático (Imagem)</label>
+              <div className="flex gap-4 items-center">
+                {settings.pix_qr_code_url ? (
+                  <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-outline-variant/30 flex-shrink-0">
+                    <Image src={settings.pix_qr_code_url} alt="QR Code" fill className="object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-20 h-20 rounded-xl border border-dashed border-outline-variant flex items-center justify-center bg-surface flex-shrink-0">
+                    <span className="text-[10px] text-on-surface-variant text-center px-1">Sem Imagem</span>
+                  </div>
+                )}
+                <div className="flex-1">
+                  <input type="file" accept="image/png,image/jpeg,image/webp" ref={qrInputRef} onChange={handleQrUpload} className="hidden" />
+                  <button type="button" onClick={() => qrInputRef.current?.click()} disabled={isUploadingQr} className="bg-surface-container-high hover:bg-surface-container-highest px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+                    {isUploadingQr ? "Enviando..." : "Fazer Upload do QR"}
+                  </button>
+                  <p className="text-[10px] text-on-surface-variant mt-1">Recomendado: PNG Quadrado. Fica visível no checkout.</p>
+                </div>
+              </div>
             </div>
+
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <label className="text-sm font-semibold text-on-surface">Instruções de Pagamento</label>
               <textarea 
                 value={settings.pix_instructions}
                 onChange={(e) => setSettings({...settings, pix_instructions: e.target.value})}
-                rows={3}
+                rows={2}
                 className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                 placeholder="Ex: Efetue o PIX e envie o comprovante via WhatsApp informando o número do pedido."
               />
             </div>
+          </div>
+        </section>
+
+        {/* DADOS BANCÁRIOS */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+            </svg>
+            Transferência Bancária (Opcional)
+          </h2>
+          <p className="text-xs text-on-surface-variant">Se preenchido, exibirá a opção de TED/DOC na tela de pagamento do cliente.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold text-on-surface">Banco</label>
+              <input type="text" value={settings.bank_name} onChange={(e) => setSettings({...settings, bank_name: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Ex: Nubank / Inter" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold text-on-surface">Titular</label>
+              <input type="text" value={settings.bank_account_holder} onChange={(e) => setSettings({...settings, bank_account_holder: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Nome Completo" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold text-on-surface">CPF/CNPJ do Titular</label>
+              <input type="text" value={settings.bank_cpf} onChange={(e) => setSettings({...settings, bank_cpf: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Documento" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold text-on-surface">Agência</label>
+              <input type="text" value={settings.bank_agency} onChange={(e) => setSettings({...settings, bank_agency: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Ex: 0001" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold text-on-surface">Conta</label>
+              <input type="text" value={settings.bank_account} onChange={(e) => setSettings({...settings, bank_account: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Com dígito" />
+            </div>
+            <div className="flex flex-col gap-1.5 lg:col-span-3">
+              <label className="text-sm font-semibold text-on-surface">Instruções de Transferência</label>
+              <input type="text" value={settings.bank_transfer_instructions} onChange={(e) => setSettings({...settings, bank_transfer_instructions: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Ex: Envie o comprovante via WhatsApp..." />
+            </div>
+          </div>
+        </section>
+
+        {/* POLÍTICA DE CANCELAMENTO */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Termos e Políticas
+          </h2>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-on-surface">Política de Cancelamento / Reembolso</label>
+            <textarea 
+              value={settings.cancellation_policy_text}
+              onChange={(e) => setSettings({...settings, cancellation_policy_text: e.target.value})}
+              rows={4}
+              className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-sm"
+              placeholder="Descreva as regras de cancelamento. Visível na tela de pagamento para o cliente estar ciente."
+            />
           </div>
         </section>
 
