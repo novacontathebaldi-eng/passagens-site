@@ -177,32 +177,7 @@ export default async function HomePage() {
       <section className="relative mt-8 sm:mt-12 z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              {
-                number: "50+",
-                label: "Excursões realizadas",
-                iconPath:
-                  "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-              },
-              {
-                number: "2.000+",
-                label: "Viajantes felizes",
-                iconPath:
-                  "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
-              },
-              {
-                number: "15+",
-                label: "Destinos",
-                iconPath:
-                  "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
-              },
-              {
-                number: "4.9",
-                label: "Avaliação média",
-                iconPath:
-                  "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
-              },
-            ].map((stat) => (
+            {(settings.hero_stats || []).map((stat) => (
               <div
                 key={stat.label}
                 className="bg-surface-container-lowest rounded-2xl p-5 text-center shadow-md hover:shadow-lg transition-shadow"

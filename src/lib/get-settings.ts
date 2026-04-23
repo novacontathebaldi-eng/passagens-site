@@ -7,6 +7,12 @@ export type PixKeyEntry = {
   label: string;
 };
 
+export type HeroStat = {
+  number: string;
+  label: string;
+  iconPath: string;
+};
+
 export type SiteSettings = {
   company_name: string;
   logo_url: string | null;
@@ -37,6 +43,7 @@ export type SiteSettings = {
   administrative_address: string | null;
   cancellation_policy_text: string | null;
   social_links: Record<string, string> | null;
+  hero_stats: HeroStat[] | null;
   updated_at: string;
 };
 
@@ -67,6 +74,7 @@ const SETTINGS_FIELDS = `
   administrative_address,
   cancellation_policy_text,
   social_links,
+  hero_stats,
   updated_at
 `;
 
@@ -110,6 +118,15 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     }
   }
 
+  let parsedHeroStats = settings.hero_stats;
+  if (typeof parsedHeroStats === "string") {
+    try {
+      parsedHeroStats = JSON.parse(parsedHeroStats);
+    } catch (e) {
+      parsedHeroStats = null;
+    }
+  }
+
   return {
     company_name: settings.company_name ?? "ViajaEdu!",
     logo_url: settings.logo_url ?? null,
@@ -137,6 +154,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     administrative_address: settings.administrative_address ?? null,
     cancellation_policy_text: settings.cancellation_policy_text ?? null,
     social_links: typeof parsedSocialLinks === "object" ? parsedSocialLinks : null,
+    hero_stats: Array.isArray(parsedHeroStats) ? parsedHeroStats : null,
     updated_at: settings.updated_at ?? new Date().toISOString(),
   };
 }
