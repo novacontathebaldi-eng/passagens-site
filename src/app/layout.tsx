@@ -27,14 +27,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const v = settings?.updated_at ? new Date(settings.updated_at).getTime() : Date.now();
 
-  const title = settings?.company_name 
+  const title = settings?.company_name
     ? `${settings.company_name} — Excursões Turísticas Rodoviárias`
-    : "ViajaEdu! — Excursões Turísticas Rodoviárias";
+    : "Partiu Turismo — Excursões Turísticas Rodoviárias";
 
   return {
     title: {
       default: title,
-      template: `%s | ${settings?.company_name || "ViajaEdu!"}`,
+      template: `%s | ${settings?.company_name || "Partiu Turismo"}`,
     },
     description:
       "Descubra destinos incríveis com excursões turísticas de ônibus premium. Pacotes completos com guia, ônibus executivo e tudo incluso. Garanta sua vaga!",
@@ -43,11 +43,11 @@ export async function generateMetadata(): Promise<Metadata> {
       "viagens de ônibus",
       "turismo rodoviário",
       "pacotes turísticos",
-      "ViajaEdu",
+      "Partiu Turismo",
       "viagem barata",
       "excursão de ônibus",
     ],
-    authors: [{ name: settings?.company_name || "ViajaEdu!" }],
+    authors: [{ name: settings?.company_name || "Partiu Turismo" }],
     icons: settings?.favicon_url ? [
       { rel: "icon", url: `${settings.favicon_url}?v=${v}` },
       { rel: "apple-touch-icon", url: `${settings.favicon_url}?v=${v}` },
