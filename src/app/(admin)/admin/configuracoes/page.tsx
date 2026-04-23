@@ -6,6 +6,7 @@ import { convertToWebP, getExtForType, getOldFilePaths } from "@/lib/image-utils
 import Image from "next/image";
 
 type PixKeyEntry = { type: string; key: string; label: string };
+type HeroStatEntry = { number: string; label: string; iconPath: string };
 
 const PIX_KEY_TYPES = [
   { value: "TELEFONE", label: "Telefone" },
@@ -13,6 +14,19 @@ const PIX_KEY_TYPES = [
   { value: "CNPJ", label: "CNPJ" },
   { value: "EMAIL", label: "E-mail" },
   { value: "CHAVE_ALEATORIA", label: "Chave Aleatória" },
+];
+
+const ICON_OPTIONS = [
+  { label: "Calendário", value: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
+  { label: "Pessoas", value: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
+  { label: "Localização", value: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" },
+  { label: "Estrela", value: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" },
+  { label: "Coração", value: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
+  { label: "Troféu", value: "M5 3h14l-1.5 6H6.5L5 3zM9 3v-1a1 1 0 011-1h4a1 1 0 011 1v1M12 9v6m-3 0h6m-8 4h10a1 1 0 001-1v-1H6v1a1 1 0 001 1z" },
+  { label: "Check", value: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
+  { label: "Ônibus", value: "M8 17h.01M16 17h.01M9 11h6M4 7h16M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
+  { label: "Globo", value: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+  { label: "Gráfico", value: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" },
 ];
 
 type GlobalSettings = {
@@ -41,6 +55,7 @@ type GlobalSettings = {
   operating_hours: string;
   administrative_address: string;
   hold_ttl_hours: number;
+  hero_stats: HeroStatEntry[];
   // Dynamic images
   logo_url: string | null;
   hero_image_url: string | null;
@@ -209,10 +224,20 @@ export default function ConfiguracoesPage() {
           }
         } catch(e) {}
 
+        let heroStats: HeroStatEntry[] = [];
+        try {
+          if (Array.isArray(data.hero_stats)) {
+            heroStats = data.hero_stats as HeroStatEntry[];
+          } else if (typeof data.hero_stats === 'string') {
+            heroStats = JSON.parse(data.hero_stats);
+          }
+        } catch(e) {}
+
         setSettings({
           ...data,
           whatsapp_support_numbers: numbers.length > 0 ? numbers : [""],
           pix_keys: pixKeys,
+          hero_stats: heroStats,
           pix_key: data.pix_key ?? "",
           pix_key_type: data.pix_key_type ?? "TELEFONE",
           pix_copy_paste: data.pix_copy_paste ?? "",
@@ -253,6 +278,7 @@ export default function ConfiguracoesPage() {
           administrative_address: "",
           whatsapp_support_numbers: [""],
           hold_ttl_hours: 24,
+          hero_stats: [],
           logo_url: null,
           hero_image_url: null,
           login_image_url: null,
@@ -276,6 +302,7 @@ export default function ConfiguracoesPage() {
       ...settings,
       whatsapp_support_numbers: JSON.stringify(settings.whatsapp_support_numbers),
       pix_keys: JSON.stringify(settings.pix_keys),
+      hero_stats: JSON.stringify(settings.hero_stats),
       updated_at: new Date().toISOString()
     };
 
@@ -325,6 +352,33 @@ export default function ConfiguracoesPage() {
   const removePixKey = (index: number) => {
     if (!settings) return;
     setSettings({ ...settings, pix_keys: settings.pix_keys.filter((_, i) => i !== index) });
+  };
+
+  // Hero Stats handlers
+  const addHeroStat = () => {
+    if (!settings) return;
+    setSettings({ ...settings, hero_stats: [...settings.hero_stats, { number: "", label: "", iconPath: ICON_OPTIONS[0].value }] });
+  };
+
+  const updateHeroStat = (index: number, field: keyof HeroStatEntry, value: string) => {
+    if (!settings) return;
+    const newStats = [...settings.hero_stats];
+    newStats[index] = { ...newStats[index], [field]: value };
+    setSettings({ ...settings, hero_stats: newStats });
+  };
+
+  const removeHeroStat = (index: number) => {
+    if (!settings) return;
+    setSettings({ ...settings, hero_stats: settings.hero_stats.filter((_, i) => i !== index) });
+  };
+
+  const moveHeroStat = (index: number, direction: -1 | 1) => {
+    if (!settings) return;
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= settings.hero_stats.length) return;
+    const newStats = [...settings.hero_stats];
+    [newStats[index], newStats[newIndex]] = [newStats[newIndex], newStats[index]];
+    setSettings({ ...settings, hero_stats: newStats });
   };
 
   // QR Code image upload
@@ -415,6 +469,88 @@ export default function ConfiguracoesPage() {
                 onUploaded={(url) => handleImageUploaded(field.key, url)}
               />
             ))}
+          </div>
+        </section>
+
+        {/* ESTATÍSTICAS DO HERO (Social Proof) */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Estatísticas do Hero (Social Proof)
+          </h2>
+          <p className="text-xs text-on-surface-variant">
+            Cards exibidos abaixo do hero na página inicial. Transmitem credibilidade e confiança ao visitante.
+          </p>
+
+          <div className="space-y-3">
+            {settings.hero_stats.map((stat, i) => (
+              <div key={i} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center p-4 bg-surface rounded-xl border border-outline-variant/30">
+                {/* Icon preview + selector */}
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={stat.iconPath} />
+                    </svg>
+                  </div>
+                  <select
+                    value={ICON_OPTIONS.find(o => o.value === stat.iconPath) ? stat.iconPath : "__custom"}
+                    onChange={(e) => { if (e.target.value !== "__custom") updateHeroStat(i, "iconPath", e.target.value); }}
+                    className="bg-surface border border-outline-variant rounded-lg px-2 py-1 text-[11px] focus:border-primary outline-none w-[110px]"
+                  >
+                    {ICON_OPTIONS.map(opt => <option key={opt.label} value={opt.value}>{opt.label}</option>)}
+                    {!ICON_OPTIONS.find(o => o.value === stat.iconPath) && <option value="__custom">Personalizado</option>}
+                  </select>
+                </div>
+
+                {/* Number + Label inputs */}
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-semibold text-on-surface-variant">Número/Valor</label>
+                    <input
+                      type="text"
+                      value={stat.number}
+                      onChange={(e) => updateHeroStat(i, "number", e.target.value)}
+                      placeholder="Ex: 50+"
+                      className="bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm font-bold focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-semibold text-on-surface-variant">Rótulo</label>
+                    <input
+                      type="text"
+                      value={stat.label}
+                      onChange={(e) => updateHeroStat(i, "label", e.target.value)}
+                      placeholder="Ex: Excursões realizadas"
+                      className="bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Actions: reorder + delete */}
+                <div className="flex sm:flex-col gap-1 shrink-0">
+                  <button type="button" onClick={() => moveHeroStat(i, -1)} disabled={i === 0} className="p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para cima">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                  </button>
+                  <button type="button" onClick={() => moveHeroStat(i, 1)} disabled={i === settings.hero_stats.length - 1} className="p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para baixo">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+                  <button type="button" onClick={() => removeHeroStat(i)} className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" title="Remover">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addHeroStat}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 border-2 border-dashed border-outline-variant/40 rounded-2xl text-sm font-semibold text-primary hover:border-primary/50 hover:bg-primary/5 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+              Adicionar Estatística
+            </button>
           </div>
         </section>
 
