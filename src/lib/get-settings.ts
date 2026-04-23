@@ -80,33 +80,63 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     .eq("id", 1)
     .single();
 
-  return (data as unknown as SiteSettings) ?? {
-    company_name: "ViajaEdu!",
-    logo_url: null,
-    hero_image_url: null,
-    login_image_url: null,
-    signup_image_url: null,
-    favicon_url: null,
-    og_image_url: null,
-    pix_key: null,
-    pix_key_type: null,
-    pix_keys: null,
-    pix_copy_paste: null,
-    pix_qr_code_url: null,
-    pix_instructions: null,
-    bank_name: null,
-    bank_account_holder: null,
-    bank_cpf: null,
-    bank_agency: null,
-    bank_account: null,
-    bank_transfer_instructions: null,
-    hold_ttl_hours: 24,
-    whatsapp_support_numbers: null,
-    contact_email: null,
-    operating_hours: null,
-    administrative_address: null,
-    cancellation_policy_text: null,
-    social_links: null,
-    updated_at: new Date().toISOString(),
+  const settings = (data as unknown as Record<string, any>) ?? {};
+
+  // Fix JSON fields that might be stored as stringified JSON
+  let parsedPixKeys = settings.pix_keys;
+  if (typeof parsedPixKeys === "string") {
+    try {
+      parsedPixKeys = JSON.parse(parsedPixKeys);
+    } catch (e) {
+      parsedPixKeys = null;
+    }
+  }
+
+  let parsedWhatsApp = settings.whatsapp_support_numbers;
+  if (typeof parsedWhatsApp === "string") {
+    try {
+      parsedWhatsApp = JSON.parse(parsedWhatsApp);
+    } catch (e) {
+      parsedWhatsApp = null;
+    }
+  }
+
+  let parsedSocialLinks = settings.social_links;
+  if (typeof parsedSocialLinks === "string") {
+    try {
+      parsedSocialLinks = JSON.parse(parsedSocialLinks);
+    } catch (e) {
+      parsedSocialLinks = null;
+    }
+  }
+
+  return {
+    company_name: settings.company_name ?? "ViajaEdu!",
+    logo_url: settings.logo_url ?? null,
+    hero_image_url: settings.hero_image_url ?? null,
+    login_image_url: settings.login_image_url ?? null,
+    signup_image_url: settings.signup_image_url ?? null,
+    favicon_url: settings.favicon_url ?? null,
+    og_image_url: settings.og_image_url ?? null,
+    pix_key: settings.pix_key ?? null,
+    pix_key_type: settings.pix_key_type ?? null,
+    pix_keys: Array.isArray(parsedPixKeys) ? parsedPixKeys : null,
+    pix_copy_paste: settings.pix_copy_paste ?? null,
+    pix_qr_code_url: settings.pix_qr_code_url ?? null,
+    pix_instructions: settings.pix_instructions ?? null,
+    bank_name: settings.bank_name ?? null,
+    bank_account_holder: settings.bank_account_holder ?? null,
+    bank_cpf: settings.bank_cpf ?? null,
+    bank_agency: settings.bank_agency ?? null,
+    bank_account: settings.bank_account ?? null,
+    bank_transfer_instructions: settings.bank_transfer_instructions ?? null,
+    hold_ttl_hours: settings.hold_ttl_hours ?? 24,
+    whatsapp_support_numbers: Array.isArray(parsedWhatsApp) ? parsedWhatsApp : null,
+    contact_email: settings.contact_email ?? null,
+    operating_hours: settings.operating_hours ?? null,
+    administrative_address: settings.administrative_address ?? null,
+    cancellation_policy_text: settings.cancellation_policy_text ?? null,
+    social_links: typeof parsedSocialLinks === "object" ? parsedSocialLinks : null,
+    updated_at: settings.updated_at ?? new Date().toISOString(),
   };
 }
