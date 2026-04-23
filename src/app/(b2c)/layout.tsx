@@ -4,6 +4,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteSettings } from "@/lib/get-settings";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 
 
 export const metadata: Metadata = {
