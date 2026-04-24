@@ -81,7 +81,7 @@ export function LogoWhite({ logoUrl, size = "md", className = "" }: LogoProps) {
           alt="Partiu Turismo"
           width={s.icon}
           height={s.icon}
-          className="object-contain brightness-0 invert"
+          className="object-contain"
           unoptimized
         />
       ) : (

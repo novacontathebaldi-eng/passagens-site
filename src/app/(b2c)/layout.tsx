@@ -21,7 +21,7 @@ function LogoMarkWhite({ logoUrl, size = 28 }: { logoUrl?: string | null; size?:
         alt="Partiu Turismo"
         width={size}
         height={size}
-        className="object-contain brightness-0 invert"
+        className="object-contain"
         unoptimized
       />
     );
