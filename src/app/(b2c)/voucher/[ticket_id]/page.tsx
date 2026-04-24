@@ -66,7 +66,7 @@ export default async function VoucherPage({
             <div>
               <div className="flex items-center gap-2 mb-2 justify-center sm:justify-start">
                 <Bus className="w-6 h-6" />
-                <span className="font-extrabold tracking-widest uppercase text-sm opacity-80">ViajaEdu! Ticket</span>
+                <span className="font-extrabold tracking-widest uppercase text-sm opacity-80">Partiu Turismo</span>
               </div>
               <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-center sm:text-left">{title}</h1>
             </div>

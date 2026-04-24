@@ -101,7 +101,7 @@ function LoginContent({ v }: { v: number }) {
                 <path d="M12 10L16 18L20 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
               </svg>
               <span className="text-2xl font-extrabold font-[family-name:var(--font-display)] text-primary">
-                ViajaEdu!
+                Partiu Turismo
               </span>
             </div>
           </div>

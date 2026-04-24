@@ -8,7 +8,7 @@ export default async function ContatoPage() {
     ? settings.whatsapp_support_numbers[0] 
     : "(11) 99999-9999";
     
-  const contactEmail = settings.contact_email || "contato@viajaedu.com.br";
+  const contactEmail = settings.contact_email || "contato@partiuturismo.com.br";
   
   const operatingHours = settings.operating_hours 
     ? settings.operating_hours.split('\n').map((line, i) => <span key={i}>{line}<br/></span>)

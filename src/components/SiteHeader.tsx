@@ -29,7 +29,7 @@ function LogoMark({ logoUrl, size = 28 }: { logoUrl?: string | null; size?: numb
     return (
       <Image
         src={logoUrl}
-        alt="ViajaEdu!"
+        alt="Partiu Turismo"
         width={size}
         height={size}
         className="object-contain"

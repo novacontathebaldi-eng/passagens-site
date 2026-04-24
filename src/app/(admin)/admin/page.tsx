@@ -143,7 +143,7 @@ export default async function AdminDashboard() {
             Dashboard
           </h1>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Visão geral do ViajaEdu! — Atualizado em tempo real
+            Visão geral do Partiu Turismo — Atualizado em tempo real
           </p>
         </div>
         <Link

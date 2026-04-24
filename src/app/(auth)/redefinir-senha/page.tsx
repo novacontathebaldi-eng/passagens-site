@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ResetPasswordClient } from "./ResetPasswordClient";
 
 export const metadata = {
-  title: "Redefinir Senha | ViajaEdu!",
+  title: "Redefinir Senha | Partiu Turismo",
 };
 
 export default async function RedefinirSenhaPage() {
@@ -23,7 +23,7 @@ export default async function RedefinirSenhaPage() {
           Redefinir sua senha
         </h1>
         <p className="text-on-surface-variant text-sm">
-          Você já pode escolher sua nova senha para acessar o ViajaEdu!.
+          Você já pode escolher sua nova senha para acessar o Partiu Turismo.
         </p>
       </div>
 

@@ -1,5 +1,5 @@
 /**
- * Client-side fuzzy search utilities for the small ViajaEdu catalogue.
+ * Client-side fuzzy search utilities for the Partiu Turismo catalogue.
  * No external dependencies — lightweight string matching + synonym mapping.
  */
 

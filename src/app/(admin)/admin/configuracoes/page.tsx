@@ -257,7 +257,7 @@ export default function ConfiguracoesPage() {
       } else if (error && error.code === 'PGRST116') {
         setSettings({
           id: 1,
-          company_name: "ViajaEdu!",
+          company_name: "Partiu Turismo",
           enable_whatsapp_notifications: true,
           enable_email_marketing_sync: true,
           pix_key: "",
@@ -798,7 +798,7 @@ export default function ConfiguracoesPage() {
                   value={settings.contact_email}
                   onChange={(e) => setSettings({...settings, contact_email: e.target.value})}
                   className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
-                  placeholder="Ex: contato@viajaedu.com.br"
+                  placeholder="Ex: contato@partiuturismo.com.br"
                 />
               </div>
 

@@ -9,7 +9,7 @@ export default function TermosPage() {
           
           <h2 className="text-xl font-bold text-on-surface mt-8 mb-4">1. Aceitação dos Termos</h2>
           <p>
-            Ao acessar e utilizar o site da ViajaEdu!, você concorda em cumprir estes termos de uso, 
+            Ao acessar e utilizar o site da Partiu Turismo, você concorda em cumprir estes termos de uso, 
             todas as leis e regulamentos aplicáveis. Se você não concordar com algum destes termos, 
             está proibido de usar ou acessar este site.
           </p>

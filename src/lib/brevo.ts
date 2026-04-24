@@ -19,7 +19,7 @@ export async function sendEmail({ to, subject, htmlContent }: SendEmailParams) {
       "api-key": apiKey
     },
     body: JSON.stringify({
-      sender: { name: "ViajaEDU - oTHEBALDI", email: "suporte@othebaldi.me" },
+      sender: { name: "Partiu Turismo - oTHEBALDI", email: "suporte@othebaldi.me" },
       to,
       subject,
       htmlContent

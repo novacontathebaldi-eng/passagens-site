@@ -7,7 +7,7 @@ import { LiveAlerts } from "@/components/LiveAlerts";
 import { AdminMobileMenu } from "./AdminMobileMenu";
 
 export const metadata: Metadata = {
-  title: "Admin — ViajaEdu!",
+  title: "Admin — Partiu Turismo",
   robots: "noindex, nofollow",
 };
 
@@ -63,7 +63,7 @@ export default async function AdminLayout({
             <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="text-lg font-extrabold font-[family-name:var(--font-display)]">
-            ViajaEdu!
+            Partiu Turismo
           </span>
           <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-primary/80 font-semibold">
             ADMIN

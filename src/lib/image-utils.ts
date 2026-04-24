@@ -1,5 +1,5 @@
 /**
- * Client-side image processing utilities for ViajaEdu!
+ * Client-side image processing utilities for Partiu Turismo
  * - Converts raster images (JPEG, PNG, GIF) to WebP for bandwidth savings
  * - Preserves transparency (alpha channel) from PNG/WebP sources
  * - Passes SVG and ICO files through unchanged (vector/icon formats)

@@ -197,7 +197,7 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
     setIsLoading(true);
     setGlobalError(null);
     try {
-      const referralCode = Cookies.get("viajaedu_ref");
+      const referralCode = Cookies.get("partiuturismo_ref") || Cookies.get("viajaedu_ref");
       const passengersData = getValues("passengers");
 
       const res = await createReservation({

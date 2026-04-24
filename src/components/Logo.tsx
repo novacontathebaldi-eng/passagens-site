@@ -23,7 +23,7 @@ function LogoIcon({ size = 24 }: { size?: number }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      {/* Stylized V mark for ViajaEdu */}
+      {/* Stylized mark for Partiu Turismo */}
       <rect width="32" height="32" rx="8" className="fill-primary" />
       <path
         d="M8 10L16 24L24 10"
@@ -52,7 +52,7 @@ export function Logo({ logoUrl, size = "md", className = "" }: LogoProps) {
       {logoUrl ? (
         <Image
           src={logoUrl}
-          alt="ViajaEdu!"
+          alt="Partiu Turismo"
           width={s.icon}
           height={s.icon}
           className="object-contain"
@@ -64,7 +64,7 @@ export function Logo({ logoUrl, size = "md", className = "" }: LogoProps) {
       <span
         className={`${s.text} font-extrabold font-[family-name:var(--font-display)] text-primary`}
       >
-        ViajaEdu!
+        Partiu Turismo
       </span>
     </span>
   );
@@ -78,7 +78,7 @@ export function LogoWhite({ logoUrl, size = "md", className = "" }: LogoProps) {
       {logoUrl ? (
         <Image
           src={logoUrl}
-          alt="ViajaEdu!"
+          alt="Partiu Turismo"
           width={s.icon}
           height={s.icon}
           className="object-contain brightness-0 invert"
@@ -114,7 +114,7 @@ export function LogoWhite({ logoUrl, size = "md", className = "" }: LogoProps) {
       <span
         className={`${s.text} font-extrabold font-[family-name:var(--font-display)] text-white`}
       >
-        ViajaEdu!
+        Partiu Turismo
       </span>
     </span>
   );

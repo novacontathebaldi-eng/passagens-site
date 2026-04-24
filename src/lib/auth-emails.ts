@@ -14,9 +14,9 @@ export async function sendConfirmationEmail(userId: string, userEmail: string) {
 
   const htmlContent = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <h2 style="color: #0284c7;">Confirme seu E-mail - ViajaEdu!</h2>
+      <h2 style="color: #0284c7;">Confirme seu E-mail - Partiu Turismo</h2>
       <p>Olá,</p>
-      <p>Obrigado por se cadastrar na ViajaEdu! Para garantir a segurança da sua conta e receber seus vouchers corretamente, precisamos confirmar seu endereço de e-mail.</p>
+      <p>Obrigado por se cadastrar na Partiu Turismo! Para garantir a segurança da sua conta e receber seus vouchers corretamente, precisamos confirmar seu endereço de e-mail.</p>
       <div style="text-align: center; margin: 30px 0;">
         <a href="${confirmLink}" style="background-color: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
           Confirmar meu E-mail
@@ -31,7 +31,7 @@ export async function sendConfirmationEmail(userId: string, userEmail: string) {
 
   await sendEmail({
     to: [{ email: userEmail }],
-    subject: "Confirme seu e-mail na ViajaEdu!",
+    subject: "Confirme seu e-mail na Partiu Turismo",
     htmlContent
   });
 }

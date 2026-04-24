@@ -55,7 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       locale: "pt_BR",
-      siteName: settings?.company_name || "ViajaEdu!",
+      siteName: settings?.company_name || "Partiu Turismo",
       title: title,
       description:
         "Descubra destinos incríveis com excursões turísticas de ônibus premium.",
@@ -64,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: `${settings.og_image_url}?v=${v}`,
           width: 1200,
           height: 630,
-          alt: settings?.company_name || "ViajaEdu!",
+          alt: settings?.company_name || "Partiu Turismo",
         }
       ] : undefined,
     },

@@ -11,7 +11,7 @@ export function RefCatcher() {
     const ref = searchParams.get("ref");
     if (ref) {
       // Save ref in a cookie for 30 days
-      Cookies.set("viajaedu_ref", ref, { expires: 30 });
+      Cookies.set("partiuturismo_ref", ref, { expires: 30 });
     }
   }, [searchParams]);
 

@@ -9,7 +9,7 @@ export default function PrivacidadePage() {
           
           <h2 className="text-xl font-bold text-on-surface mt-8 mb-4">1. Introdução</h2>
           <p>
-            A ViajaEdu! tem o compromisso de proteger sua privacidade e seus dados pessoais. 
+            A Partiu Turismo tem o compromisso de proteger sua privacidade e seus dados pessoais. 
             Esta política explica como coletamos, usamos e protegemos as informações que você nos fornece 
             através do nosso site, em conformidade com a Lei Geral de Proteção de Dados (LGPD).
           </p>

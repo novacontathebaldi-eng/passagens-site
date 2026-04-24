@@ -13,7 +13,7 @@ export default function SobrePage() {
             Nossa Missão é Conectar Pessoas a <span className="text-primary">Destinos Incríveis</span>
           </h1>
           <p className="mt-4 text-lg text-on-surface-variant max-w-2xl mx-auto">
-            A ViajaEdu! nasceu da paixão por explorar o Brasil. Oferecemos pacotes rodoviários completos com conforto, segurança e a melhor curadoria de roteiros.
+            A Partiu Turismo nasceu da paixão por explorar o Brasil. Oferecemos pacotes rodoviários completos com conforto, segurança e a melhor curadoria de roteiros.
           </p>
         </div>
       </div>

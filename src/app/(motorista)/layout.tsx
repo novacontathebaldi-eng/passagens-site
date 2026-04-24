@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Motorista — ViajaEdu!",
+  title: "Motorista — Partiu Turismo",
   robots: "noindex, nofollow",
 };
 
@@ -43,7 +43,7 @@ export default async function MotoristaLayout({
             <rect width="32" height="32" rx="8" className="fill-primary" />
             <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="tracking-tight">Expedição ViajaEdu</span>
+          <span className="tracking-tight">Partiu Turismo</span>
         </div>
         <form action={logout}>
           <button type="submit" className="p-2 text-outline hover:text-error transition-colors rounded-full">

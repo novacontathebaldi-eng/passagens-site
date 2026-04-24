@@ -128,7 +128,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   }
 
   return {
-    company_name: settings.company_name ?? "ViajaEdu!",
+    company_name: settings.company_name ?? "Partiu Turismo",
     logo_url: settings.logo_url ?? null,
     hero_image_url: settings.hero_image_url ?? null,
     login_image_url: settings.login_image_url ?? null,
