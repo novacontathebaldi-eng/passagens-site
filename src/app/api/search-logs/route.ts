@@ -8,7 +8,7 @@ const MAX_REQUESTS_PER_MINUTE = 30;
 export async function POST(req: NextRequest) {
   try {
     // Basic IP detection
-    const ip = req.headers.get("x-forwarded-for")?.split(',')[0] || req.ip || "unknown";
+    const ip = req.headers.get("x-forwarded-for")?.split(',')[0]?.trim() || "unknown";
     const now = Date.now();
 
     // Clean up expired entries occasionally to prevent memory leaks
