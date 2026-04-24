@@ -165,9 +165,21 @@ export default async function B2CLayout({
             </div>
           </div>
 
-          <div className="mt-12 pt-6 border-t border-outline/30 text-center text-xs text-outline">
-            © {new Date().getFullYear()} {settings.company_name} — Todos os direitos
-            reservados.
+          <div className="mt-12 pt-6 border-t border-outline/30 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left text-xs text-outline">
+            <div>
+              © {new Date().getFullYear()} {settings.company_name} — Todos os direitos reservados.
+            </div>
+            <div>
+              Design e Tecnologia por{" "}
+              <a
+                href="https://othebaldi.me/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white font-medium hover:underline transition-colors"
+              >
+                oTHEBALDI
+              </a>
+            </div>
           </div>
         </div>
       </footer>
