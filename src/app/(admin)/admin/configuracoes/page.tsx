@@ -321,17 +321,11 @@ export default function ConfiguracoesPage() {
     }
   };
 
-  const handleWhatsappChange = (index: number, value: string) => {
+  const handleWhatsappChange = (value: string) => {
     if (!settings) return;
-    const newNumbers = [...settings.whatsapp_support_numbers];
-    newNumbers[index] = value;
-    setSettings({ ...settings, whatsapp_support_numbers: newNumbers });
+    setSettings({ ...settings, whatsapp_support_numbers: [value] });
   };
 
-  const addWhatsappNumber = () => {
-    if (!settings) return;
-    setSettings({ ...settings, whatsapp_support_numbers: [...settings.whatsapp_support_numbers, ""] });
-  };
 
   // PIX Keys handlers
   const addPixKey = () => {
@@ -583,7 +577,7 @@ export default function ConfiguracoesPage() {
                 min="1"
                 required
               />
-              <p className="text-xs text-on-surface-variant">Tempo até a reserva "Aguardando PIX" expirar.</p>
+              <p className="text-xs text-on-surface-variant">Tempo até a reserva &quot;Aguardando PIX&quot; expirar.</p>
             </div>
           </div>
         </section>
@@ -826,25 +820,14 @@ export default function ConfiguracoesPage() {
             </div>
 
             <div className="flex flex-col gap-2 mt-4">
-              <label className="text-sm font-semibold text-on-surface">Números de Suporte WhatsApp (Contato)</label>
-              <div className="space-y-2">
-                {settings.whatsapp_support_numbers.map((num, i) => (
-                  <div key={i} className="flex gap-2">
-                    <input 
-                      type="text" 
-                      value={num}
-                      onChange={(e) => handleWhatsappChange(i, e.target.value)}
-                      className="flex-1 bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                      placeholder="Ex: 5511999999999"
-                    />
-                    {i === settings.whatsapp_support_numbers.length - 1 && (
-                      <button type="button" onClick={addWhatsappNumber} className="bg-surface-container-high hover:bg-surface-container-highest px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
-                        +
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <label className="text-sm font-semibold text-on-surface">Número de Suporte WhatsApp (Contato)</label>
+              <input 
+                type="text" 
+                value={settings.whatsapp_support_numbers[0] || ""}
+                onChange={(e) => handleWhatsappChange(e.target.value)}
+                className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                placeholder="Ex: 5511999999999"
+              />
             </div>
           </div>
         </section>
