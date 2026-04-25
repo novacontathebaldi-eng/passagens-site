@@ -12,7 +12,7 @@ import { ConfirmEmailBanner } from "./ConfirmEmailBanner";
 export default async function PainelClientePage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const supabase = await createClient();
 
@@ -22,8 +22,9 @@ export default async function PainelClientePage({
     redirect("/login");
   }
 
-  const successMessage = searchParams?.success as string;
-  const errorMessage = searchParams?.error as string;
+  const resolvedParams = await searchParams;
+  const successMessage = resolvedParams?.success as string;
+  const errorMessage = resolvedParams?.error as string;
 
   // 1. Perfil do Usuário
   const { data: profile } = await supabase

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/brevo";
 import QRCode from "qrcode";
 
 function maskCPF(cpf: string): string {
@@ -67,14 +66,26 @@ export async function POST(request: NextRequest) {
   const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
   const clientName = profile?.full_name ?? "Viajante";
 
-  // Generate QR codes as base64
-  const qrMap: Record<string, string> = {};
+  // Generate QR codes as PNG buffers for CID inline attachments
+  const attachments: { content: string; name: string }[] = [];
+  const qrCidMap: Record<string, string> = {};
+
   for (const t of tickets) {
-    const dataUrl = await QRCode.toDataURL(t.qr_code_token, { width: 200, margin: 1, errorCorrectionLevel: "M" });
-    qrMap[t.id] = dataUrl;
+    const buffer = await QRCode.toBuffer(t.qr_code_token, {
+      type: "png",
+      width: 200,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    });
+    const cidName = `qr-${t.short_code}.png`;
+    attachments.push({
+      content: buffer.toString("base64"),
+      name: cidName,
+    });
+    qrCidMap[t.id] = cidName;
   }
 
-  // Build ticket rows HTML
+  // Build ticket rows HTML using CID references for QR images
   const ticketRows = tickets.map((t) => `
     <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:16px;">
       <div style="background:#f0f9ff;padding:12px 16px;border-bottom:1px solid #e2e8f0;">
@@ -87,7 +98,7 @@ export async function POST(request: NextRequest) {
         </tr></table>
         <hr style="border:none;border-top:1px dashed #e2e8f0;margin:12px 0;" />
         <table style="width:100%;"><tr>
-          <td style="vertical-align:top;width:120px;"><img src="${qrMap[t.id]}" alt="QR" width="100" height="100" style="border-radius:8px;" /></td>
+          <td style="vertical-align:top;width:120px;"><img src="cid:${qrCidMap[t.id]}" alt="QR Code" width="100" height="100" style="border-radius:8px;display:block;" /></td>
           <td style="vertical-align:top;padding-left:12px;">
             <span style="color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">Código de Embarque</span>
             <div style="font-size:28px;font-weight:bold;color:#0369a1;letter-spacing:4px;margin:4px 0;font-family:monospace;">${t.short_code}</div>
@@ -130,11 +141,32 @@ export async function POST(request: NextRequest) {
   </div>`;
 
   try {
-    await sendEmail({
-      to: [{ email: user.email!, name: clientName }],
-      subject: `Seu Voucher de Embarque — ${tripTitle}`,
-      htmlContent,
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) {
+      throw new Error("BREVO_API_KEY is not set");
+    }
+
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "api-key": apiKey,
+      },
+      body: JSON.stringify({
+        sender: { name: "Partiu Turismo - oTHEBALDI", email: "suporte@othebaldi.me" },
+        to: [{ email: user.email!, name: clientName }],
+        subject: `Seu Voucher de Embarque — ${tripTitle}`,
+        htmlContent,
+        attachment: attachments,
+      }),
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Brevo API error:", errorText);
+      throw new Error(`Failed to send email: ${errorText}`);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
