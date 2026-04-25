@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
 export async function GET(request: Request) {
@@ -26,25 +25,19 @@ export async function GET(request: Request) {
   }
 
   // 2. Token is VALID. We can confirm the email even if the user is not logged in.
-  // Since the user might not be logged in (e.g. clicked link on mobile email app),
-  // we use the Service Role Key to bypass RLS and update the profile.
-  const adminClient = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-
-  const { error: updateError } = await adminClient
-    .from('profiles')
-    .update({ email_confirmed_at: new Date().toISOString() })
-    .eq('id', uid);
+  const supabase = await createClient();
+  
+  // Call the SECURITY DEFINER RPC function to bypass RLS and update the profile
+  const { error: updateError } = await supabase.rpc('confirm_user_email', {
+    user_uid: uid
+  });
 
   if (updateError) {
-    console.error("Erro ao confirmar e-mail via admin client:", updateError);
+    console.error("Erro ao confirmar e-mail via RPC:", updateError);
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent("Erro interno ao confirmar o e-mail.")}`);
   }
 
   // 3. Now we check if the user happens to be logged in on this current browser session
-  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   // Se o usuário não estiver logado (ou estiver logado em outra conta),
