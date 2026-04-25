@@ -93,6 +93,7 @@ export default async function AdminDashboard() {
       sub: `${totalExcursions ?? 0} total`,
       color: "text-primary",
       bgColor: "bg-primary-container/30",
+      href: "/admin/excursoes?status=PUBLISHED",
     },
     {
       icon: "M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z",
@@ -101,6 +102,7 @@ export default async function AdminDashboard() {
       sub: `${totalReservations ?? 0} total`,
       color: "text-warning",
       bgColor: "bg-warning-light/50",
+      href: "/admin/reservas?status=PENDING_PIX",
     },
     {
       icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
@@ -109,6 +111,7 @@ export default async function AdminDashboard() {
       sub: "confirmadas",
       color: "text-success",
       bgColor: "bg-success-light/50",
+      href: "/admin/reservas?status=APPROVED",
     },
     {
       icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
@@ -117,6 +120,7 @@ export default async function AdminDashboard() {
       sub: "receita aprovada",
       color: "text-primary",
       bgColor: "bg-primary-container/30",
+      href: "/admin/financeiro?view=receitas",
     },
     {
       icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
@@ -125,6 +129,7 @@ export default async function AdminDashboard() {
       sub: "cadastrados",
       color: "text-secondary",
       bgColor: "bg-secondary-container/30",
+      href: "/admin/clientes?sort=newest",
     },
   ];
 
@@ -159,24 +164,44 @@ export default async function AdminDashboard() {
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className={`${kpi.bgColor} rounded-2xl p-5 hover:shadow-md transition-shadow`}
+            className={`${kpi.bgColor} relative rounded-2xl p-5 transition-all duration-300 group hover:shadow-md hover:scale-[1.01] focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2`}
           >
-            <div className="flex items-center justify-between">
+            {/* Absolute link to expand clickable area to the whole card */}
+            <Link
+              href={kpi.href}
+              className="absolute inset-0 z-10 rounded-2xl focus:outline-none"
+              aria-label={`Visualizar ${kpi.label}`}
+            />
+            
+            <div className="flex items-center justify-between relative z-0">
               <div className="w-9 h-9 rounded-lg bg-white/50 flex items-center justify-center">
                 <svg className={`w-5 h-5 ${kpi.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d={kpi.icon} />
                 </svg>
               </div>
+              {/* Affordance icon */}
+              <svg 
+                className={`w-5 h-5 opacity-0 -translate-x-2 translate-y-2 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-300 ${kpi.color}`} 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor" 
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+              </svg>
             </div>
-            <p
-              className={`text-2xl lg:text-3xl font-bold mt-3 ${kpi.color}`}
-            >
-              {kpi.value}
-            </p>
-            <p className="text-xs text-on-surface-variant mt-1 font-medium">
-              {kpi.label}
-            </p>
-            <p className="text-[10px] text-outline mt-0.5">{kpi.sub}</p>
+            
+            <div className="relative z-0">
+              <p
+                className={`text-2xl lg:text-3xl font-bold mt-3 ${kpi.color}`}
+              >
+                {kpi.value}
+              </p>
+              <p className="text-xs text-on-surface-variant mt-1 font-medium group-hover:text-on-surface transition-colors">
+                {kpi.label}
+              </p>
+              <p className="text-[10px] text-outline mt-0.5">{kpi.sub}</p>
+            </div>
           </div>
         ))}
       </div>
