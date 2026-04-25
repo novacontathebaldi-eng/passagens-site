@@ -17,6 +17,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
+  // Ownership check: verify token belongs to user's reservation
+  const { data: ticket } = await supabase
+    .from("passenger_tickets")
+    .select("id, reservation_id, reservations!inner(user_id)")
+    .eq("qr_code_token", token)
+    .single();
+
+  if (!ticket || (ticket.reservations as any)?.user_id !== user.id) {
+    return NextResponse.json({ error: "Token não encontrado" }, { status: 404 });
+  }
+
   try {
     const buffer = await QRCode.toBuffer(token, {
       type: "png",
