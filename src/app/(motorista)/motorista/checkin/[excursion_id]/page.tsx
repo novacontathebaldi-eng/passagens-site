@@ -27,7 +27,6 @@ export default function CheckinPage() {
   // UI state
   const [activeTab, setActiveTab] = useState<TabMode>("camera");
   const [manualCode, setManualCode] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
   const [scannerPaused, setScannerPaused] = useState(false);
   const [facingMode, setFacingMode] = useState<"environment" | "user">(
     "environment"
@@ -37,15 +36,19 @@ export default function CheckinPage() {
     seat: string;
   } | null>(null);
   const [flashSuccess, setFlashSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Counter state
+  // Counter state — only updated from the database, never locally
   const [total, setTotal] = useState(0);
   const [boarded, setBoarded] = useState(0);
+
+  // Ref-based processing lock to avoid stale closure issues with useCallback
+  const processingRef = useRef(false);
 
   // Refs
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ── Load initial count ──
+  // ── Load initial count from database ──
   useEffect(() => {
     fetchCheckinCount(excursionId).then((count) => {
       setTotal(count.total);
@@ -69,7 +72,7 @@ export default function CheckinPage() {
           filter: `excursion_id=eq.${excursionId}`,
         },
         () => {
-          // Re-fetch count on any ticket update for this excursion
+          // Always re-fetch from database to get the true count
           fetchCheckinCount(excursionId).then((count) => {
             setTotal(count.total);
             setBoarded(count.boarded);
@@ -84,68 +87,78 @@ export default function CheckinPage() {
   }, [excursionId]);
 
   // ── Handle check-in result (shared by camera and manual) ──
-  const handleResult = useCallback((result: CheckInResult) => {
-    if (result.success) {
-      setLastResult({
-        name: result.passenger.full_name,
-        seat: result.passenger.seat_code,
-      });
+  const handleResult = useCallback(
+    (result: CheckInResult) => {
+      if (result.success) {
+        setLastResult({
+          name: result.passenger.full_name,
+          seat: result.passenger.seat_code,
+        });
 
-      toast.success(
-        `✅ ${result.passenger.full_name} — Poltrona ${result.passenger.seat_code}`,
-        { duration: 3000 }
-      );
+        toast.success(
+          `✅ ${result.passenger.full_name} — Poltrona ${result.passenger.seat_code}`,
+          { duration: 3000 }
+        );
 
-      // Flash green
-      setFlashSuccess(true);
-      setTimeout(() => setFlashSuccess(false), 600);
+        // Flash green
+        setFlashSuccess(true);
+        setTimeout(() => setFlashSuccess(false), 600);
 
-      // Increment counter locally for instant feedback
-      setBoarded((prev) => prev + 1);
-    } else {
-      switch (result.error) {
-        case "ALREADY_CHECKED_IN":
-          toast.warning("⚠️ Passageiro já embarcou", { duration: 3000 });
-          if (typeof navigator !== "undefined" && navigator.vibrate) {
-            navigator.vibrate([100, 50, 100]);
-          }
-          break;
-        case "NOT_FOUND":
-          toast.error("❌ Código não encontrado", { duration: 3000 });
-          if (typeof navigator !== "undefined" && navigator.vibrate) {
-            navigator.vibrate(200);
-          }
-          break;
-        case "WRONG_EXCURSION":
-          toast.error("❌ Este voucher é de outra viagem", { duration: 3000 });
-          if (typeof navigator !== "undefined" && navigator.vibrate) {
-            navigator.vibrate(200);
-          }
-          break;
-        case "INVALID_RESERVATION":
-          toast.error(
-            "❌ Reserva não confirmada — entre em contato com o suporte",
-            { duration: 4000 }
-          );
-          if (typeof navigator !== "undefined" && navigator.vibrate) {
-            navigator.vibrate(200);
-          }
-          break;
-        case "UNAUTHORIZED":
-          toast.error("❌ Você não tem permissão para realizar check-in", {
-            duration: 4000,
-          });
-          break;
+        // Re-fetch counter from database to get the true count
+        fetchCheckinCount(excursionId).then((count) => {
+          setTotal(count.total);
+          setBoarded(count.boarded);
+        });
+      } else {
+        switch (result.error) {
+          case "ALREADY_CHECKED_IN":
+            toast.warning("⚠️ Passageiro já embarcou", { duration: 3000 });
+            if (typeof navigator !== "undefined" && navigator.vibrate) {
+              navigator.vibrate([100, 50, 100]);
+            }
+            break;
+          case "NOT_FOUND":
+            toast.error("❌ Código não encontrado", { duration: 3000 });
+            if (typeof navigator !== "undefined" && navigator.vibrate) {
+              navigator.vibrate(200);
+            }
+            break;
+          case "WRONG_EXCURSION":
+            toast.error("❌ Este voucher é de outra viagem", {
+              duration: 3000,
+            });
+            if (typeof navigator !== "undefined" && navigator.vibrate) {
+              navigator.vibrate(200);
+            }
+            break;
+          case "INVALID_RESERVATION":
+            toast.error(
+              "❌ Reserva não confirmada — entre em contato com o suporte",
+              { duration: 4000 }
+            );
+            if (typeof navigator !== "undefined" && navigator.vibrate) {
+              navigator.vibrate(200);
+            }
+            break;
+          case "UNAUTHORIZED":
+            toast.error("❌ Você não tem permissão para realizar check-in", {
+              duration: 4000,
+            });
+            break;
+        }
       }
-    }
-  }, []);
+    },
+    [excursionId]
+  );
 
   // ── Process identifier (called by both camera and manual) ──
   const processCheckin = useCallback(
     async (identifier: string) => {
-      if (isProcessing || !identifier.trim()) return;
+      // Use ref to prevent concurrent calls (avoids stale closure issues)
+      if (processingRef.current || !identifier.trim()) return;
 
-      setIsProcessing(true);
+      processingRef.current = true;
+      setIsSubmitting(true);
       try {
         const result = await performCheckin({
           identifier: identifier.trim(),
@@ -155,35 +168,39 @@ export default function CheckinPage() {
       } catch {
         toast.error("❌ Erro de conexão — tente novamente", { duration: 3000 });
       } finally {
-        setIsProcessing(false);
+        setIsSubmitting(false);
+        // Keep locked for 2 seconds after completion to prevent rapid re-scans
+        setTimeout(() => {
+          processingRef.current = false;
+        }, 2000);
       }
     },
-    [excursionId, isProcessing, handleResult]
+    [excursionId, handleResult]
   );
 
   // ── QR Scanner callback ──
   const handleScan = useCallback(
     (detectedCodes: { rawValue: string }[]) => {
-      if (scannerPaused || isProcessing) return;
+      if (processingRef.current) return;
 
       const code = detectedCodes?.[0]?.rawValue;
       if (!code) return;
 
-      // Pause scanner to avoid duplicate reads
+      // Pause scanner visual feedback
       setScannerPaused(true);
       processCheckin(code).finally(() => {
-        // Re-enable scanner after 2 seconds
-        setTimeout(() => setScannerPaused(false), 2000);
+        // Re-enable scanner after the 2s lock in processCheckin expires
+        setTimeout(() => setScannerPaused(false), 2200);
       });
     },
-    [scannerPaused, isProcessing, processCheckin]
+    [processCheckin]
   );
 
   // ── Manual submit ──
   const handleManualSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (!manualCode.trim()) return;
+      if (!manualCode.trim() || processingRef.current) return;
 
       processCheckin(manualCode.trim()).finally(() => {
         setManualCode("");
@@ -195,12 +212,13 @@ export default function CheckinPage() {
 
   return (
     <div
-      className={`bg-surface min-h-screen pb-20 transition-colors duration-300 ${
-        flashSuccess ? "!bg-success/10" : ""
+      className={`flex flex-col transition-colors duration-300 ${
+        flashSuccess ? "!bg-success/10" : "bg-surface"
       }`}
+      style={{ height: "calc(100dvh - 56px - 64px)" }}
     >
       {/* ── Header with counter ── */}
-      <div className="bg-surface-container-lowest sticky top-14 z-30 px-4 py-3 border-b border-outline-variant/30 shadow-sm">
+      <div className="bg-surface-container-lowest px-4 py-3 border-b border-outline-variant/30 shadow-sm shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
@@ -226,14 +244,14 @@ export default function CheckinPage() {
           <div
             className="bg-primary h-1.5 rounded-full transition-all duration-500 ease-out"
             style={{
-              width: `${total > 0 ? (boarded / total) * 100 : 0}%`,
+              width: `${total > 0 ? Math.min((boarded / total) * 100, 100) : 0}%`,
             }}
           />
         </div>
       </div>
 
       {/* ── Tab switcher ── */}
-      <div className="px-4 pt-4">
+      <div className="px-4 pt-3 shrink-0">
         <div className="bg-surface-container-high rounded-2xl p-1 flex gap-1">
           <button
             onClick={() => setActiveTab("camera")}
@@ -263,11 +281,12 @@ export default function CheckinPage() {
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      {/* ── Content area — fills remaining space ── */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* ── Camera mode ── */}
         {activeTab === "camera" && (
           <div className="space-y-3">
-            <div className="relative rounded-3xl overflow-hidden bg-black aspect-square shadow-lg">
+            <div className="relative rounded-3xl overflow-hidden bg-black aspect-[3/4] max-h-[55dvh] shadow-lg">
               {!scannerPaused ? (
                 <Scanner
                   onScan={handleScan}
@@ -337,10 +356,10 @@ export default function CheckinPage() {
               />
               <button
                 type="submit"
-                disabled={isProcessing || manualCode.length < 6}
+                disabled={isSubmitting || manualCode.length < 6}
                 className="px-5 bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                {isProcessing ? (
+                {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <Search className="w-5 h-5" />
@@ -352,7 +371,7 @@ export default function CheckinPage() {
 
         {/* ── Last result feedback ── */}
         {lastResult && (
-          <div className="bg-success/10 border border-success/30 p-4 rounded-2xl flex items-center gap-4 animate-in fade-in duration-300">
+          <div className="bg-success/10 border border-success/30 p-4 rounded-2xl flex items-center gap-4">
             <div className="w-12 h-12 bg-success text-on-primary rounded-xl flex items-center justify-center text-lg font-bold shrink-0">
               {lastResult.seat}
             </div>

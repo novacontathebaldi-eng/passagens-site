@@ -75,6 +75,9 @@ export async function findTicketByIdentifier(
  * Marks a ticket as checked-in by setting check_in_status = true
  * and recording the current timestamp.
  *
+ * Uses { count: 'exact' } to confirm the UPDATE actually affected a row.
+ * Supabase RLS can silently block UPDATEs, returning no error but 0 rows.
+ *
  * OFFLINE-READY: In offline mode, this will write to IndexedDB and
  * enqueue the mutation for background sync. See PLAN-motorista-offline.md.
  */
@@ -82,15 +85,18 @@ export async function markTicketAsCheckedIn(
   supabase: SupabaseClient,
   ticketId: string
 ): Promise<boolean> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("passenger_tickets")
     .update({
       check_in_status: true,
       checked_in_at: new Date().toISOString(),
     })
-    .eq("id", ticketId);
+    .eq("id", ticketId)
+    .select("id")
+    .single();
 
-  return !error;
+  // If RLS blocks the UPDATE, data will be null and error will be set
+  return !error && !!data;
 }
 
 /**
