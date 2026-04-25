@@ -54,7 +54,8 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
   const [editFromReview, setEditFromReview] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
-  const liveOccupiedSeats = useRealtimeSeats(excursion.id, occupiedSeats);
+  const validOccupiedSeats = occupiedSeats.filter(seat => !seat.startsWith('WAITING_ALLOCATION'));
+  const liveOccupiedSeats = useRealtimeSeats(excursion.id, validOccupiedSeats);
   const totalAmount = quantity * excursion.price_per_seat;
   const capacity = excursion.vehicle_layouts?.capacity || 0;
   const availableCount = capacity - liveOccupiedSeats.length;

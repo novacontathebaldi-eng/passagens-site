@@ -88,7 +88,28 @@ export async function createReservation(data: CheckoutData) {
       return { error: "Erro ao criar reserva. Tente novamente." };
     }
 
-    // 4. Inserir Tickets
+    // 4. Alocar poltronas e inserir Tickets
+    let allocatedSeats: string[] = [];
+
+    if (!excursion.allow_seat_selection) {
+      const { data: seats, error: allocError } = await supabase
+        .rpc('allocate_seats_for_reservation', {
+          p_excursion_id: data.excursionId,
+          p_reservation_id: reservation.id,
+          p_ticket_count: data.quantity,
+          p_prefer_together: true
+        });
+      
+      if (allocError || !seats) {
+        console.error("Erro ao alocar poltronas:", allocError);
+        // Rollback manual
+        await supabase.from("reservations").delete().eq("id", reservation.id);
+        return { error: 'Não foi possível alocar as poltronas. Por favor, tente novamente.' };
+      }
+      
+      allocatedSeats = seats;
+    }
+
     const ticketsToInsert = data.passengers.map((p, idx) => ({
       reservation_id: reservation.id,
       excursion_id: data.excursionId,
@@ -96,9 +117,9 @@ export async function createReservation(data: CheckoutData) {
       cpf: p.cpf,
       rg: p.rg || null,
       orgao_emissor: p.orgao_emissor || null,
-      seat_code: excursion.allow_seat_selection && data.selectedSeats[idx] 
+      seat_code: excursion.allow_seat_selection 
         ? data.selectedSeats[idx] 
-        : `WAITING_ALLOCATION_${Date.now()}_${idx}`
+        : allocatedSeats[idx]
     }));
 
     const { error: ticketError } = await supabase
