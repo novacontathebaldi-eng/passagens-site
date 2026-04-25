@@ -100,13 +100,22 @@ export async function middleware(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
+      let targetUrl = new URL("/", request.url);
       if (profile?.role === "ADMIN" || profile?.role === "AGENT") {
-        return NextResponse.redirect(new URL("/admin", request.url));
+        targetUrl = new URL("/admin", request.url);
+      } else if (profile?.role === "DRIVER") {
+        targetUrl = new URL("/motorista", request.url);
+      } else {
+        targetUrl = new URL("/painel", request.url); // Default for CLIENT should ideally be /painel, not /
       }
-      if (profile?.role === "DRIVER") {
-        return NextResponse.redirect(new URL("/motorista", request.url));
-      }
-      return NextResponse.redirect(new URL("/", request.url));
+
+      // Preserve query params like success or error
+      const success = request.nextUrl.searchParams.get("success");
+      const error = request.nextUrl.searchParams.get("error");
+      if (success) targetUrl.searchParams.set("success", success);
+      if (error) targetUrl.searchParams.set("error", error);
+
+      return NextResponse.redirect(targetUrl);
     }
   }
 

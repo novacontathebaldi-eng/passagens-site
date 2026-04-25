@@ -16,6 +16,7 @@ export default function LoginClient({ v }: { v: number }) {
 function LoginContent({ v }: { v: number }) {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const success = searchParams.get("success");
   const redirectParams = searchParams.get("redirect");
 
   const [isEmailPending, startEmailTransition] = useTransition();
@@ -114,6 +115,12 @@ function LoginContent({ v }: { v: number }) {
               Bom te ver de volta! Acesse para gerenciar suas viagens.
             </p>
           </div>
+
+          {success && (
+            <div className="rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-medium">
+              {success}
+            </div>
+          )}
 
           {error && (
             <div className="rounded-xl bg-error-light border border-error/20 px-4 py-3 text-sm text-error">
