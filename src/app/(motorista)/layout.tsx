@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { BusFront, ClipboardCheck, Settings, LogOut } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
+import { Toaster } from "sonner";
 
 export default async function MotoristaLayout({
   children,
@@ -51,6 +52,9 @@ export default async function MotoristaLayout({
           </button>
         </form>
       </header>
+
+      {/* Toast notifications — large and visible for outdoor use */}
+      <Toaster position="top-center" richColors toastOptions={{ style: { fontSize: '16px', fontWeight: 600 } }} />
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto">
