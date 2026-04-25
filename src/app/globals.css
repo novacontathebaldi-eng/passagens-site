@@ -140,6 +140,22 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-on-primary-container);
 }
 
+/* ── Print Styles (Voucher) ── */
+@media print {
+  body { background: white !important; }
+  header, footer, nav, .no-print,
+  [class*="bottom-nav"], [class*="sidebar"] { display: none !important; }
+  .voucher-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 16px;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .voucher-card * { color-adjust: exact; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
