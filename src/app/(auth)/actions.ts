@@ -43,7 +43,7 @@ export async function login(formData: FormData) {
       .single();
 
     // If profile is incomplete (Google login without CPF), redirect to complete — preserve next
-    if (profile && !profile.cpf) {
+    if (!profile || !profile.cpf) {
       redirect(`/completar-cadastro${nextParam}`);
     }
 

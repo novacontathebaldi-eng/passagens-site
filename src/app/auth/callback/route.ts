@@ -25,7 +25,7 @@ export async function GET(request: Request) {
           .single();
 
         // Google login users might not have CPF yet — always redirect to complete
-        if (profile && !profile.cpf && next !== "/redefinir-senha") {
+        if ((!profile || !profile.cpf) && next !== "/redefinir-senha") {
           const redirectUrl = next && next !== "/" ? `/completar-cadastro?next=${encodeURIComponent(next)}` : `/completar-cadastro`;
           return NextResponse.redirect(`${origin}${redirectUrl}`);
         }
