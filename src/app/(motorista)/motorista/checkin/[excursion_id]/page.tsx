@@ -13,6 +13,7 @@ import {
   RefreshCcw,
   Users,
   Loader2,
+  List,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { performCheckin, fetchCheckinCount } from "../actions";
@@ -57,8 +58,6 @@ export default function CheckinPage() {
   }, [excursionId]);
 
   // ── Real-time counter via Supabase channel ──
-  // OFFLINE-READY: In offline mode, the counter will be computed from
-  // IndexedDB records plus pending sync queue entries.
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
@@ -72,7 +71,6 @@ export default function CheckinPage() {
           filter: `excursion_id=eq.${excursionId}`,
         },
         () => {
-          // Always re-fetch from database to get the true count
           fetchCheckinCount(excursionId).then((count) => {
             setTotal(count.total);
             setBoarded(count.boarded);
@@ -86,7 +84,7 @@ export default function CheckinPage() {
     };
   }, [excursionId]);
 
-  // ── Handle check-in result (shared by camera and manual) ──
+  // ── Handle check-in result ──
   const handleResult = useCallback(
     (result: CheckInResult) => {
       if (result.success) {
@@ -100,11 +98,9 @@ export default function CheckinPage() {
           { duration: 3000 }
         );
 
-        // Flash green
         setFlashSuccess(true);
         setTimeout(() => setFlashSuccess(false), 600);
 
-        // Re-fetch counter from database to get the true count
         fetchCheckinCount(excursionId).then((count) => {
           setTotal(count.total);
           setBoarded(count.boarded);
@@ -151,10 +147,9 @@ export default function CheckinPage() {
     [excursionId]
   );
 
-  // ── Process identifier (called by both camera and manual) ──
+  // ── Process identifier ──
   const processCheckin = useCallback(
     async (identifier: string) => {
-      // Use ref to prevent concurrent calls (avoids stale closure issues)
       if (processingRef.current || !identifier.trim()) return;
 
       processingRef.current = true;
@@ -169,7 +164,6 @@ export default function CheckinPage() {
         toast.error("❌ Erro de conexão — tente novamente", { duration: 3000 });
       } finally {
         setIsSubmitting(false);
-        // Keep locked for 2 seconds after completion to prevent rapid re-scans
         setTimeout(() => {
           processingRef.current = false;
         }, 2000);
@@ -186,10 +180,8 @@ export default function CheckinPage() {
       const code = detectedCodes?.[0]?.rawValue;
       if (!code) return;
 
-      // Pause scanner visual feedback
       setScannerPaused(true);
       processCheckin(code).finally(() => {
-        // Re-enable scanner after the 2s lock in processCheckin expires
         setTimeout(() => setScannerPaused(false), 2200);
       });
     },
@@ -210,52 +202,62 @@ export default function CheckinPage() {
     [manualCode, processCheckin]
   );
 
+  const progressPercent =
+    total > 0 ? Math.min((boarded / total) * 100, 100) : 0;
+
   return (
     <div
-      className={`flex flex-col transition-colors duration-300 ${
-        flashSuccess ? "!bg-success/10" : "bg-surface"
+      className={`min-h-[calc(100dvh-56px-64px)] bg-surface flex flex-col transition-colors duration-300 ${
+        flashSuccess ? "!bg-success/10" : ""
       }`}
-      style={{ height: "calc(100dvh - 56px - 64px)" }}
     >
-      {/* ── Header with counter ── */}
-      <div className="bg-surface-container-lowest px-4 py-3 border-b border-outline-variant/30 shadow-sm shrink-0">
+      {/* ── Compact header ── */}
+      <div className="bg-surface-container-lowest px-4 py-2.5 border-b border-outline-variant/30 shadow-sm shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Link
-              href="/motorista"
-              className="text-on-surface-variant hover:text-primary p-1.5 bg-surface-container rounded-full transition-colors"
+              href={`/motorista/manifesto/${excursionId}`}
+              className="text-on-surface-variant hover:text-primary p-1.5 rounded-full transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="font-bold text-on-surface text-lg">Check-in</h1>
+            <h1 className="font-bold text-on-surface text-base">Check-in</h1>
           </div>
 
-          {/* Live counter */}
-          <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full">
-            <Users className="w-4 h-4" />
-            <span className="text-sm font-bold tabular-nums">
-              {boarded}/{total}
-            </span>
+          <div className="flex items-center gap-2">
+            {/* Live counter pill */}
+            <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+              <Users className="w-3.5 h-3.5" />
+              <span className="text-xs font-bold tabular-nums">
+                {boarded}/{total}
+              </span>
+            </div>
+            {/* Quick link to manifest */}
+            <Link
+              href={`/motorista/manifesto/${excursionId}`}
+              className="p-1.5 text-on-surface-variant hover:text-primary rounded-full transition-colors"
+              title="Ver lista de passageiros"
+            >
+              <List className="w-5 h-5" />
+            </Link>
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="mt-3 w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden">
+        {/* Thin progress bar */}
+        <div className="mt-2 w-full bg-surface-container-high rounded-full h-1 overflow-hidden">
           <div
-            className="bg-primary h-1.5 rounded-full transition-all duration-500 ease-out"
-            style={{
-              width: `${total > 0 ? Math.min((boarded / total) * 100, 100) : 0}%`,
-            }}
+            className="bg-primary h-1 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
       {/* ── Tab switcher ── */}
-      <div className="px-4 pt-3 shrink-0">
+      <div className="px-4 pt-3 pb-1 shrink-0">
         <div className="bg-surface-container-high rounded-2xl p-1 flex gap-1">
           <button
             onClick={() => setActiveTab("camera")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all ${
               activeTab === "camera"
                 ? "bg-primary text-on-primary shadow-sm"
                 : "text-on-surface-variant hover:text-on-surface"
@@ -269,7 +271,7 @@ export default function CheckinPage() {
               setActiveTab("manual");
               setTimeout(() => inputRef.current?.focus(), 100);
             }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all ${
               activeTab === "manual"
                 ? "bg-primary text-on-primary shadow-sm"
                 : "text-on-surface-variant hover:text-on-surface"
@@ -281,12 +283,13 @@ export default function CheckinPage() {
         </div>
       </div>
 
-      {/* ── Content area — fills remaining space ── */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* ── Content area ── */}
+      <div className="flex-1 flex flex-col px-4 pb-4 pt-2 overflow-y-auto">
         {/* ── Camera mode ── */}
         {activeTab === "camera" && (
-          <div className="space-y-3">
-            <div className="relative rounded-3xl overflow-hidden bg-black aspect-[3/4] max-h-[55dvh] shadow-lg">
+          <div className="flex flex-col flex-1 gap-3">
+            {/* Scanner fills available space */}
+            <div className="relative rounded-2xl overflow-hidden bg-black flex-1 min-h-0 shadow-lg">
               {!scannerPaused ? (
                 <Scanner
                   onScan={handleScan}
@@ -295,11 +298,15 @@ export default function CheckinPage() {
                   scanDelay={500}
                   styles={{
                     container: {
+                      position: "absolute",
+                      inset: "0",
                       width: "100%",
                       height: "100%",
                     },
                     video: {
                       objectFit: "cover" as const,
+                      width: "100%",
+                      height: "100%",
                     },
                   }}
                   components={{
@@ -316,73 +323,96 @@ export default function CheckinPage() {
               )}
             </div>
 
-            {/* Camera toggle */}
+            {/* Camera toggle — compact */}
             <button
               onClick={() =>
                 setFacingMode((prev) =>
                   prev === "environment" ? "user" : "environment"
                 )
               }
-              className="w-full flex items-center justify-center gap-2 py-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl text-sm font-bold text-on-surface-variant hover:text-primary transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-xl text-xs font-bold text-on-surface-variant hover:text-primary transition-colors shrink-0"
             >
-              <RefreshCcw className="w-4 h-4" />
+              <RefreshCcw className="w-3.5 h-3.5" />
               {facingMode === "environment"
                 ? "Usar câmera frontal"
                 : "Usar câmera traseira"}
             </button>
+
+            {/* Last result feedback — inline at bottom */}
+            {lastResult && (
+              <div className="bg-success/10 border border-success/30 p-3 rounded-xl flex items-center gap-3 shrink-0">
+                <div className="w-10 h-10 bg-success text-on-primary rounded-lg flex items-center justify-center text-sm font-bold shrink-0">
+                  {lastResult.seat.length > 4
+                    ? "✓"
+                    : lastResult.seat}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-success font-bold">
+                    Último check-in
+                  </p>
+                  <p className="text-sm font-bold text-on-surface truncate">
+                    {lastResult.name}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* ── Manual mode ── */}
         {activeTab === "manual" && (
-          <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/30 shadow-sm">
-            <label className="block text-sm font-bold text-on-surface mb-3">
-              Código do Voucher (6 caracteres)
-            </label>
-            <form onSubmit={handleManualSubmit} className="flex gap-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={manualCode}
-                onChange={(e) =>
-                  setManualCode(e.target.value.toUpperCase().slice(0, 6))
-                }
-                placeholder="EX: M9HZ6E"
-                maxLength={6}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="characters"
-                className="flex-1 px-4 py-3 bg-surface-container border border-outline-variant/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 text-base font-mono uppercase tracking-widest text-center"
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting || manualCode.length < 6}
-                className="px-5 bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Search className="w-5 h-5" />
-                )}
-              </button>
-            </form>
-          </div>
-        )}
+          <div className="space-y-4">
+            <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
+              <label className="block text-sm font-bold text-on-surface mb-3">
+                Código do Voucher (6 caracteres)
+              </label>
+              <form onSubmit={handleManualSubmit} className="flex gap-2">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={manualCode}
+                  onChange={(e) =>
+                    setManualCode(e.target.value.toUpperCase().slice(0, 6))
+                  }
+                  placeholder="EX: M9HZ6E"
+                  maxLength={6}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="characters"
+                  className="flex-1 px-4 py-3 bg-surface-container border border-outline-variant/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 text-lg font-mono uppercase tracking-widest text-center"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting || manualCode.length < 6}
+                  className="px-5 bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Search className="w-5 h-5" />
+                  )}
+                </button>
+              </form>
+            </div>
 
-        {/* ── Last result feedback ── */}
-        {lastResult && (
-          <div className="bg-success/10 border border-success/30 p-4 rounded-2xl flex items-center gap-4">
-            <div className="w-12 h-12 bg-success text-on-primary rounded-xl flex items-center justify-center text-lg font-bold shrink-0">
-              {lastResult.seat}
-            </div>
-            <div>
-              <p className="text-sm text-success font-bold">
-                Último check-in
-              </p>
-              <p className="text-base font-bold text-on-surface">
-                {lastResult.name}
-              </p>
-            </div>
+            {/* Last result feedback */}
+            {lastResult && (
+              <div className="bg-success/10 border border-success/30 p-4 rounded-2xl flex items-center gap-4">
+                <div className="w-12 h-12 bg-success text-on-primary rounded-xl flex items-center justify-center text-lg font-bold shrink-0">
+                  {lastResult.seat.length > 4
+                    ? "✓"
+                    : lastResult.seat}
+                </div>
+                <div>
+                  <p className="text-sm text-success font-bold">
+                    Último check-in
+                  </p>
+                  <p className="text-base font-bold text-on-surface">
+                    {lastResult.name}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

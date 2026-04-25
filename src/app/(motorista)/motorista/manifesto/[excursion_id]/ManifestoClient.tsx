@@ -47,13 +47,16 @@ export default function ManifestoClient({
 }: ManifestoClientProps) {
   const [passengers, setPassengers] = useState<Passenger[]>(initialPassengers);
 
-  const totalBoarded =
-    passengers.filter((p) => p.check_in_status === true).length;
-  const totalTickets = passengers.length;
+  // Only count APPROVED passengers — consistent with check-in counter
+  const approvedPassengers = passengers.filter(
+    (p) => p.payment_status === "APPROVED"
+  );
+  const totalBoarded = approvedPassengers.filter(
+    (p) => p.check_in_status === true
+  ).length;
+  const totalApproved = approvedPassengers.length;
 
   // ── Real-time updates via Supabase channel ──
-  // OFFLINE-READY: In offline mode, the passenger list will be populated
-  // from IndexedDB and updated by local check-in operations.
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
@@ -93,42 +96,44 @@ export default function ManifestoClient({
   }, [excursionId]);
 
   return (
-    <div className="bg-surface pb-20">
-      {/* Sticky Header */}
-      <div className="bg-surface-container-lowest sticky top-14 z-30 px-4 py-4 border-b border-outline-variant/30 shadow-sm">
-        <div className="flex items-center gap-3 mb-2">
+    <div className="bg-surface min-h-[calc(100dvh-56px-64px)]">
+      {/* Sticky Header — not overlapping content */}
+      <div className="bg-surface-container-lowest sticky top-0 z-30 px-4 py-3 border-b border-outline-variant/30 shadow-sm">
+        <div className="flex items-center gap-3">
           <Link
             href="/motorista"
-            className="text-on-surface-variant hover:text-primary p-1 bg-surface-container rounded-full"
+            className="text-on-surface-variant hover:text-primary p-1 rounded-full transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="font-bold text-on-surface text-lg leading-tight truncate flex-1">
+          <h1 className="font-bold text-on-surface text-base leading-tight truncate flex-1">
             {excursionTitle}
           </h1>
           <Link
             href={`/motorista/checkin/${excursionId}`}
-            className="bg-cta text-on-cta p-2 rounded-xl shadow-sm"
+            className="bg-cta text-on-cta p-2 rounded-xl shadow-sm active:scale-95 transition-transform"
             title="Ir para Check-in"
           >
             <QrCode className="w-5 h-5" />
           </Link>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mt-4">
+        {/* Progress Bar — only counts APPROVED */}
+        <div className="mt-3">
           <div className="flex justify-between text-xs font-bold mb-1">
             <span className="text-on-surface-variant">Embarcados</span>
             <span className="text-primary">
-              {totalBoarded} / {totalTickets}
+              {totalBoarded} / {totalApproved}
             </span>
           </div>
-          <div className="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden">
             <div
-              className="bg-primary h-2 rounded-full transition-all duration-500"
+              className="bg-primary h-1.5 rounded-full transition-all duration-500"
               style={{
                 width: `${
-                  totalTickets > 0 ? (totalBoarded / totalTickets) * 100 : 0
+                  totalApproved > 0
+                    ? (totalBoarded / totalApproved) * 100
+                    : 0
                 }%`,
               }}
             />
@@ -136,10 +141,10 @@ export default function ManifestoClient({
         </div>
       </div>
 
-      {/* Passenger List */}
-      <div className="p-4 space-y-3">
-        {passengers.length > 0 ? (
-          passengers.map((passenger) => (
+      {/* Passenger List — only APPROVED passengers shown */}
+      <div className="p-4 space-y-3 pb-20">
+        {approvedPassengers.length > 0 ? (
+          approvedPassengers.map((passenger) => (
             <div
               key={passenger.ticket_id}
               className={`border rounded-2xl p-4 flex items-start gap-4 transition-all duration-300 shadow-sm ${
@@ -149,28 +154,25 @@ export default function ManifestoClient({
               }`}
             >
               <div
-                className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 ${
+                className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
                   passenger.check_in_status
                     ? "bg-success text-on-primary"
                     : "bg-surface-container-high text-on-surface-variant"
                 }`}
               >
-                {passenger.seat_code}
+                {passenger.check_in_status ? (
+                  <CheckCircle2 className="w-5 h-5" />
+                ) : (
+                  <Clock className="w-5 h-5" />
+                )}
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-bold text-on-surface text-base truncate">
-                    {passenger.full_name}
-                  </h3>
-                  {passenger.check_in_status ? (
-                    <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                  ) : (
-                    <Clock className="w-5 h-5 text-outline-variant shrink-0" />
-                  )}
-                </div>
+                <h3 className="font-bold text-on-surface text-sm truncate">
+                  {passenger.full_name}
+                </h3>
 
-                <p className="text-xs text-on-surface-variant mt-1 font-mono">
+                <p className="text-xs text-on-surface-variant mt-0.5 font-mono">
                   {passenger.masked_cpf}
                 </p>
 
@@ -182,16 +184,9 @@ export default function ManifestoClient({
                 )}
 
                 {passenger.emergency_contact_phone && (
-                  <div className="mt-2 flex items-center gap-1 text-xs text-primary bg-primary/10 w-max px-2 py-1 rounded-md">
+                  <div className="mt-1.5 flex items-center gap-1 text-xs text-primary bg-primary/10 w-max px-2 py-0.5 rounded-md">
                     <Phone className="w-3 h-3" />
-                    Emergência: {passenger.emergency_contact_phone}
-                  </div>
-                )}
-
-                {passenger.payment_status === "PENDING_PIX" && (
-                  <div className="mt-2 flex items-center gap-1 text-xs text-error font-bold">
-                    <AlertCircle className="w-3 h-3" />
-                    PAGAMENTO PENDENTE
+                    {passenger.emergency_contact_phone}
                   </div>
                 )}
               </div>
