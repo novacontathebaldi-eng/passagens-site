@@ -211,11 +211,11 @@ export default function ConfiguracoesPage() {
         let numbers: string[] = [];
         try {
           if (Array.isArray(data.whatsapp_support_numbers)) {
-             numbers = data.whatsapp_support_numbers;
+            numbers = data.whatsapp_support_numbers;
           } else if (typeof data.whatsapp_support_numbers === 'string') {
-             numbers = JSON.parse(data.whatsapp_support_numbers);
+            numbers = JSON.parse(data.whatsapp_support_numbers);
           }
-        } catch(e) {}
+        } catch (e) { }
 
         let pixKeys: PixKeyEntry[] = [];
         try {
@@ -224,7 +224,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.pix_keys === 'string') {
             pixKeys = JSON.parse(data.pix_keys);
           }
-        } catch(e) {}
+        } catch (e) { }
 
         let heroStats: HeroStatEntry[] = [];
         try {
@@ -233,7 +233,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.hero_stats === 'string') {
             heroStats = JSON.parse(data.hero_stats);
           }
-        } catch(e) {}
+        } catch (e) { }
 
         let driverContacts: DriverContactEntry[] = [];
         try {
@@ -242,7 +242,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.driver_contact_numbers === 'string') {
             driverContacts = JSON.parse(data.driver_contact_numbers);
           }
-        } catch(e) {}
+        } catch (e) { }
 
         setSettings({
           ...data,
@@ -317,9 +317,9 @@ export default function ConfiguracoesPage() {
       pix_keys: JSON.stringify(settings.pix_keys),
       hero_stats: JSON.stringify(settings.hero_stats),
       driver_contact_numbers: JSON.stringify(settings.driver_contact_numbers.map(c => {
-         let num = c.number.replace(/\D/g, '');
-         if (num.length >= 10 && !num.startsWith('55')) num = '55' + num;
-         return { ...c, number: num };
+        let num = c.number.replace(/\D/g, '');
+        if (num.length >= 10 && !num.startsWith('55')) num = '55' + num;
+        return { ...c, number: num };
       })),
       updated_at: new Date().toISOString()
     };
@@ -355,7 +355,7 @@ export default function ConfiguracoesPage() {
     const newContacts = [...settings.driver_contact_numbers];
     newContacts[index] = { ...newContacts[index], [field]: value };
     if (field === 'number') {
-       newContacts[index].number = value.replace(/[^\d+]/g, '');
+      newContacts[index].number = value.replace(/[^\d+]/g, '');
     }
     setSettings({ ...settings, driver_contact_numbers: newContacts });
   };
@@ -470,17 +470,16 @@ export default function ConfiguracoesPage() {
 
       {/* Success/Error Message */}
       {saveMsg && (
-        <div className={`rounded-xl px-4 py-3 text-sm font-medium ${
-          saveMsg.type === "ok" 
-            ? "bg-green-50 text-green-700 border border-green-200" 
+        <div className={`rounded-xl px-4 py-3 text-sm font-medium ${saveMsg.type === "ok"
+            ? "bg-green-50 text-green-700 border border-green-200"
             : "bg-red-50 text-red-700 border border-red-200"
-        }`}>
+          }`}>
           {saveMsg.text}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8 bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/30">
-        
+
         {/* IMAGENS DO SITE */}
         <section className="space-y-4">
           <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
@@ -597,20 +596,20 @@ export default function ConfiguracoesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">Nome da Empresa</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={settings.company_name}
-                onChange={(e) => setSettings({...settings, company_name: e.target.value})}
+                onChange={(e) => setSettings({ ...settings, company_name: e.target.value })}
                 className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 required
               />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">TTL da Reserva (Horas)</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={settings.hold_ttl_hours}
-                onChange={(e) => setSettings({...settings, hold_ttl_hours: parseInt(e.target.value)})}
+                onChange={(e) => setSettings({ ...settings, hold_ttl_hours: parseInt(e.target.value) })}
                 className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 min="1"
                 required
@@ -629,7 +628,7 @@ export default function ConfiguracoesPage() {
             Pagamento B2C (PIX)
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
+
             {/* Chaves PIX */}
             <div className="sm:col-span-2 space-y-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-2">
@@ -638,29 +637,29 @@ export default function ConfiguracoesPage() {
                   + Adicionar Chave
                 </button>
               </div>
-              
+
               {settings.pix_keys.length === 0 && (
                 <p className="text-xs text-on-surface-variant italic">Nenhuma chave PIX configurada. Adicione pelo menos uma para vendas B2C.</p>
               )}
 
               {settings.pix_keys.map((pix, i) => (
                 <div key={i} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                  <select 
+                  <select
                     value={pix.type}
                     onChange={(e) => updatePixKey(i, "type", e.target.value)}
                     className="bg-surface border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                   >
                     {PIX_KEY_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={pix.key}
                     onChange={(e) => updatePixKey(i, "key", e.target.value)}
                     placeholder="Chave (ex: 123.456.789-00)"
                     className="flex-1 w-full bg-surface border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                   />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={pix.label}
                     onChange={(e) => updatePixKey(i, "label", e.target.value)}
                     placeholder="Rótulo (ex: CPF do Eduardo)"
@@ -675,15 +674,15 @@ export default function ConfiguracoesPage() {
 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">Código Copia e Cola (Opcional)</label>
-              <textarea 
+              <textarea
                 value={settings.pix_copy_paste}
-                onChange={(e) => setSettings({...settings, pix_copy_paste: e.target.value})}
+                onChange={(e) => setSettings({ ...settings, pix_copy_paste: e.target.value })}
                 className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-xs font-mono"
                 placeholder="00020126580014br.gov.bcb.pix..."
                 rows={3}
               />
             </div>
-            
+
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">QR Code Estático (Imagem)</label>
               <div className="flex gap-4 items-center">
@@ -708,9 +707,9 @@ export default function ConfiguracoesPage() {
 
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <label className="text-sm font-semibold text-on-surface">Instruções de Pagamento</label>
-              <textarea 
+              <textarea
                 value={settings.pix_instructions}
-                onChange={(e) => setSettings({...settings, pix_instructions: e.target.value})}
+                onChange={(e) => setSettings({ ...settings, pix_instructions: e.target.value })}
                 rows={2}
                 className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                 placeholder="Ex: Efetue o PIX e envie o comprovante via WhatsApp informando o número do pedido."
@@ -731,27 +730,27 @@ export default function ConfiguracoesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">Banco</label>
-              <input type="text" value={settings.bank_name} onChange={(e) => setSettings({...settings, bank_name: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Ex: Nubank / Inter" />
+              <input type="text" value={settings.bank_name} onChange={(e) => setSettings({ ...settings, bank_name: e.target.value })} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Ex: Nubank / Inter" />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">Titular</label>
-              <input type="text" value={settings.bank_account_holder} onChange={(e) => setSettings({...settings, bank_account_holder: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Nome Completo" />
+              <input type="text" value={settings.bank_account_holder} onChange={(e) => setSettings({ ...settings, bank_account_holder: e.target.value })} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Nome Completo" />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">CPF/CNPJ do Titular</label>
-              <input type="text" value={settings.bank_cpf} onChange={(e) => setSettings({...settings, bank_cpf: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Documento" />
+              <input type="text" value={settings.bank_cpf} onChange={(e) => setSettings({ ...settings, bank_cpf: e.target.value })} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Documento" />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">Agência</label>
-              <input type="text" value={settings.bank_agency} onChange={(e) => setSettings({...settings, bank_agency: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Ex: 0001" />
+              <input type="text" value={settings.bank_agency} onChange={(e) => setSettings({ ...settings, bank_agency: e.target.value })} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Ex: 0001" />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-on-surface">Conta</label>
-              <input type="text" value={settings.bank_account} onChange={(e) => setSettings({...settings, bank_account: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Com dígito" />
+              <input type="text" value={settings.bank_account} onChange={(e) => setSettings({ ...settings, bank_account: e.target.value })} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Com dígito" />
             </div>
             <div className="flex flex-col gap-1.5 lg:col-span-3">
               <label className="text-sm font-semibold text-on-surface">Instruções de Transferência</label>
-              <input type="text" value={settings.bank_transfer_instructions} onChange={(e) => setSettings({...settings, bank_transfer_instructions: e.target.value})} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Ex: Envie o comprovante via WhatsApp..." />
+              <input type="text" value={settings.bank_transfer_instructions} onChange={(e) => setSettings({ ...settings, bank_transfer_instructions: e.target.value })} className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm" placeholder="Ex: Envie o comprovante via WhatsApp..." />
             </div>
           </div>
         </section>
@@ -766,9 +765,9 @@ export default function ConfiguracoesPage() {
           </h2>
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-on-surface">Política de Cancelamento / Reembolso</label>
-            <textarea 
+            <textarea
               value={settings.cancellation_policy_text}
-              onChange={(e) => setSettings({...settings, cancellation_policy_text: e.target.value})}
+              onChange={(e) => setSettings({ ...settings, cancellation_policy_text: e.target.value })}
               rows={4}
               className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-sm"
               placeholder="Descreva as regras de cancelamento. Visível na tela de pagamento para o cliente estar ciente."
@@ -784,7 +783,7 @@ export default function ConfiguracoesPage() {
             </svg>
             Comunicação e Notificações
           </h2>
-          
+
           <div className="grid grid-cols-1 gap-6">
             <div className="flex gap-4 items-center p-4 bg-surface rounded-xl border border-outline-variant/30">
               <div className="flex items-center h-5">
@@ -792,7 +791,7 @@ export default function ConfiguracoesPage() {
                   id="whatsapp_notif"
                   type="checkbox"
                   checked={settings.enable_whatsapp_notifications}
-                  onChange={(e) => setSettings({...settings, enable_whatsapp_notifications: e.target.checked})}
+                  onChange={(e) => setSettings({ ...settings, enable_whatsapp_notifications: e.target.checked })}
                   className="w-5 h-5 text-primary bg-surface border-outline-variant rounded focus:ring-primary focus:ring-2"
                 />
               </div>
@@ -810,7 +809,7 @@ export default function ConfiguracoesPage() {
                   id="email_mkt"
                   type="checkbox"
                   checked={settings.enable_email_marketing_sync}
-                  onChange={(e) => setSettings({...settings, enable_email_marketing_sync: e.target.checked})}
+                  onChange={(e) => setSettings({ ...settings, enable_email_marketing_sync: e.target.checked })}
                   className="w-5 h-5 text-primary bg-surface border-outline-variant rounded focus:ring-primary focus:ring-2"
                 />
               </div>
@@ -825,10 +824,10 @@ export default function ConfiguracoesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-semibold text-on-surface">E-mail de Contato</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={settings.contact_email}
-                  onChange={(e) => setSettings({...settings, contact_email: e.target.value})}
+                  onChange={(e) => setSettings({ ...settings, contact_email: e.target.value })}
                   className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
                   placeholder="Ex: contato@partiuturismo.com.br"
                 />
@@ -836,20 +835,20 @@ export default function ConfiguracoesPage() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-semibold text-on-surface">Endereço (Sede Administrativa)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={settings.administrative_address}
-                  onChange={(e) => setSettings({...settings, administrative_address: e.target.value})}
+                  onChange={(e) => setSettings({ ...settings, administrative_address: e.target.value })}
                   className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
                   placeholder="Ex: Vitória - ES"
                 />
               </div>
-              
+
               <div className="flex flex-col gap-1.5 sm:col-span-2">
                 <label className="text-sm font-semibold text-on-surface">Horário de Atendimento</label>
-                <textarea 
+                <textarea
                   value={settings.operating_hours}
-                  onChange={(e) => setSettings({...settings, operating_hours: e.target.value})}
+                  onChange={(e) => setSettings({ ...settings, operating_hours: e.target.value })}
                   rows={2}
                   className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-sm"
                   placeholder="Ex: Segunda a Sexta: 09h às 18h"
@@ -859,8 +858,8 @@ export default function ConfiguracoesPage() {
 
             <div className="flex flex-col gap-2 mt-4">
               <label className="text-sm font-semibold text-on-surface">Número de Suporte WhatsApp (Contato)</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={settings.whatsapp_support_numbers[0] || ""}
                 onChange={(e) => handleWhatsappChange(e.target.value)}
                 className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -889,17 +888,17 @@ export default function ConfiguracoesPage() {
 
             {settings.driver_contact_numbers.map((contact, i) => (
               <div key={contact.id} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={contact.label}
                   onChange={(e) => updateDriverContact(i, "label", e.target.value)}
-                  placeholder="Ex: Mecânico Parceiro"
+                  placeholder="Ex: Suporte para motoristas"
                   className="flex-1 w-full bg-surface border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                   required
                   minLength={2}
                 />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={contact.number}
                   onChange={(e) => updateDriverContact(i, "number", e.target.value)}
                   placeholder="Número (Ex: 27999999999)"
@@ -929,8 +928,8 @@ export default function ConfiguracoesPage() {
         </section>
 
         <div className="pt-4 flex justify-end">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isSaving}
             className="bg-primary hover:bg-primary-dark text-on-primary px-8 py-3 rounded-full font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
           >
