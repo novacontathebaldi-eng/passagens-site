@@ -188,16 +188,16 @@ export default function ExcursoesPage() {
                       </td>
                       <td className="py-4 px-6 text-right space-x-2">
                         <Link
-                          href={`/admin/excursoes/${exc.id}/editar`}
-                          className="text-primary hover:text-primary-dark text-sm font-medium transition-colors"
+                          href={`/admin/excursoes/${exc.id}`}
+                          className="text-primary hover:text-primary-dark text-sm font-bold transition-colors"
                         >
-                          Editar
+                          Detalhes
                         </Link>
                         <Link
-                          href={`/admin/reservas?excursion_id=${exc.id}`}
+                          href={`/admin/excursoes/${exc.id}/editar`}
                           className="text-outline hover:text-on-surface text-sm font-medium transition-colors"
                         >
-                          Reservas
+                          Editar
                         </Link>
                         <button
                           onClick={() => handleDelete(exc.id)}

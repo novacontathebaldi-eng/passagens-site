@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import QRCode from "qrcode";
-import VoucherPDFDocument from "./VoucherPDFDocument";
+import VoucherPDFDocument from "@/components/pdf/VoucherPDFDocument";
 
 export async function GET(request: NextRequest) {
   const reservationId = request.nextUrl.searchParams.get("reservation_id");

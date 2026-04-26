@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import AdminRelatorioVistoria from "@/components/admin/AdminRelatorioVistoria";
+
 
 type TourPackage = { id: string; title: string };
 type VehicleLayout = { id: string; name: string; capacity: number };
@@ -187,11 +187,7 @@ export default function EditarExcursaoPage() {
         )}
       </div>
 
-      {/* Relatórios de Vistoria */}
-      <div>
-        <h2 className="text-lg font-bold text-on-surface mb-4">Relatórios de Vistoria</h2>
-        <AdminRelatorioVistoria excursionId={id} />
-      </div>
+
     </div>
   );
 }
