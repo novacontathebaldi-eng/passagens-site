@@ -49,6 +49,7 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
   const [step, setStep] = useState(1);
   const [quantity, setQuantity] = useState(1);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [activeDeckIndex, setActiveDeckIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [editFromReview, setEditFromReview] = useState(false);
@@ -432,34 +433,135 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
               <h2 className="text-2xl font-bold text-on-surface mb-2">Escolha as Poltronas</h2>
               <p className="text-on-surface-variant mb-6">Selecione <strong className="text-primary">{quantity}</strong> poltrona(s) no mapa do ônibus.</p>
               
-              <div className="bg-surface-container p-6 rounded-2xl flex flex-col items-center">
-                {/* Simplified Bus Matrix visualizer for now */}
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-outline-variant/30 text-center">
-                  <p className="text-sm text-outline-variant mb-4">Mapa de Assentos</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {Array.from({length: 20}).map((_, i) => {
-                      const code = `P${i+1}`;
-                      const isOccupied = liveOccupiedSeats.includes(code);
-                      const isSelected = selectedSeats.includes(code);
-                      return (
-                        <button
-                          key={code}
-                          disabled={isOccupied}
-                          onClick={() => {
-                            if (isSelected) setSelectedSeats(s => s.filter(x => x !== code));
-                            else if (selectedSeats.length < quantity) setSelectedSeats(s => [...s, code]);
+              <div className="bg-surface-container p-4 sm:p-6 rounded-2xl flex flex-col items-center">
+                {(() => {
+                  const gridMatrix = excursion.vehicle_layouts?.grid_matrix;
+                  const isV2 = gridMatrix?.version === 2;
+                  
+                  if (!isV2 || !gridMatrix.decks || gridMatrix.decks.length === 0) {
+                    return (
+                      <div className="p-8 text-center bg-surface-container-high rounded-xl w-full">
+                        <p className="text-on-surface-variant">Mapa de assentos não disponível para este veículo.</p>
+                      </div>
+                    );
+                  }
+
+                  const deck = gridMatrix.decks[activeDeckIndex];
+
+                  return (
+                    <div className="w-full max-w-sm">
+                      {gridMatrix.decks.length > 1 && (
+                        <div className="flex gap-2 mb-6 bg-surface-container-high p-1 rounded-xl">
+                          {gridMatrix.decks.map((d: any, idx: number) => (
+                            <button
+                              key={d.id}
+                              onClick={() => setActiveDeckIndex(idx)}
+                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${
+                                activeDeckIndex === idx
+                                  ? 'bg-surface text-primary shadow-sm'
+                                  : 'text-on-surface-variant hover:text-on-surface'
+                              }`}
+                            >
+                              {d.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col items-center relative overflow-hidden">
+                        {/* Frente do onibus decorativo */}
+                        <div className="w-3/4 h-12 border-4 border-b-0 border-outline-variant/30 rounded-t-full mb-6 relative">
+                          <div className="absolute inset-x-4 bottom-2 h-4 border-2 border-outline-variant/20 rounded-t-xl opacity-50" />
+                        </div>
+                        
+                        <div
+                          className="grid gap-2 mb-6 w-full max-w-[280px] mx-auto"
+                          style={{
+                            gridTemplateColumns: `repeat(${deck.cols}, minmax(0, 1fr))`
                           }}
-                          className={`w-12 h-12 rounded-lg flex items-center justify-center font-bold text-sm transition-colors ${
-                            isOccupied ? 'bg-surface-container-high text-outline cursor-not-allowed' : 
-                            isSelected ? 'bg-primary text-on-primary shadow-md' : 'bg-surface border border-outline-variant hover:border-primary'
-                          }`}
                         >
-                          {i+1}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
+                          {deck.cells.map((cell: any) => {
+                            const isOccupied = liveOccupiedSeats.includes(cell.label);
+                            const isSelected = selectedSeats.includes(cell.label);
+                            
+                            // Cell classes based on type
+                            let cellClasses = "flex items-center justify-center font-bold text-xs sm:text-sm rounded-lg transition-all ";
+                            let content: React.ReactNode = "";
+                            let disabled = true;
+                            let onClick = undefined;
+
+                            if (cell.type === 'seat') {
+                              if (isOccupied) {
+                                cellClasses += "bg-surface-container-high text-outline cursor-not-allowed";
+                              } else if (isSelected) {
+                                cellClasses += "bg-primary text-on-primary shadow-md hover:bg-primary/90 cursor-pointer ring-2 ring-primary ring-offset-1";
+                              } else {
+                                cellClasses += "bg-surface border border-outline-variant text-on-surface hover:border-primary cursor-pointer shadow-sm";
+                              }
+                              content = cell.label;
+                              disabled = isOccupied;
+                              onClick = () => {
+                                if (isSelected) setSelectedSeats(s => s.filter(x => x !== cell.label));
+                                else if (selectedSeats.length < quantity) setSelectedSeats(s => [...s, cell.label]);
+                              };
+                            } else if (cell.type === 'corridor') {
+                                cellClasses += "bg-transparent";
+                            } else if (cell.type === 'driver') {
+                                cellClasses += "bg-surface-container text-on-surface-variant border border-outline-variant/30 text-[10px] sm:text-xs";
+                                content = "Mot.";
+                            } else if (cell.type === 'bathroom') {
+                                cellClasses += "bg-blue-50 text-blue-400 border border-blue-100 text-[10px] sm:text-xs";
+                                content = "WC";
+                            } else if (cell.type === 'door') {
+                                cellClasses += "bg-emerald-50 text-emerald-500 border border-emerald-100 text-[10px] sm:text-xs";
+                                content = "Porta";
+                            } else if (cell.type === 'stairs') {
+                                cellClasses += "bg-amber-50 text-amber-500 border border-amber-100 text-[10px] sm:text-xs";
+                                content = "Escada";
+                            } else {
+                                cellClasses += "bg-transparent";
+                            }
+
+                            return (
+                              <button
+                                key={cell.id}
+                                disabled={disabled}
+                                onClick={onClick}
+                                className={cellClasses}
+                                style={{
+                                  gridRow: `span ${cell.rowSpan}`,
+                                  gridColumn: `span ${cell.colSpan}`,
+                                  aspectRatio: cell.type === 'seat' ? '1 / 1' : 'auto',
+                                  minHeight: cell.type === 'seat' ? '36px' : 'auto'
+                                }}
+                                title={cell.type === 'seat' ? `Poltrona ${cell.label}` : cell.type}
+                              >
+                                {content}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        
+                        {/* Fundo do onibus decorativo */}
+                        <div className="w-full h-8 border-4 border-t-0 border-outline-variant/30 rounded-b-3xl relative" />
+                      </div>
+
+                      {/* Legenda */}
+                      <div className="mt-6 flex flex-wrap justify-center gap-4 text-xs font-medium text-on-surface-variant">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-4 h-4 rounded bg-surface border border-outline-variant shadow-sm" /> Livre
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-4 h-4 rounded bg-primary shadow-sm" /> Selecionada
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-4 h-4 rounded bg-surface-container-high text-outline" /> Ocupada
+                        </div>
+                      </div>
+
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
