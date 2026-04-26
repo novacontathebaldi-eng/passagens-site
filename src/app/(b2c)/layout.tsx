@@ -64,12 +64,23 @@ export default async function B2CLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Fetch user role server-side for secure conditional rendering (e.g. admin shortcut)
+  let userRole: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    userRole = profile?.role ?? null;
+  }
+
   const settings = await getSiteSettings();
 
   return (
     <div className="min-h-screen flex flex-col" suppressHydrationWarning>
       {/* ── Navbar ── */}
-      <SiteHeader user={user} settings={settings} />
+      <SiteHeader user={user} settings={settings} userRole={userRole} />
 
 
       {/* ── Main ── */}

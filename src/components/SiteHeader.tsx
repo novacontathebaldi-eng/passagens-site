@@ -1,13 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import type { User } from "@supabase/supabase-js";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
-import { Menu, X, User as UserIcon, Map, Info, MessageCircle, LayoutDashboard, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  User as UserIcon,
+  Map,
+  Info,
+  MessageCircle,
+  LayoutDashboard,
+  LogOut,
+  ShieldCheck,
+  ChevronDown,
+} from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
 
 // Types
@@ -22,6 +33,12 @@ interface SiteSettings {
 interface SiteHeaderProps {
   user: User | null;
   settings: SiteSettings;
+  /**
+   * The user's role fetched server-side from `profiles.role`.
+   * Used to conditionally render the Admin shortcut.
+   * NOTE: This is a UI convenience — the real route protection is in middleware.ts.
+   */
+  userRole?: string | null;
 }
 
 // Logo Component
@@ -66,20 +83,30 @@ const navLinks = [
   { name: "Contato", href: "/contato", isScroll: false, icon: MessageCircle },
 ];
 
-export function SiteHeader({ user, settings }: SiteHeaderProps) {
+const ADMIN_ROLES = ["ADMIN", "AGENT"];
+
+export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  const isAdmin = userRole != null && ADMIN_ROLES.includes(userRole);
 
   // Close menu on route change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
+    setIsDropdownOpen(false);
   }, [pathname]);
 
   // Lock body scroll and handle Esc key when menu is open
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false);
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        setIsDropdownOpen(false);
+      }
     };
 
     if (isOpen) {
@@ -94,6 +121,23 @@ export function SiteHeader({ user, settings }: SiteHeaderProps) {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   const closeMenu = () => setIsOpen(false);
 
@@ -142,13 +186,91 @@ export function SiteHeader({ user, settings }: SiteHeaderProps) {
             {/* Desktop Auth Buttons */}
             <div className="hidden md:flex items-center gap-3">
               {user ? (
-                <Link
-                  href="/painel"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-dark transition-colors"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  Meu Painel
-                </Link>
+                /* ── Desktop User Dropdown ── */
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsDropdownOpen((prev) => !prev)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-dark transition-colors"
+                    aria-expanded={isDropdownOpen}
+                    aria-haspopup="true"
+                    id="user-menu-button"
+                  >
+                    <UserIcon className="w-4 h-4" />
+                    <span className="max-w-[120px] truncate">
+                      {user.user_metadata?.full_name?.split(" ")[0] || "Minha Conta"}
+                    </span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {isDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="absolute right-0 mt-2 w-56 rounded-2xl bg-surface border border-outline-variant/30 shadow-xl overflow-hidden"
+                        role="menu"
+                        aria-labelledby="user-menu-button"
+                      >
+                        {/* User info header */}
+                        <div className="px-4 py-3 border-b border-outline-variant/20">
+                          <p className="text-sm font-semibold text-on-surface truncate">
+                            {user.user_metadata?.full_name || "Usuário"}
+                          </p>
+                          <p className="text-xs text-on-surface-variant truncate mt-0.5">
+                            {user.email}
+                          </p>
+                        </div>
+
+                        <div className="py-1.5">
+                          {/* Meu Painel — visible for all logged-in users */}
+                          <Link
+                            href="/painel"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-high transition-colors"
+                            role="menuitem"
+                          >
+                            <LayoutDashboard className="w-4 h-4 text-on-surface-variant" />
+                            Meu Painel
+                          </Link>
+
+                          {/*
+                           * Admin shortcut — UI convenience only.
+                           * Real route protection is enforced by middleware.ts (lines 40-60).
+                           * This button is NOT rendered in the DOM for non-admin users (server-side prop).
+                           */}
+                          {isAdmin && (
+                            <Link
+                              href="/admin"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-high transition-colors"
+                              role="menuitem"
+                            >
+                              <ShieldCheck className="w-4 h-4 text-primary" />
+                              <span className="font-medium">Admin</span>
+                            </Link>
+                          )}
+                        </div>
+
+                        {/* Separator + Logout */}
+                        <div className="border-t border-outline-variant/20 py-1.5">
+                          <form action={logout}>
+                            <button
+                              type="submit"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-error hover:bg-error-container/20 transition-colors"
+                              role="menuitem"
+                            >
+                              <LogOut className="w-4 h-4" />
+                              Sair
+                            </button>
+                          </form>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ) : (
                 <>
                   <Link
@@ -284,6 +406,23 @@ export function SiteHeader({ user, settings }: SiteHeaderProps) {
                       <LayoutDashboard className="w-5 h-5" />
                       Meu Painel
                     </Link>
+
+                    {/*
+                     * Admin shortcut (mobile drawer) — UI convenience only.
+                     * Real route protection is enforced by middleware.ts (lines 40-60).
+                     * This button is NOT rendered in the DOM for non-admin users (server-side prop).
+                     */}
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        onClick={closeMenu}
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-surface-container border border-primary/30 text-primary font-semibold hover:bg-primary/10 transition-colors"
+                      >
+                        <ShieldCheck className="w-5 h-5" />
+                        Painel Admin
+                      </Link>
+                    )}
+
                     <form action={logout} className="w-full">
                       <button 
                         type="submit" 
