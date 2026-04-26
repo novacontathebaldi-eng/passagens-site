@@ -9,13 +9,13 @@ type ExcursionReport = {
   driver_id: string;
   checklist_results: Record<string, boolean>;
   observations: string | null;
-  photo_path: string | null;
+  photo_paths: string[] | null;
   created_at: string;
   driver_name: string | null;
 };
 
 type ReportWithPhoto = ExcursionReport & {
-  photoUrl: string | null;
+  photoUrls: string[];
 };
 
 export default function AdminRelatorioVistoria({ excursionId }: { excursionId: string }) {
@@ -32,7 +32,7 @@ export default function AdminRelatorioVistoria({ excursionId }: { excursionId: s
           driver_id,
           checklist_results,
           observations,
-          photo_path,
+          photo_paths,
           created_at,
           profiles ( full_name )
         `)
@@ -47,13 +47,18 @@ export default function AdminRelatorioVistoria({ excursionId }: { excursionId: s
 
       const formattedReports = await Promise.all(
         (data || []).map(async (report: any) => {
-          let photoUrl: string | null = null;
+          let photoUrls: string[] = [];
 
-          if (report.photo_path) {
-            const { data: urlData } = await supabase.storage
-              .from("excursion-reports")
-              .createSignedUrl(report.photo_path, 3600); // 1 hour expiration
-            photoUrl = urlData?.signedUrl || null;
+          if (report.photo_paths && report.photo_paths.length > 0) {
+            const urls = await Promise.all(
+              report.photo_paths.map(async (path: string) => {
+                const { data: urlData } = await supabase.storage
+                  .from("excursion-reports")
+                  .createSignedUrl(path, 3600); // 1 hour expiration
+                return urlData?.signedUrl || null;
+              })
+            );
+            photoUrls = urls.filter((url): url is string => url !== null);
           }
 
           const profileData = Array.isArray(report.profiles)
@@ -65,10 +70,10 @@ export default function AdminRelatorioVistoria({ excursionId }: { excursionId: s
             driver_id: report.driver_id,
             checklist_results: report.checklist_results || {},
             observations: report.observations,
-            photo_path: report.photo_path,
+            photo_paths: report.photo_paths,
             created_at: report.created_at,
             driver_name: profileData?.full_name || null,
-            photoUrl,
+            photoUrls,
           } as ReportWithPhoto;
         })
       );
@@ -150,26 +155,31 @@ export default function AdminRelatorioVistoria({ excursionId }: { excursionId: s
               </div>
             )}
 
-            {/* Foto */}
-            {report.photoUrl && (
+            {/* Fotos */}
+            {report.photoUrls.length > 0 && (
               <div>
-                <h4 className="text-sm font-bold text-on-surface mb-3 uppercase tracking-wider">Foto Anexada</h4>
-                <a
-                  href={report.photoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative inline-block aspect-video max-w-md rounded-xl overflow-hidden border border-outline-variant/30 bg-surface-container"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={report.photoUrl}
-                    alt="Foto da vistoria"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                    <ExternalLink className="text-white opacity-0 group-hover:opacity-100 w-6 h-6 transition-opacity" />
-                  </div>
-                </a>
+                <h4 className="text-sm font-bold text-on-surface mb-3 uppercase tracking-wider">Fotos Anexadas</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {report.photoUrls.map((url, idx) => (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative inline-block aspect-square w-full rounded-xl overflow-hidden border border-outline-variant/30 bg-surface-container"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={url}
+                        alt={`Foto da vistoria ${idx + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                        <ExternalLink className="text-white opacity-0 group-hover:opacity-100 w-6 h-6 transition-opacity" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
               </div>
             )}
           </div>

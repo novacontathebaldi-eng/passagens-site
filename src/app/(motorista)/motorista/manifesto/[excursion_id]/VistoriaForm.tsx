@@ -23,8 +23,8 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
   const [isLoading, setIsLoading] = useState(true);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<{file: File, preview: string}[]>([]);
+  const [existingPhotos, setExistingPhotos] = useState<{path: string, url: string}[]>([]);
 
   const supabase = createClient();
 
@@ -64,6 +64,17 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
           setExistingReport(report);
           setResults(report.checklist_results || {});
           setObservations(report.observations || "");
+          
+          if (report.photo_paths && report.photo_paths.length > 0) {
+            const photosWithUrls = await Promise.all(
+              report.photo_paths.map(async (path: string) => {
+                const { data } = await supabase.storage.from("excursion-reports").createSignedUrl(path, 3600);
+                return { path, url: data?.signedUrl || "" };
+              })
+            );
+            setExistingPhotos(photosWithUrls.filter(p => p.url !== ""));
+          }
+          
           onStatusChange(true);
         } else {
           onStatusChange(false);
@@ -82,16 +93,42 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
   }, [excursionId, supabase, onStatusChange]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("Formato inválido. Selecione uma imagem.");
-      return;
+    const validFiles: {file: File, preview: string}[] = [];
+    
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`Formato inválido ignorado: ${file.name}`);
+        continue;
+      }
+      validFiles.push({
+        file,
+        preview: URL.createObjectURL(file)
+      });
     }
 
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    setSelectedFiles(prev => [...prev, ...validFiles]);
+    // Reset input so the same files can be selected again if removed
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+  
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => {
+      const newFiles = [...prev];
+      URL.revokeObjectURL(newFiles[index].preview);
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
+  };
+
+  const removeExistingPhoto = (index: number) => {
+    setExistingPhotos(prev => {
+      const newPhotos = [...prev];
+      newPhotos.splice(index, 1);
+      return newPhotos;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,51 +139,61 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      let photoPath = null;
+      let uploadedPaths: string[] = [];
 
-      // Upload photo if selected
-      if (selectedFile) {
+      // Upload photos if selected
+      if (selectedFiles.length > 0) {
         setIsUploading(true);
 
-        // Compress and convert to webp
-        let fileToUpload: File | Blob = selectedFile;
-        try {
-          fileToUpload = await imageCompression(selectedFile, {
-            maxSizeMB: 4.5,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
-            fileType: "image/webp",
-          });
-        } catch (compErr) {
-          console.error("Erro ao comprimir imagem:", compErr);
-          // Fallback if compression fails completely
+        for (let i = 0; i < selectedFiles.length; i++) {
+          const { file: selectedFile } = selectedFiles[i];
+          
+          // Compress and convert to webp
+          let fileToUpload: File | Blob = selectedFile;
+          try {
+            fileToUpload = await imageCompression(selectedFile, {
+              maxSizeMB: 4.5,
+              maxWidthOrHeight: 1920,
+              useWebWorker: true,
+              fileType: "image/webp",
+            });
+          } catch (compErr) {
+            console.error("Erro ao comprimir imagem:", compErr);
+          }
+
+          if (fileToUpload.size > 10 * 1024 * 1024) {
+            toast.error(`A imagem ${selectedFile.name} ainda é muito grande. Tente com menor resolução.`);
+            continue; // Skip this file but continue others
+          }
+
+          const fileName = `${Date.now()}_${i}.webp`;
+          const path = `reports/${excursionId}/${user.id}/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from("excursion-reports")
+            .upload(path, fileToUpload, { upsert: true });
+
+          if (uploadError) {
+            console.error("Erro ao enviar:", uploadError);
+            toast.error(`Erro ao enviar ${selectedFile.name}`);
+          } else {
+            uploadedPaths.push(path);
+          }
         }
-
-        if (fileToUpload.size > 10 * 1024 * 1024) {
-          toast.error("Imagem muito grande. Tente uma foto com menor resolução.");
-          setIsUploading(false);
-          setIsSubmitting(false);
-          return;
-        }
-
-        const fileName = `${Date.now()}.webp`;
-        const path = `reports/${excursionId}/${user.id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("excursion-reports")
-          .upload(path, fileToUpload, { upsert: true });
-
-        if (uploadError) throw new Error("Erro ao enviar foto: " + uploadError.message);
-        photoPath = path;
         setIsUploading(false);
       }
+
+      const allPhotoPaths = [
+        ...existingPhotos.map(p => p.path),
+        ...uploadedPaths
+      ];
 
       const payload = {
         excursion_id: excursionId,
         driver_id: user.id,
         checklist_results: results,
         observations: observations,
-        ...(photoPath && { photo_path: photoPath }),
+        photo_paths: allPhotoPaths,
       };
 
       if (existingReport) {
@@ -227,28 +274,54 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
             />
           </div>
 
-          {/* Foto */}
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-on-surface">Foto (Opcional)</label>
+          {/* Fotos */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-bold text-on-surface">Fotos do Ocorrido</label>
+              <button 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()}
+                className="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full"
+              >
+                + Adicionar Fotos
+              </button>
+            </div>
             
-            {existingReport?.photo_path && !previewUrl ? (
-              <div className="p-4 bg-surface border border-outline-variant rounded-xl flex items-center justify-between">
-                <span className="text-sm text-on-surface-variant flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-success" /> Foto já enviada
-                </span>
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="text-sm text-primary font-bold">Trocar</button>
-              </div>
-            ) : previewUrl ? (
-              <div className="relative rounded-xl overflow-hidden border border-outline-variant aspect-video bg-surface-container-high">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-3 right-3 bg-surface/90 backdrop-blur text-on-surface px-3 py-1.5 rounded-lg text-sm font-bold shadow"
-                >
-                  Trocar foto
-                </button>
+            {(existingPhotos.length > 0 || selectedFiles.length > 0) ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {/* Existing Photos */}
+                {existingPhotos.map((photo, index) => (
+                  <div key={`exist-${index}`} className="relative rounded-xl overflow-hidden border border-outline-variant aspect-square bg-surface-container-high group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photo.url} alt="Foto existente" className="w-full h-full object-cover" />
+                    <div className="absolute top-1 right-1 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm">Enviada</div>
+                    <button
+                      type="button"
+                      onClick={() => removeExistingPhoto(index)}
+                      className="absolute top-1 left-1 bg-error/90 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Remover"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                
+                {/* New Selected Photos */}
+                {selectedFiles.map((fileObj, index) => (
+                  <div key={`new-${index}`} className="relative rounded-xl overflow-hidden border border-primary/50 aspect-square bg-surface-container-high group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={fileObj.preview} alt="Nova foto" className="w-full h-full object-cover" />
+                    <div className="absolute top-1 right-1 bg-primary text-white text-[10px] px-2 py-0.5 rounded-full shadow">Nova</div>
+                    <button
+                      type="button"
+                      onClick={() => removeSelectedFile(index)}
+                      className="absolute top-1 left-1 bg-error/90 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Remover"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
               </div>
             ) : (
               <button
@@ -257,7 +330,7 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
                 className="w-full py-8 border-2 border-dashed border-outline-variant/50 rounded-xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:bg-surface-container-high transition-colors"
               >
                 <Camera className="w-8 h-8 opacity-50" />
-                <span className="text-sm font-medium">Tirar foto do problema</span>
+                <span className="text-sm font-medium">Tirar foto ou anexar imagens</span>
                 <span className="text-xs opacity-70">Qualquer formato (compressão automática)</span>
               </button>
             )}
@@ -266,6 +339,7 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
               type="file"
               ref={fileInputRef}
               accept="image/*"
+              multiple
               onChange={handleFileSelect}
               className="hidden"
             />
