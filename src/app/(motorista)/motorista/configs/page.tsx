@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { MessageCircle } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
+import { DriverContactCard } from "./DriverContactCard";
 
 export default async function ConfigsPage() {
   const supabase = await createClient();
@@ -19,37 +19,27 @@ export default async function ConfigsPage() {
     .eq("id", user.id)
     .single();
 
-  // Busca configurações globais para o WhatsApp
+  // Busca configurações globais
   const { data: settings } = await supabase
     .from("global_settings")
-    .select("whatsapp_support_numbers")
+    .select("driver_contact_numbers")
     .single();
 
-  const rawNumbers = settings?.whatsapp_support_numbers as string[] | undefined;
-  // Extrai o primeiro número não vazio
-  const rawNumber = Array.isArray(rawNumbers)
-    ? rawNumbers.find((n) => n.trim() !== "")
-    : null;
-
-  let supportLink = null;
-  if (rawNumber) {
-    // Remove tudo que não for dígito
-    let cleanNumber = rawNumber.replace(/\D/g, "");
-    if (cleanNumber.length >= 10) {
-      // Se não tiver o DDI 55 (Brasil), adiciona
-      if (!cleanNumber.startsWith("55")) {
-        cleanNumber = "55" + cleanNumber;
-      }
-      supportLink = `https://wa.me/${cleanNumber}?text=Olá, preciso de suporte com uma viagem.`;
+  let driverContacts: any[] = [];
+  try {
+    if (Array.isArray(settings?.driver_contact_numbers)) {
+      driverContacts = settings?.driver_contact_numbers as any[];
+    } else if (typeof settings?.driver_contact_numbers === 'string') {
+      driverContacts = JSON.parse(settings?.driver_contact_numbers);
     }
-  }
+  } catch (e) {}
 
   const initials = profile?.full_name
     ? profile.full_name.substring(0, 2).toUpperCase()
     : "MO";
 
   return (
-    <div className="p-4 space-y-8">
+    <div className="p-4 space-y-8 pb-24">
       <h1 className="font-bold text-on-surface text-xl px-2">Ajustes</h1>
 
       {/* ── Perfil do Motorista ── */}
@@ -80,23 +70,26 @@ export default async function ConfigsPage() {
         </p>
       </section>
 
-      {/* ── Suporte ── */}
-      {supportLink && (
-        <section className="space-y-3">
-          <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider ml-2">
-            Suporte
-          </h3>
-          <a
-            href={supportLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-between p-4 bg-success/10 text-success rounded-2xl border border-success/20 hover:bg-success/20 transition-colors"
-          >
-            <span className="font-bold text-base">Falar com o suporte</span>
-            <MessageCircle className="w-5 h-5" />
-          </a>
-        </section>
-      )}
+      {/* ── Números Úteis ── */}
+      <section className="space-y-3">
+        <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider ml-2">
+          Números Úteis
+        </h3>
+        
+        {driverContacts.length > 0 ? (
+          <div className="space-y-3">
+            {driverContacts.map((contact) => (
+              <DriverContactCard key={contact.id} contact={contact} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-surface-container border border-outline-variant/30 rounded-2xl p-4 text-center">
+            <p className="text-xs text-on-surface-variant italic">
+              Nenhum número de suporte configurado. Peça ao administrador para cadastrar os contatos.
+            </p>
+          </div>
+        )}
+      </section>
 
       {/* ── Conta ── */}
       <section className="space-y-3">

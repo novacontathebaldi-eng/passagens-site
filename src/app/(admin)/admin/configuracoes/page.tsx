@@ -7,6 +7,7 @@ import Image from "next/image";
 
 type PixKeyEntry = { type: string; key: string; label: string };
 type HeroStatEntry = { number: string; label: string; iconPath: string };
+type DriverContactEntry = { id: string; label: string; number: string; whatsapp: boolean };
 
 const PIX_KEY_TYPES = [
   { value: "TELEFONE", label: "Telefone" },
@@ -48,9 +49,10 @@ type GlobalSettings = {
   bank_agency: string;
   bank_account: string;
   bank_transfer_instructions: string;
-  // Other
+  // Outros
   cancellation_policy_text: string;
   whatsapp_support_numbers: string[];
+  driver_contact_numbers: DriverContactEntry[];
   contact_email: string;
   operating_hours: string;
   administrative_address: string;
@@ -233,9 +235,19 @@ export default function ConfiguracoesPage() {
           }
         } catch(e) {}
 
+        let driverContacts: DriverContactEntry[] = [];
+        try {
+          if (Array.isArray(data.driver_contact_numbers)) {
+            driverContacts = data.driver_contact_numbers as DriverContactEntry[];
+          } else if (typeof data.driver_contact_numbers === 'string') {
+            driverContacts = JSON.parse(data.driver_contact_numbers);
+          }
+        } catch(e) {}
+
         setSettings({
           ...data,
           whatsapp_support_numbers: numbers.length > 0 ? numbers : [""],
+          driver_contact_numbers: driverContacts,
           pix_keys: pixKeys,
           hero_stats: heroStats,
           pix_key: data.pix_key ?? "",
@@ -277,6 +289,7 @@ export default function ConfiguracoesPage() {
           operating_hours: "",
           administrative_address: "",
           whatsapp_support_numbers: [""],
+          driver_contact_numbers: [],
           hold_ttl_hours: 24,
           hero_stats: [],
           logo_url: null,
@@ -303,6 +316,11 @@ export default function ConfiguracoesPage() {
       whatsapp_support_numbers: JSON.stringify(settings.whatsapp_support_numbers),
       pix_keys: JSON.stringify(settings.pix_keys),
       hero_stats: JSON.stringify(settings.hero_stats),
+      driver_contact_numbers: JSON.stringify(settings.driver_contact_numbers.map(c => {
+         let num = c.number.replace(/\D/g, '');
+         if (num.length >= 10 && !num.startsWith('55')) num = '55' + num;
+         return { ...c, number: num };
+      })),
       updated_at: new Date().toISOString()
     };
 
@@ -326,6 +344,26 @@ export default function ConfiguracoesPage() {
     setSettings({ ...settings, whatsapp_support_numbers: [value] });
   };
 
+  // Driver contacts handlers
+  const addDriverContact = () => {
+    if (!settings) return;
+    setSettings({ ...settings, driver_contact_numbers: [...settings.driver_contact_numbers, { id: crypto.randomUUID(), label: "", number: "", whatsapp: true }] });
+  };
+
+  const updateDriverContact = (index: number, field: keyof DriverContactEntry, value: any) => {
+    if (!settings) return;
+    const newContacts = [...settings.driver_contact_numbers];
+    newContacts[index] = { ...newContacts[index], [field]: value };
+    if (field === 'number') {
+       newContacts[index].number = value.replace(/[^\d+]/g, '');
+    }
+    setSettings({ ...settings, driver_contact_numbers: newContacts });
+  };
+
+  const removeDriverContact = (index: number) => {
+    if (!settings) return;
+    setSettings({ ...settings, driver_contact_numbers: settings.driver_contact_numbers.filter((_, i) => i !== index) });
+  };
 
   // PIX Keys handlers
   const addPixKey = () => {
@@ -829,6 +867,64 @@ export default function ConfiguracoesPage() {
                 placeholder="Ex: 5511999999999"
               />
             </div>
+          </div>
+        </section>
+
+        {/* NÚMEROS ÚTEIS PARA O MOTORISTA */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+            Números Úteis para o Motorista
+          </h2>
+          <p className="text-xs text-on-surface-variant">
+            Configure os contatos que aparecerão no app do motorista durante as viagens. O número será limpo e formatado com o DDI (55) automaticamente ao salvar.
+          </p>
+
+          <div className="space-y-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4">
+            {settings.driver_contact_numbers.length === 0 && (
+              <p className="text-xs text-on-surface-variant italic">Nenhum número cadastrado.</p>
+            )}
+
+            {settings.driver_contact_numbers.map((contact, i) => (
+              <div key={contact.id} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                <input 
+                  type="text" 
+                  value={contact.label}
+                  onChange={(e) => updateDriverContact(i, "label", e.target.value)}
+                  placeholder="Ex: Mecânico Parceiro"
+                  className="flex-1 w-full bg-surface border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  required
+                  minLength={2}
+                />
+                <input 
+                  type="text" 
+                  value={contact.number}
+                  onChange={(e) => updateDriverContact(i, "number", e.target.value)}
+                  placeholder="Número (Ex: 27999999999)"
+                  className="flex-1 w-full bg-surface border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  required
+                  minLength={10}
+                />
+                <label className="flex items-center gap-2 text-sm font-semibold text-on-surface whitespace-nowrap px-2">
+                  <input
+                    type="checkbox"
+                    checked={contact.whatsapp}
+                    onChange={(e) => updateDriverContact(i, "whatsapp", e.target.checked)}
+                    className="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary focus:ring-2"
+                  />
+                  WhatsApp?
+                </label>
+                <button type="button" onClick={() => removeDriverContact(i)} className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors" title="Remover contato">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+              </div>
+            ))}
+
+            <button type="button" onClick={addDriverContact} className="w-full flex items-center justify-center gap-2 py-3 px-4 border-2 border-dashed border-outline-variant/40 rounded-xl text-sm font-semibold text-primary hover:border-primary/50 hover:bg-primary/5 transition-all mt-2">
+              + Adicionar número
+            </button>
           </div>
         </section>
 
