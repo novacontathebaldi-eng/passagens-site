@@ -8,7 +8,8 @@ export function useRealtimeSeats(excursionId: string, initialOccupiedSeats: stri
   // Keep state in sync if parent server component passes new initial props
   useEffect(() => {
     setOccupiedSeats(initialOccupiedSeats);
-  }, [initialOccupiedSeats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(initialOccupiedSeats)]);
 
   const fetchSeats = useCallback(async () => {
     const { data: tickets } = await supabase

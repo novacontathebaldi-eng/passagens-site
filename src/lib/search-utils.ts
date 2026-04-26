@@ -63,6 +63,7 @@ export interface ExcursionItem {
     cover_image: string;
   };
   vehicle_capacity: number | null;
+  available_count: number | null;
 }
 
 /** Search result from the autocomplete */

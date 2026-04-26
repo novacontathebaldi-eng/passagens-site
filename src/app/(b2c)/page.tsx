@@ -45,6 +45,26 @@ export default async function HomePage() {
     .eq("status", "PUBLISHED")
     .order("departure_date", { ascending: true });
 
+  // Calcular ocupação real das poltronas
+  const allIds = (excursionsRaw ?? []).map((e: any) => e.id);
+  let occupiedMap: Record<string, number> = {};
+  if (allIds.length > 0) {
+    const { data: ticketsData } = await supabase
+      .from('passenger_tickets')
+      .select('excursion_id, reservations!inner(status)')
+      .in('excursion_id', allIds);
+
+    occupiedMap = allIds.reduce((acc: Record<string, number>, id: string) => {
+      acc[id] = ticketsData?.filter(t => {
+        if (t.excursion_id !== id) return false;
+        const res = t.reservations as any;
+        const status = Array.isArray(res) ? res[0]?.status : res?.status;
+        return ['PENDING_PIX', 'AWAITING_MANUAL_CHECK', 'APPROVED'].includes(status);
+      }).length || 0;
+      return acc;
+    }, {});
+  }
+
   // Transform raw data into clean ExcursionItem[] for client components
   const excursions: ExcursionItem[] = (excursionsRaw ?? [])
     .map((exc) => {
@@ -68,6 +88,9 @@ export default async function HomePage() {
 
       if (!pkg) return null;
 
+      const cap = vehicle?.capacity ?? 0;
+      const occupied = occupiedMap[exc.id] || 0;
+
       return {
         id: exc.id,
         price_per_seat: Number(exc.price_per_seat),
@@ -83,7 +106,8 @@ export default async function HomePage() {
           category: pkg.category,
           cover_image: getCoverImage(pkg.tour_package_images),
         },
-        vehicle_capacity: vehicle?.capacity ?? null,
+        vehicle_capacity: cap,
+        available_count: Math.max(0, cap - occupied),
       } satisfies ExcursionItem;
     })
     .filter(Boolean) as ExcursionItem[];

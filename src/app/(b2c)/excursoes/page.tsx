@@ -110,7 +110,36 @@ export default async function CatalogoPage({
     fallbackExcursions = allExc;
   }
 
-  const displayExcursions = noResults ? fallbackExcursions : excursions;
+  const rawExcursions = noResults ? fallbackExcursions : excursions;
+
+  // Calcular ocupação real das poltronas para cada excursão
+  const excursionIds = (rawExcursions || []).map((e: any) => e.id);
+  let occupiedByExcursion: Record<string, number> = {};
+  
+  if (excursionIds.length > 0) {
+    const { data: ticketsData } = await supabase
+      .from('passenger_tickets')
+      .select('excursion_id, reservations!inner(status)')
+      .in('excursion_id', excursionIds);
+
+    occupiedByExcursion = excursionIds.reduce((acc: Record<string, number>, id: string) => {
+      acc[id] = ticketsData?.filter(t => {
+        if (t.excursion_id !== id) return false;
+        const res = t.reservations as any;
+        const status = Array.isArray(res) ? res[0]?.status : res?.status;
+        return ['PENDING_PIX', 'AWAITING_MANUAL_CHECK', 'APPROVED'].includes(status);
+      }).length || 0;
+      return acc;
+    }, {});
+  }
+
+  const displayExcursions = (rawExcursions || []).map((exc: any) => {
+    const vl = Array.isArray(exc.vehicle_layouts) ? exc.vehicle_layouts[0] : exc.vehicle_layouts;
+    const capacity = vl?.capacity || 0;
+    const occupied = occupiedByExcursion[exc.id] || 0;
+    const availableCount = Math.max(0, capacity - occupied);
+    return { ...exc, availableCount };
+  });
 
   return (
     <div className="min-h-screen bg-surface py-12">
@@ -199,7 +228,7 @@ export default async function CatalogoPage({
               </div>
             )}
 
-            {displayExcursions && displayExcursions.length > 0 ? (
+            {displayExcursions.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {displayExcursions.map((exc) => {
                   const pkgRaw = exc.tour_packages as unknown;
@@ -257,6 +286,15 @@ export default async function CatalogoPage({
                           <div className="flex items-center text-sm text-on-surface-variant">
                             <CalendarDays className="w-4 h-4 mr-2 text-primary" />
                             {formatDate(exc.departure_date)}
+                          </div>
+                          <div className="text-xs font-medium">
+                            {exc.availableCount <= 0 ? (
+                              <span className="text-error">Esgotado</span>
+                            ) : exc.availableCount <= 5 ? (
+                              <span className="text-error animate-pulse">🔥 Últimas {exc.availableCount} vagas!</span>
+                            ) : (
+                              <span className="text-success">{exc.availableCount} vagas disponíveis</span>
+                            )}
                           </div>
                         </div>
 
