@@ -177,9 +177,9 @@ export default async function PainelClientePage({
                             </Link>
                           )}
                           {res.status === 'APPROVED' && (
-                            <button className="relative z-[2] text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all">
+                            <Link href={`/sucesso/${res.id}`} className="relative z-[2] text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all">
                               Ver Voucher
-                            </button>
+                            </Link>
                           )}
                         </div>
                       </div>
