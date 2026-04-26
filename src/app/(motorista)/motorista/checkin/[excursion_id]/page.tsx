@@ -342,9 +342,7 @@ export default function CheckinPage() {
             {lastResult && (
               <div className="bg-success/10 border border-success/30 p-3 rounded-xl flex items-center gap-3 shrink-0">
                 <div className="w-10 h-10 bg-success text-on-primary rounded-lg flex items-center justify-center text-sm font-bold shrink-0">
-                  {lastResult.seat.length > 4
-                    ? "✓"
-                    : lastResult.seat}
+                  {lastResult.seat}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs text-success font-bold">
@@ -399,9 +397,7 @@ export default function CheckinPage() {
             {lastResult && (
               <div className="bg-success/10 border border-success/30 p-4 rounded-2xl flex items-center gap-4">
                 <div className="w-12 h-12 bg-success text-on-primary rounded-xl flex items-center justify-center text-lg font-bold shrink-0">
-                  {lastResult.seat.length > 4
-                    ? "✓"
-                    : lastResult.seat}
+                  {lastResult.seat}
                 </div>
                 <div>
                   <p className="text-sm text-success font-bold">

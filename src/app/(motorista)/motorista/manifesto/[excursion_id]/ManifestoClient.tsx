@@ -160,17 +160,20 @@ export default function ManifestoClient({
                     : "bg-surface-container-high text-on-surface-variant"
                 }`}
               >
-                {passenger.check_in_status ? (
-                  <CheckCircle2 className="w-5 h-5" />
-                ) : (
-                  <Clock className="w-5 h-5" />
-                )}
+                {passenger.seat_code}
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-on-surface text-sm truncate">
-                  {passenger.full_name}
-                </h3>
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-bold text-on-surface text-sm truncate">
+                    {passenger.full_name}
+                  </h3>
+                  {passenger.check_in_status ? (
+                    <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
+                  ) : (
+                    <Clock className="w-5 h-5 text-outline-variant shrink-0" />
+                  )}
+                </div>
 
                 <p className="text-xs text-on-surface-variant mt-0.5 font-mono">
                   {passenger.masked_cpf}
