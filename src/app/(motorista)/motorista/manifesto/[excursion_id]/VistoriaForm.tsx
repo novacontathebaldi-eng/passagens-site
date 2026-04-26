@@ -85,8 +85,8 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!["image/jpeg", "image/png"].includes(file.type)) {
-      toast.error("Formato inválido. Envie apenas JPG ou PNG.");
+    if (!file.type.startsWith("image/")) {
+      toast.error("Formato inválido. Selecione uma imagem.");
       return;
     }
 
@@ -108,23 +108,28 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
       if (selectedFile) {
         setIsUploading(true);
 
-        // Compress if over 5MB
+        // Compress and convert to webp
         let fileToUpload: File | Blob = selectedFile;
-        if (selectedFile.size > 5 * 1024 * 1024) {
-          try {
-            fileToUpload = await imageCompression(selectedFile, {
-              maxSizeMB: 4.5,
-              maxWidthOrHeight: 1920,
-              useWebWorker: true,
-            });
-          } catch (compErr) {
-            console.error("Erro ao comprimir imagem:", compErr);
-            // Fallback: try uploading original
-          }
+        try {
+          fileToUpload = await imageCompression(selectedFile, {
+            maxSizeMB: 4.5,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+            fileType: "image/webp",
+          });
+        } catch (compErr) {
+          console.error("Erro ao comprimir imagem:", compErr);
+          // Fallback if compression fails completely
         }
 
-        const ext = selectedFile.name.split(".").pop();
-        const fileName = `${Date.now()}.${ext}`;
+        if (fileToUpload.size > 10 * 1024 * 1024) {
+          toast.error("Imagem muito grande. Tente uma foto com menor resolução.");
+          setIsUploading(false);
+          setIsSubmitting(false);
+          return;
+        }
+
+        const fileName = `${Date.now()}.webp`;
         const path = `reports/${excursionId}/${user.id}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -253,14 +258,14 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
               >
                 <Camera className="w-8 h-8 opacity-50" />
                 <span className="text-sm font-medium">Tirar foto do problema</span>
-                <span className="text-xs opacity-70">JPG ou PNG (compressão automática)</span>
+                <span className="text-xs opacity-70">Qualquer formato (compressão automática)</span>
               </button>
             )}
             
             <input
               type="file"
               ref={fileInputRef}
-              accept="image/jpeg,image/png"
+              accept="image/*"
               onChange={handleFileSelect}
               className="hidden"
             />
