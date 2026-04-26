@@ -68,12 +68,41 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
     notFound();
   }
 
-  const availableExcursions = pkg.excursions
-    .filter((e: any) => e.status === "PUBLISHED" && new Date(e.departure_date) > new Date())
+  // Buscar ocupação real das poltronas para as excursões ativas
+  const excursionIds = pkg.excursions.map((e: any) => e.id);
+  const { data: ticketsData } = await supabase
+    .from('passenger_tickets')
+    .select('excursion_id, reservations!inner(status)')
+    .in('excursion_id', excursionIds);
+
+  const occupiedByExcursion = pkg.excursions.reduce((acc: any, exc: any) => {
+    acc[exc.id] = ticketsData?.filter(t => {
+      if (t.excursion_id !== exc.id) return false;
+      const res = t.reservations as any;
+      const status = Array.isArray(res) ? res[0]?.status : res?.status;
+      return ['PENDING_PIX', 'AWAITING_MANUAL_CHECK', 'APPROVED'].includes(status);
+    }).length || 0;
+    return acc;
+  }, {});
+
+  const excursionsWithAvailability = pkg.excursions.map((exc: any) => {
+    const capacity = exc.vehicle_layouts?.capacity || 0;
+    const occupied = occupiedByExcursion[exc.id] || 0;
+    const availableCount = Math.max(0, capacity - occupied);
+    return { ...exc, capacity, occupied, availableCount };
+  });
+
+  const activeStatuses = ["PUBLISHED", "IN_PROGRESS"];
+
+  const availableExcursions = excursionsWithAvailability
+    .filter((e: any) => activeStatuses.includes(e.status) && new Date(e.departure_date) > new Date() && e.availableCount > 0)
     .sort((a: any, b: any) => new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime());
 
-  const soldOutExcursions = pkg.excursions
-    .filter((e: any) => e.status === "SOLD_OUT" && new Date(e.departure_date) > new Date())
+  const soldOutExcursions = excursionsWithAvailability
+    .filter((e: any) => 
+      (e.status === "SOLD_OUT" || (activeStatuses.includes(e.status) && e.availableCount === 0)) 
+      && new Date(e.departure_date) > new Date()
+    )
     .sort((a: any, b: any) => new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime());
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -231,12 +260,19 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 text-xs text-on-surface-variant mb-4">
+                      <div className="flex items-center gap-4 text-xs text-on-surface-variant mb-4 flex-wrap">
                         <span className="flex items-center gap-1"><Bus className="w-3 h-3" /> Ônibus Executivo</span>
+                        <span className="flex items-center gap-1">•</span>
                         {exc.allow_seat_selection ? (
                           <span className="text-success font-medium">Escolha sua Poltrona</span>
                         ) : (
                           <span>Alocação automática</span>
+                        )}
+                        <span className="flex items-center gap-1">•</span>
+                        {exc.availableCount <= 5 ? (
+                          <span className="text-error font-bold flex items-center gap-1 animate-pulse">🔥 Últimas {exc.availableCount} vagas!</span>
+                        ) : (
+                          <span className="text-success font-medium">{exc.availableCount} vagas</span>
                         )}
                       </div>
 

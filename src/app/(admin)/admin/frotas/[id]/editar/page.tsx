@@ -18,6 +18,17 @@ interface GridCell {
   rowSpan?: number;
 }
 
+export const BUS_TYPES = [
+  { value: "CONVENCIONAL", label: "Convencional (Sem AC/WC)" },
+  { value: "EXECUTIVO", label: "Executivo (Com AC/WC)" },
+  { value: "SEMI_LEITO", label: "Semi-Leito (Maior reclinação)" },
+  { value: "LEITO", label: "Leito (Poltronas largas)" },
+  { value: "CAMA", label: "Leito Cama (Deita 180º)" },
+  { value: "DD_LEITO_CAMA", label: "Double Decker (Leito Cama / Leito)" },
+  { value: "MICRO", label: "Micro-ônibus" },
+  { value: "VAN", label: "Van de Passageiros" }
+];
+
 interface Deck {
   id: string;
   name: string;
@@ -69,6 +80,7 @@ export default function EditarFrotaPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
+  const [busType, setBusType] = useState("EXECUTIVO");
   const [decks, setDecks] = useState<Deck[]>([]);
   const [activeDeckId, setActiveDeckId] = useState<string>("");
   const [amenities, setAmenities] = useState({ wifi: true, ac: true, bathroom: true, usb: true });
@@ -83,6 +95,7 @@ export default function EditarFrotaPage() {
 
       if (data) {
         setName(data.name || "");
+        setBusType(data.bus_type || "EXECUTIVO");
         setAmenities(data.amenities || { wifi: true, ac: true, bathroom: true, usb: true });
         
         if (data.grid_matrix?.version === 2) {
@@ -120,7 +133,30 @@ export default function EditarFrotaPage() {
       return {
         ...deck,
         cells: deck.cells.map(cell => {
-          if (cell.row === row && cell.col === col) return { ...cell, type };
+          if (cell.row === row && cell.col === col) {
+            const needsSpan = type === 'bathroom' || type === 'driver' || type === 'door';
+            return { 
+              ...cell, 
+              type,
+              colSpan: needsSpan ? (cell.colSpan || 1) : 1,
+              rowSpan: needsSpan ? (cell.rowSpan || 1) : 1
+            };
+          }
+          return cell;
+        })
+      };
+    }));
+  }
+
+  function updateCellSpan(deckId: string, row: number, col: number, spanType: 'colSpan' | 'rowSpan', value: number) {
+    setDecks(decks.map(deck => {
+      if (deck.id !== deckId) return deck;
+      return {
+        ...deck,
+        cells: deck.cells.map(cell => {
+          if (cell.row === row && cell.col === col) {
+            return { ...cell, [spanType]: Math.max(1, value) };
+          }
           return cell;
         })
       };
@@ -170,7 +206,7 @@ export default function EditarFrotaPage() {
 
     const { error: updateError } = await supabase
       .from("vehicle_layouts")
-      .update({ name, capacity, grid_matrix: gridMatrix as any, amenities })
+      .update({ name, bus_type: busType, capacity, grid_matrix: gridMatrix as any, amenities })
       .eq("id", id);
 
     setIsLoading(false);
@@ -210,6 +246,19 @@ export default function EditarFrotaPage() {
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-on-surface mb-1.5">Nome do Layout</label>
                 <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} required className="w-full rounded-xl border border-outline-variant bg-surface px-4 py-2.5 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-on-surface mb-1.5">Tipo do Veículo</label>
+                <select 
+                  value={busType}
+                  onChange={(e) => setBusType(e.target.value)}
+                  className="w-full rounded-xl border border-outline-variant bg-surface px-4 py-2.5 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                >
+                  {BUS_TYPES.map(t => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -282,31 +331,76 @@ export default function EditarFrotaPage() {
                   <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/50 max-w-sm w-full overflow-x-auto relative">
                     <div className="w-full text-center text-xs font-bold text-outline uppercase tracking-widest mb-6">Frente</div>
                     
-                    <div className="grid gap-2 mx-auto" style={{ gridTemplateColumns: `repeat(${activeDeck.cols}, minmax(0, 1fr))` }}>
-                      {activeDeck.cells.sort((a, b) => a.row === b.row ? a.col - b.col : a.row - b.row).map((cell) => (
-                        <div key={cell.id} className="aspect-square relative group">
-                          <select 
-                            value={cell.type}
-                            onChange={(e) => updateCellType(activeDeck.id, cell.row, cell.col, e.target.value as GridCellType)}
-                            className={`w-full h-full text-center flex flex-col items-center justify-center rounded-lg border-2 text-xs font-bold cursor-pointer transition-all appearance-none
-                              ${cell.type === 'seat' ? 'bg-primary-container border-primary text-primary-dark' : ''}
-                              ${cell.type === 'corridor' ? 'bg-transparent border-transparent text-transparent hover:border-outline-variant' : ''}
-                              ${cell.type === 'bathroom' ? 'bg-surface-dim border-outline text-outline-variant' : ''}
-                              ${cell.type === 'door' ? 'bg-secondary-container border-secondary text-secondary-dark' : ''}
-                              ${cell.type === 'stairs' ? 'bg-tertiary-container border-tertiary text-tertiary-dark' : ''}
-                              ${cell.type === 'empty' ? 'bg-surface-container border-outline/20 text-transparent' : ''}
-                            `}
-                          >
-                            <option value="seat">{cell.label || "S"}</option>
-                            <option value="corridor">--</option>
-                            <option value="bathroom">WC</option>
-                            <option value="door">🚪</option>
-                            <option value="stairs">🪜</option>
-                            <option value="empty">✕</option>
-                          </select>
+                    {(() => {
+                      const hiddenCells = new Set<string>();
+                      activeDeck.cells.forEach(c => {
+                        if ((c.colSpan && c.colSpan > 1) || (c.rowSpan && c.rowSpan > 1)) {
+                          for (let r = c.row; r < c.row + (c.rowSpan || 1); r++) {
+                            for (let col = c.col; col < c.col + (c.colSpan || 1); col++) {
+                              if (r === c.row && col === c.col) continue;
+                              hiddenCells.add(`r${r}-c${col}`);
+                            }
+                          }
+                        }
+                      });
+
+                      return (
+                        <div className="grid gap-2 mx-auto" style={{ gridTemplateColumns: `repeat(${activeDeck.cols}, minmax(0, 1fr))` }}>
+                          {activeDeck.cells
+                            .sort((a, b) => a.row === b.row ? a.col - b.col : a.row - b.row)
+                            .filter(c => !hiddenCells.has(`r${c.row}-c${c.col}`))
+                            .map((cell) => (
+                            <div 
+                              key={cell.id} 
+                              className="relative group"
+                              style={{
+                                gridRow: `span ${cell.rowSpan || 1}`,
+                                gridColumn: `span ${cell.colSpan || 1}`,
+                                aspectRatio: cell.colSpan === cell.rowSpan ? '1 / 1' : 'auto',
+                                minHeight: '36px'
+                              }}
+                            >
+                              <select 
+                                value={cell.type}
+                                onChange={(e) => updateCellType(activeDeck.id, cell.row, cell.col, e.target.value as GridCellType)}
+                                className={`w-full h-full text-center flex flex-col items-center justify-center rounded-lg border-2 text-xs font-bold cursor-pointer transition-all appearance-none
+                                  ${cell.type === 'seat' ? 'bg-primary-container border-primary text-primary-dark' : ''}
+                                  ${cell.type === 'corridor' ? 'bg-transparent border-transparent text-transparent hover:border-outline-variant' : ''}
+                                  ${cell.type === 'bathroom' ? 'bg-surface-dim border-outline text-outline-variant' : ''}
+                                  ${cell.type === 'door' ? 'bg-secondary-container border-secondary text-secondary-dark' : ''}
+                                  ${cell.type === 'stairs' ? 'bg-tertiary-container border-tertiary text-tertiary-dark' : ''}
+                                  ${cell.type === 'empty' ? 'bg-surface-container border-outline/20 text-transparent' : ''}
+                                  ${cell.type === 'driver' ? 'bg-surface border-outline-variant/50 text-on-surface-variant' : ''}
+                                `}
+                              >
+                                <option value="seat">{cell.label || "S"}</option>
+                                <option value="corridor">--</option>
+                                <option value="bathroom">WC</option>
+                                <option value="door">🚪</option>
+                                <option value="stairs">🪜</option>
+                                <option value="driver">MOT</option>
+                                <option value="empty">✕</option>
+                              </select>
+
+                              {(cell.type === 'bathroom' || cell.type === 'driver' || cell.type === 'door' || cell.type === 'stairs') && (
+                                <div className="absolute -top-2 -right-2 bg-surface shadow-md rounded-md border border-outline-variant hidden group-hover:flex flex-col z-10 p-1 gap-1">
+                                  <div className="flex gap-1 items-center">
+                                    <span className="text-[10px] text-outline px-1">↔</span>
+                                    <button type="button" onClick={() => updateCellSpan(activeDeck.id, cell.row, cell.col, 'colSpan', (cell.colSpan || 1) - 1)} className="w-4 h-4 bg-surface-container rounded text-xs leading-none flex items-center justify-center hover:bg-surface-container-high">-</button>
+                                    <button type="button" onClick={() => updateCellSpan(activeDeck.id, cell.row, cell.col, 'colSpan', (cell.colSpan || 1) + 1)} className="w-4 h-4 bg-surface-container rounded text-xs leading-none flex items-center justify-center hover:bg-surface-container-high">+</button>
+                                  </div>
+                                  <div className="flex gap-1 items-center">
+                                    <span className="text-[10px] text-outline px-1">↕</span>
+                                    <button type="button" onClick={() => updateCellSpan(activeDeck.id, cell.row, cell.col, 'rowSpan', (cell.rowSpan || 1) - 1)} className="w-4 h-4 bg-surface-container rounded text-xs leading-none flex items-center justify-center hover:bg-surface-container-high">-</button>
+                                    <button type="button" onClick={() => updateCellSpan(activeDeck.id, cell.row, cell.col, 'rowSpan', (cell.rowSpan || 1) + 1)} className="w-4 h-4 bg-surface-container rounded text-xs leading-none flex items-center justify-center hover:bg-surface-container-high">+</button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })()}
                     
                     <div className="w-full text-center text-xs font-bold text-outline uppercase tracking-widest mt-6">Fundo</div>
                   </div>
