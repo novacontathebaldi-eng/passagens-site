@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { CheckCircle2, CalendarDays, Bus, ShieldCheck } from "lucide-react";
+import AmenityBadges from "@/components/AmenityBadges";
 import WaitlistButton from "./WaitlistButton";
 import LightboxGallery from "./LightboxGallery";
 import StickyExcursionTitle from "@/components/StickyExcursionTitle";
@@ -176,6 +177,25 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
                 </div>
               </section>
             )}
+
+            {/* Conforto a Bordo (Amenidades do Veículo) */}
+            {(() => {
+              const firstWithAmenities = excursionsWithAvailability.find(
+                (e: any) => e.vehicle_layouts?.amenities
+              );
+              const amenities = firstWithAmenities?.vehicle_layouts?.amenities;
+              if (!amenities) return null;
+              const hasActive = Object.values(amenities).some((v: any) => v === true);
+              if (!hasActive) return null;
+              return (
+                <section className="bg-surface-container-lowest rounded-3xl p-6 md:p-8 border border-outline-variant/30 shadow-sm">
+                  <h2 className="text-2xl font-bold text-on-surface mb-6 flex items-center gap-2">
+                    <Bus className="text-primary w-6 h-6" /> Conforto a Bordo
+                  </h2>
+                  <AmenityBadges amenities={amenities} variant="pills" size="md" />
+                </section>
+              );
+            })()}
 
             {/* Galeria de Fotos */}
             {galleryImages.length > 0 && (

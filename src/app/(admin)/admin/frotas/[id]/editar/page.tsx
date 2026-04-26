@@ -83,7 +83,7 @@ export default function EditarFrotaPage() {
   const [busType, setBusType] = useState("EXECUTIVO");
   const [decks, setDecks] = useState<Deck[]>([]);
   const [activeDeckId, setActiveDeckId] = useState<string>("");
-  const [amenities, setAmenities] = useState({ wifi: true, ac: true, bathroom: true, usb: true });
+  const [amenities, setAmenities] = useState({ wifi: true, ac: true, bathroom: true, usb: true, tv: false, blanket: false, reclining_seats: false });
 
   useEffect(() => {
     async function load() {
@@ -96,7 +96,7 @@ export default function EditarFrotaPage() {
       if (data) {
         setName(data.name || "");
         setBusType(data.bus_type || "EXECUTIVO");
-        setAmenities(data.amenities || { wifi: true, ac: true, bathroom: true, usb: true });
+        setAmenities({ wifi: true, ac: true, bathroom: true, usb: true, tv: false, blanket: false, reclining_seats: false, ...(data.amenities || {}) });
         
         if (data.grid_matrix?.version === 2) {
           setDecks(data.grid_matrix.decks);
@@ -264,7 +264,7 @@ export default function EditarFrotaPage() {
               <div>
                 <label className="block text-sm font-medium text-on-surface mb-3">Amenidades Inclusas</label>
                 <div className="space-y-3">
-                  {Object.entries({ wifi: "Wi-Fi a bordo", ac: "Ar Condicionado", bathroom: "Banheiro", usb: "Tomadas USB" }).map(([key, label]) => (
+                  {Object.entries({ wifi: "Wi-Fi a bordo", ac: "Ar Condicionado", bathroom: "Banheiro", usb: "Tomadas USB", tv: "TV", blanket: "Cobertor", reclining_seats: "Reclinação de Assento" }).map(([key, label]) => (
                     <label key={key} className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"

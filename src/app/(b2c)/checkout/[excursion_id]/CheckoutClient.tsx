@@ -8,6 +8,8 @@ import * as z from "zod";
 import Cookies from "js-cookie";
 import { User, Pencil, ChevronLeft, LogOut, X } from "lucide-react";
 
+import AmenityBadges from "@/components/AmenityBadges";
+
 import { formatBRL, formatCPF, validateCPF } from "@/lib/utils";
 import { createReservation } from "./actions";
 import { useRealtimeSeats } from "@/hooks/useRealtimeSeats";
@@ -693,6 +695,14 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
             <span className="text-sm font-semibold text-on-surface">Total</span>
             <span className="text-2xl font-extrabold text-primary">{formatBRL(totalAmount)}</span>
           </div>
+
+          {/* Amenidades do veículo */}
+          {excursion.vehicle_layouts?.amenities && (
+            <div className="pt-4 mt-4 border-t border-outline-variant/30">
+              <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider block mb-2">Conforto a bordo</span>
+              <AmenityBadges amenities={excursion.vehicle_layouts.amenities} variant="icons" size="sm" />
+            </div>
+          )}
 
         </div>
       </div>

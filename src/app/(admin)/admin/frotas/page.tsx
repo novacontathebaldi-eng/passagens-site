@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import AmenityBadges from "@/components/AmenityBadges";
 
 type VehicleLayout = {
   id: string;
   name: string;
   capacity: number;
-  amenities: { wifi: boolean; ac: boolean; bathroom: boolean; usb: boolean };
+  amenities: Record<string, boolean> | null;
   created_at: string;
 };
 
@@ -45,13 +46,6 @@ export default function FrotasPage() {
     }
     setDeletingId(null);
   }
-
-  const amenityIcons: { key: keyof VehicleLayout["amenities"]; label: string; icon: string }[] = [
-    { key: "wifi", label: "Wi-Fi", icon: "M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.14 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0" },
-    { key: "ac", label: "Ar Condicionado", icon: "M12 3v18m-4.5-6l4.5 3 4.5-3M7.5 9l4.5-3 4.5 3" },
-    { key: "bathroom", label: "Banheiro", icon: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" },
-    { key: "usb", label: "Tomadas USB", icon: "M5 12h14M12 5l7 7-7 7" },
-  ];
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -117,15 +111,7 @@ export default function FrotasPage() {
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="flex gap-2">
-                        {amenityIcons.map(a => layout.amenities?.[a.key] && (
-                          <span key={a.key} title={a.label} className="w-7 h-7 rounded-lg bg-surface-container-high flex items-center justify-center">
-                            <svg className="w-4 h-4 text-on-surface-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d={a.icon} />
-                            </svg>
-                          </span>
-                        ))}
-                      </div>
+                      <AmenityBadges amenities={layout.amenities} variant="icons" />
                     </td>
                     <td className="py-4 px-6 text-right space-x-2">
                       <Link

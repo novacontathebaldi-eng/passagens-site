@@ -34,7 +34,7 @@ export default async function CheckoutPage({ params }: { params: Params }) {
     .select(`
       *,
       tour_packages (title, slug, short_description, images),
-      vehicle_layouts (name, capacity, grid_matrix)
+      vehicle_layouts (name, capacity, grid_matrix, amenities)
     `)
     .eq("id", excursionId)
     .single();

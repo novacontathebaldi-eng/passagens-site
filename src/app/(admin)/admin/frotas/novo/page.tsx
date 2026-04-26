@@ -95,6 +95,9 @@ export default function NovaFrotaPage() {
     ac: true,
     bathroom: true,
     usb: true,
+    tv: false,
+    blanket: false,
+    reclining_seats: false,
   });
 
   // Automatically renumber seats when decks change structurally or types change
@@ -270,7 +273,10 @@ export default function NovaFrotaPage() {
                   wifi: "Wi-Fi a bordo",
                   ac: "Ar Condicionado",
                   bathroom: "Banheiro",
-                  usb: "Tomadas USB"
+                  usb: "Tomadas USB",
+                  tv: "TV",
+                  blanket: "Cobertor",
+                  reclining_seats: "Reclinação de Assento"
                 }).map(([key, label]) => (
                   <label key={key} className="flex items-center gap-3 cursor-pointer">
                     <input 
