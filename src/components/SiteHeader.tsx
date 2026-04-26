@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { User } from "@supabase/supabase-js";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 import { Menu, X, User as UserIcon, Map, Info, MessageCircle, LayoutDashboard, LogOut } from "lucide-react";
+import { logout } from "@/app/(auth)/actions";
 
 // Types
 interface SiteSettings {
@@ -283,7 +284,7 @@ export function SiteHeader({ user, settings }: SiteHeaderProps) {
                       <LayoutDashboard className="w-5 h-5" />
                       Meu Painel
                     </Link>
-                    <form action="/api/auth/signout" method="POST" className="w-full">
+                    <form action={logout} className="w-full">
                       <button 
                         type="submit" 
                         onClick={closeMenu}
