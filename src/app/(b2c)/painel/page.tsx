@@ -70,11 +70,11 @@ export default async function PainelClientePage({
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'PENDING_PIX': return <span className="px-3 py-1 bg-surface-container-high text-on-surface-variant text-xs font-bold rounded-full flex items-center gap-1"><Clock className="w-3 h-3" /> Aguardando PIX</span>;
-      case 'APPROVED': return <span className="px-3 py-1 bg-success/10 text-success text-xs font-bold rounded-full flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Aprovada</span>;
-      case 'EXPIRED': return <span className="px-3 py-1 bg-error/10 text-error text-xs font-bold rounded-full flex items-center gap-1"><XCircle className="w-3 h-3" /> Expirada</span>;
-      case 'CANCELLED': return <span className="px-3 py-1 bg-error/10 text-error text-xs font-bold rounded-full flex items-center gap-1"><XCircle className="w-3 h-3" /> Cancelada</span>;
-      case 'REFUNDED': return <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full flex items-center gap-1">Reembolsada</span>;
+      case 'PENDING_PIX': return <span className="px-3 py-1 bg-surface/95 backdrop-blur-sm shadow-md border border-outline-variant/30 text-on-surface text-xs font-bold rounded-full flex items-center gap-1"><Clock className="w-3 h-3" /> Aguardando PIX</span>;
+      case 'APPROVED': return <span className="px-3 py-1 bg-surface/95 backdrop-blur-sm shadow-md border border-success/30 text-success text-xs font-bold rounded-full flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Aprovada</span>;
+      case 'EXPIRED': return <span className="px-3 py-1 bg-surface/95 backdrop-blur-sm shadow-md border border-error/30 text-error text-xs font-bold rounded-full flex items-center gap-1"><XCircle className="w-3 h-3" /> Expirada</span>;
+      case 'CANCELLED': return <span className="px-3 py-1 bg-surface/95 backdrop-blur-sm shadow-md border border-error/30 text-error text-xs font-bold rounded-full flex items-center gap-1"><XCircle className="w-3 h-3" /> Cancelada</span>;
+      case 'REFUNDED': return <span className="px-3 py-1 bg-surface/95 backdrop-blur-sm shadow-md border border-primary/30 text-primary text-xs font-bold rounded-full flex items-center gap-1">Reembolsada</span>;
       default: return null;
     }
   };
