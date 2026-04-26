@@ -67,10 +67,6 @@ export default async function MotoristaLayout({
           <BusFront className="w-6 h-6" />
           <span className="text-[10px] font-bold uppercase tracking-wider">Viagens</span>
         </Link>
-        <Link href="/motorista/checklist" className="flex flex-col items-center gap-1 p-2 text-on-surface-variant hover:text-primary transition-colors focus:text-primary active:scale-95">
-          <ClipboardCheck className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">Checklist</span>
-        </Link>
         <Link href="/motorista/configs" className="flex flex-col items-center gap-1 p-2 text-on-surface-variant hover:text-primary transition-colors focus:text-primary active:scale-95">
           <Settings className="w-6 h-6" />
           <span className="text-[10px] font-bold uppercase tracking-wider">Ajustes</span>

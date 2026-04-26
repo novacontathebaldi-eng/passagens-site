@@ -8,6 +8,7 @@ import Image from "next/image";
 type PixKeyEntry = { type: string; key: string; label: string };
 type HeroStatEntry = { number: string; label: string; iconPath: string };
 type DriverContactEntry = { id: string; label: string; number: string; whatsapp: boolean };
+type ChecklistItem = { id: string; label: string };
 
 const PIX_KEY_TYPES = [
   { value: "TELEFONE", label: "Telefone" },
@@ -53,6 +54,7 @@ type GlobalSettings = {
   cancellation_policy_text: string;
   whatsapp_support_numbers: string[];
   driver_contact_numbers: DriverContactEntry[];
+  driver_checklist_items: ChecklistItem[];
   contact_email: string;
   operating_hours: string;
   administrative_address: string;
@@ -244,10 +246,20 @@ export default function ConfiguracoesPage() {
           }
         } catch (e) { }
 
+        let checklistItems: ChecklistItem[] = [];
+        try {
+          if (Array.isArray(data.driver_checklist_items)) {
+            checklistItems = data.driver_checklist_items as ChecklistItem[];
+          } else if (typeof data.driver_checklist_items === 'string') {
+            checklistItems = JSON.parse(data.driver_checklist_items);
+          }
+        } catch (e) { }
+
         setSettings({
           ...data,
           whatsapp_support_numbers: numbers.length > 0 ? numbers : [""],
           driver_contact_numbers: driverContacts,
+          driver_checklist_items: checklistItems,
           pix_keys: pixKeys,
           hero_stats: heroStats,
           pix_key: data.pix_key ?? "",
@@ -290,6 +302,7 @@ export default function ConfiguracoesPage() {
           administrative_address: "",
           whatsapp_support_numbers: [""],
           driver_contact_numbers: [],
+          driver_checklist_items: [],
           hold_ttl_hours: 24,
           hero_stats: [],
           logo_url: null,
@@ -321,6 +334,7 @@ export default function ConfiguracoesPage() {
         if (num.length >= 10 && !num.startsWith('55')) num = '55' + num;
         return { ...c, number: num };
       })),
+      driver_checklist_items: JSON.stringify(settings.driver_checklist_items),
       updated_at: new Date().toISOString()
     };
 
@@ -363,6 +377,23 @@ export default function ConfiguracoesPage() {
   const removeDriverContact = (index: number) => {
     if (!settings) return;
     setSettings({ ...settings, driver_contact_numbers: settings.driver_contact_numbers.filter((_, i) => i !== index) });
+  };
+
+  const addChecklistItem = () => {
+    if (!settings) return;
+    setSettings({ ...settings, driver_checklist_items: [...settings.driver_checklist_items, { id: crypto.randomUUID(), label: "" }] });
+  };
+
+  const updateChecklistItem = (index: number, label: string) => {
+    if (!settings) return;
+    const newItems = [...settings.driver_checklist_items];
+    newItems[index] = { ...newItems[index], label };
+    setSettings({ ...settings, driver_checklist_items: newItems });
+  };
+
+  const removeChecklistItem = (index: number) => {
+    if (!settings) return;
+    setSettings({ ...settings, driver_checklist_items: settings.driver_checklist_items.filter((_, i) => i !== index) });
   };
 
   // PIX Keys handlers
@@ -923,6 +954,43 @@ export default function ConfiguracoesPage() {
 
             <button type="button" onClick={addDriverContact} className="w-full flex items-center justify-center gap-2 py-3 px-4 border-2 border-dashed border-outline-variant/40 rounded-xl text-sm font-semibold text-primary hover:border-primary/50 hover:bg-primary/5 transition-all mt-2">
               + Adicionar número
+            </button>
+          </div>
+        </section>
+
+        {/* PERGUNTAS DA VISTORIA DO ÔNIBUS */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-primary"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+            Perguntas da Vistoria do Ônibus
+          </h2>
+          <p className="text-xs text-on-surface-variant">
+            Configure as perguntas que os motoristas deverão responder ao realizar a vistoria da excursão. As respostas são de "Sim" ou "Não".
+          </p>
+
+          <div className="space-y-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4">
+            {settings.driver_checklist_items.length === 0 && (
+              <p className="text-xs text-on-surface-variant italic">Nenhuma pergunta cadastrada.</p>
+            )}
+
+            {settings.driver_checklist_items.map((item, i) => (
+              <div key={item.id} className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={item.label}
+                  onChange={(e) => updateChecklistItem(i, e.target.value)}
+                  placeholder="Ex: Ar-condicionado funcionando?"
+                  className="flex-1 bg-surface border border-outline-variant rounded-xl px-4 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  required
+                />
+                <button type="button" onClick={() => removeChecklistItem(i)} className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors" title="Remover pergunta">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+              </div>
+            ))}
+
+            <button type="button" onClick={addChecklistItem} className="w-full flex items-center justify-center gap-2 py-3 px-4 border-2 border-dashed border-outline-variant/40 rounded-xl text-sm font-semibold text-primary hover:border-primary/50 hover:bg-primary/5 transition-all mt-2">
+              + Adicionar pergunta
             </button>
           </div>
         </section>

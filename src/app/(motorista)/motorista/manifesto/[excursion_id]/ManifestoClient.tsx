@@ -10,7 +10,10 @@ import {
   Phone,
   AlertCircle,
   QrCode,
+  ClipboardCheck,
+  Users
 } from "lucide-react";
+import VistoriaForm from "./VistoriaForm";
 
 interface Passenger {
   ticket_id: string;
@@ -46,6 +49,8 @@ export default function ManifestoClient({
   excursionTitle,
 }: ManifestoClientProps) {
   const [passengers, setPassengers] = useState<Passenger[]>(initialPassengers);
+  const [activeTab, setActiveTab] = useState<"manifesto" | "ocorrencias">("manifesto");
+  const [isReportCompleted, setIsReportCompleted] = useState<boolean>(false);
 
   // Only count APPROVED passengers — consistent with check-in counter
   const approvedPassengers = passengers.filter(
@@ -139,70 +144,102 @@ export default function ManifestoClient({
             />
           </div>
         </div>
+
+        {/* TABS */}
+        <div className="flex items-center gap-4 mt-4 border-b border-outline-variant/30">
+          <button
+            onClick={() => setActiveTab("manifesto")}
+            className={`pb-2 text-sm font-bold flex items-center gap-2 transition-all border-b-2 ${
+              activeTab === "manifesto"
+                ? "border-primary text-primary"
+                : "border-transparent text-on-surface-variant hover:text-on-surface"
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Passageiros
+          </button>
+          <button
+            onClick={() => setActiveTab("ocorrencias")}
+            className={`pb-2 text-sm font-bold flex items-center gap-2 transition-all border-b-2 relative ${
+              activeTab === "ocorrencias"
+                ? "border-primary text-primary"
+                : "border-transparent text-on-surface-variant hover:text-on-surface"
+            }`}
+          >
+            <ClipboardCheck className="w-4 h-4" />
+            Ocorrências
+            {!isReportCompleted && (
+              <span className="absolute top-0 -right-2 w-2 h-2 bg-warning rounded-full animate-pulse" />
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Passenger List — only APPROVED passengers shown */}
-      <div className="p-4 space-y-3 pb-20">
-        {approvedPassengers.length > 0 ? (
-          approvedPassengers.map((passenger) => (
-            <div
-              key={passenger.ticket_id}
-              className={`border rounded-2xl p-4 flex items-start gap-4 transition-all duration-300 shadow-sm ${
-                passenger.check_in_status
-                  ? "bg-success/5 border-success/30"
-                  : "bg-surface-container-lowest border-outline-variant/30"
-              }`}
-            >
+      {activeTab === "manifesto" ? (
+        <div className="p-4 space-y-3 pb-20">
+          {approvedPassengers.length > 0 ? (
+            approvedPassengers.map((passenger) => (
               <div
-                className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
+                key={passenger.ticket_id}
+                className={`border rounded-2xl p-4 flex items-start gap-4 transition-all duration-300 shadow-sm ${
                   passenger.check_in_status
-                    ? "bg-success text-on-primary"
-                    : "bg-surface-container-high text-on-surface-variant"
+                    ? "bg-success/5 border-success/30"
+                    : "bg-surface-container-lowest border-outline-variant/30"
                 }`}
               >
-                {passenger.seat_code}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-bold text-on-surface text-sm truncate">
-                    {passenger.full_name}
-                  </h3>
-                  {passenger.check_in_status ? (
-                    <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                  ) : (
-                    <Clock className="w-5 h-5 text-outline-variant shrink-0" />
-                  )}
+                <div
+                  className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
+                    passenger.check_in_status
+                      ? "bg-success text-on-primary"
+                      : "bg-surface-container-high text-on-surface-variant"
+                  }`}
+                >
+                  {passenger.seat_code}
                 </div>
 
-                <p className="text-xs text-on-surface-variant mt-0.5 font-mono">
-                  {passenger.masked_cpf}
-                </p>
-
-                {/* Check-in timestamp */}
-                {passenger.check_in_status && passenger.checked_in_at && (
-                  <p className="text-xs text-success mt-1 font-medium">
-                    Embarcou às {formatTime(passenger.checked_in_at)}
-                  </p>
-                )}
-
-                {passenger.emergency_contact_phone && (
-                  <div className="mt-1.5 flex items-center gap-1 text-xs text-primary bg-primary/10 w-max px-2 py-0.5 rounded-md">
-                    <Phone className="w-3 h-3" />
-                    {passenger.emergency_contact_phone}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-on-surface text-sm truncate">
+                      {passenger.full_name}
+                    </h3>
+                    {passenger.check_in_status ? (
+                      <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
+                    ) : (
+                      <Clock className="w-5 h-5 text-outline-variant shrink-0" />
+                    )}
                   </div>
-                )}
+
+                  <p className="text-xs text-on-surface-variant mt-0.5 font-mono">
+                    {passenger.masked_cpf}
+                  </p>
+
+                  {/* Check-in timestamp */}
+                  {passenger.check_in_status && passenger.checked_in_at && (
+                    <p className="text-xs text-success mt-1 font-medium">
+                      Embarcou às {formatTime(passenger.checked_in_at)}
+                    </p>
+                  )}
+
+                  {passenger.emergency_contact_phone && (
+                    <div className="mt-1.5 flex items-center gap-1 text-xs text-primary bg-primary/10 w-max px-2 py-0.5 rounded-md">
+                      <Phone className="w-3 h-3" />
+                      {passenger.emergency_contact_phone}
+                    </div>
+                  )}
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="text-center py-10 bg-surface-container-lowest rounded-2xl border border-outline-variant/30">
+              <p className="text-on-surface-variant">
+                Nenhum passageiro confirmado ainda.
+              </p>
             </div>
-          ))
-        ) : (
-          <div className="text-center py-10 bg-surface-container-lowest rounded-2xl border border-outline-variant/30">
-            <p className="text-on-surface-variant">
-              Nenhum passageiro confirmado ainda.
-            </p>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        <VistoriaForm excursionId={excursionId} onStatusChange={(status) => setIsReportCompleted(status)} />
+      )}
     </div>
   );
 }
