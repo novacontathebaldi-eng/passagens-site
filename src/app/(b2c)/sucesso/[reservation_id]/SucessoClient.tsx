@@ -183,7 +183,7 @@ export default function SucessoClient({
                 <div className="absolute bottom-4 left-4 sm:left-6 right-4 sm:right-6 text-white flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider mb-1 text-white/80 drop-shadow-md">Pedido #{shortId}</p>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white drop-shadow-md">{tripTitle}</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold drop-shadow-md">{tripTitle}</h2>
                   </div>
                   <div className="text-left sm:text-right">
                     <p className="text-sm flex items-center gap-1 sm:justify-end text-white/90 drop-shadow-md">
