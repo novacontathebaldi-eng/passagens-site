@@ -209,13 +209,13 @@ export default function CheckinPage() {
 
   return (
     <div
-      className={`min-h-[calc(100dvh-56px-64px)] bg-slate-50 flex flex-col relative transition-colors duration-300 font-sans ${
+      className={`h-[calc(100dvh-80px-72px)] bg-slate-50 flex flex-col relative transition-colors duration-300 font-sans overflow-hidden ${
         flashSuccess ? "!bg-green-50" : ""
       }`}
     >
       {/* ── Header Top Area ── */}
-      <header className="w-full z-50 flex flex-col px-6 py-4 bg-white/80 backdrop-blur-md rounded-b-[2rem] shadow-[0_32px_64px_rgba(25,28,30,0.06)] shrink-0">
-        <div className="flex justify-between items-center w-full mb-3">
+      <header className="w-full z-50 flex flex-col px-4 py-3 bg-white/80 backdrop-blur-md rounded-b-[1.5rem] shadow-[0_32px_64px_rgba(25,28,30,0.06)] shrink-0">
+        <div className="flex justify-between items-center w-full mb-2">
           <Link
             href={`/motorista/manifesto/${excursionId}`}
             className="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition-colors active:scale-95 duration-200"
@@ -237,8 +237,8 @@ export default function CheckinPage() {
         </div>
 
         {/* Status & Progress */}
-        <div className="w-full max-w-sm mx-auto flex flex-col gap-2">
-          <div className="flex justify-between items-center px-4 py-1.5 bg-blue-100/50 rounded-full">
+        <div className="w-full max-w-sm mx-auto flex flex-col gap-1">
+          <div className="flex justify-between items-center px-3 py-1 bg-blue-100/50 rounded-full">
             <span className="text-xs font-semibold text-[#1E40AF]">
               Passageiros
             </span>
@@ -256,9 +256,9 @@ export default function CheckinPage() {
       </header>
 
       {/* ── Main Content Canvas ── */}
-      <main className="flex-grow pb-32 px-4 flex flex-col items-center pt-6 overflow-y-auto">
+      <main className="flex-1 min-h-0 px-4 flex flex-col items-center pt-3 overflow-y-auto">
         {/* Tabs */}
-        <div className="bg-slate-200/50 p-1.5 rounded-full flex gap-1 w-full max-w-xs shadow-inner mb-6 shrink-0">
+        <div className="bg-slate-200/50 p-1 rounded-full flex gap-1 w-full max-w-xs shadow-inner mb-3 shrink-0">
           <button
             onClick={() => setActiveTab("camera")}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-full transition-all ${
@@ -308,8 +308,8 @@ export default function CheckinPage() {
 
         {/* ── Camera Viewport ── */}
         {activeTab === "camera" && (
-          <div className="w-full max-w-sm flex flex-col items-center gap-6 flex-1 min-h-0">
-            <div className="relative w-full aspect-[3/4] bg-slate-900 rounded-[2rem] overflow-hidden shadow-[0_16px_48px_rgba(0,40,142,0.15)] flex items-center justify-center flex-1 min-h-0">
+          <div className="w-full max-w-sm flex flex-col items-center gap-3 flex-1 min-h-0">
+            <div className="relative w-full aspect-square max-h-[55dvh] bg-slate-900 rounded-[1.5rem] overflow-hidden shadow-[0_16px_48px_rgba(0,40,142,0.15)] flex items-center justify-center flex-1 min-h-0">
               {/* Scanning Frame lines overlay (visual only, actual scanner below) */}
               <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
                 <div className="relative w-48 h-48 border-2 border-dashed border-white/40 rounded-xl">
@@ -369,15 +369,15 @@ export default function CheckinPage() {
                 <RefreshCcw className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-sm font-medium text-slate-500 text-center max-w-xs shrink-0">
-              Aponte para o QR Code do passageiro para realizar o check-in automático.
+            <p className="text-xs font-medium text-slate-400 text-center max-w-xs shrink-0">
+              Aponte para o QR Code do voucher
             </p>
           </div>
         )}
 
         {/* ── Manual Mode ── */}
         {activeTab === "manual" && (
-          <div className="w-full max-w-sm flex flex-col gap-4 mt-4 flex-1">
+          <div className="w-full max-w-sm flex flex-col gap-4 flex-1">
             <div className="relative w-full">
               <form onSubmit={handleManualSubmit} className="relative">
                 <input

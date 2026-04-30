@@ -136,7 +136,7 @@ export default function ManifestoClient({
   return (
     <div className="min-h-[calc(100dvh-56px-64px)] relative">
       {/* Sticky Header and Tabs */}
-      <div className="bg-white sticky top-[72px] z-30 px-4 md:px-6 py-3 md:py-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border-b border-slate-200 -mx-4 md:-mx-0 md:rounded-t-[2rem]">
+      <div className="bg-white sticky top-[80px] z-30 px-4 py-3 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border-b border-slate-200 -mx-4 md:-mx-0 md:rounded-t-[2rem]">
         <div className="flex items-center gap-2 md:gap-3">
           <Link
             href="/motorista"
@@ -214,7 +214,7 @@ export default function ManifestoClient({
       </div>
 
       {activeTab === "manifesto" ? (
-        <div className="pt-6 px-1 md:px-0 space-y-4 pb-36">
+        <div className="pt-4 px-0 md:px-0 space-y-3 pb-28">
           {/* Filtros Rápidos */}
           <div className="flex gap-2 mb-2 overflow-x-auto pb-2 scrollbar-hide">
             <button
@@ -247,14 +247,14 @@ export default function ManifestoClient({
             filteredPassengers.map((passenger) => (
               <div
                 key={passenger.ticket_id}
-                className={`rounded-3xl p-4 md:p-5 flex items-center gap-4 transition-all duration-300 shadow-[0_4px_16px_rgb(25,28,30,0.04)] border ${
+                className={`rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 shadow-[0_2px_12px_rgb(25,28,30,0.04)] border ${
                   passenger.check_in_status
                     ? "bg-green-50 border-green-200"
                     : "bg-white border-transparent hover:border-slate-200"
                 }`}
               >
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0 shadow-sm ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-sm ${
                     passenger.check_in_status
                       ? "bg-green-500 text-white"
                       : "bg-slate-100 text-slate-500"
@@ -265,7 +265,7 @@ export default function ManifestoClient({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="font-headline font-bold text-slate-900 text-base truncate">
+                    <h3 className="font-headline font-bold text-slate-900 text-sm truncate">
                       {passenger.full_name}
                     </h3>
                     {passenger.check_in_status ? (
@@ -275,11 +275,11 @@ export default function ManifestoClient({
                     )}
                   </div>
 
-                  <p className="text-sm text-slate-500 mt-1 font-body">
+                  <p className="text-xs text-slate-500 mt-0.5 font-body">
                     CPF: {passenger.masked_cpf}
                   </p>
 
-                  <div className="flex items-center gap-3 mt-2 flex-wrap">
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     {/* Check-in timestamp */}
                     {passenger.check_in_status && passenger.checked_in_at && (
                       <div className="text-[11px] font-bold tracking-wide uppercase text-green-700 bg-green-100 px-2 py-1 rounded-md">
@@ -310,7 +310,7 @@ export default function ManifestoClient({
           )}
         </div>
       ) : (
-        <div className="pt-6 px-1 md:px-0 pb-36">
+        <div className="pt-4 px-0 md:px-0 pb-28">
           <VistoriaForm excursionId={excursionId} onStatusChange={(status) => setIsReportCompleted(status)} />
         </div>
       )}
@@ -318,7 +318,7 @@ export default function ManifestoClient({
       {/* FAB - Botão Flutuante de Atalho */}
       <Link
         href={`/motorista/checkin/${excursionId}`}
-        className="fixed bottom-32 md:bottom-28 right-6 w-14 h-14 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-full shadow-[0_8px_24px_rgb(249,115,22,0.4)] flex items-center justify-center transition-transform active:scale-90 z-40 group"
+        className="fixed bottom-24 md:bottom-28 right-4 w-14 h-14 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-full shadow-[0_8px_24px_rgb(249,115,22,0.4)] flex items-center justify-center transition-transform active:scale-90 z-40 group"
         title="Escanear QR Code"
       >
         <QrCode className="w-6 h-6 group-hover:scale-110 transition-transform" />
