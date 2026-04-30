@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Clock,
   Phone,
-  AlertCircle,
   QrCode,
   ClipboardCheck,
   Users
@@ -52,7 +51,7 @@ export default function ManifestoClient({
   const [activeTab, setActiveTab] = useState<"manifesto" | "ocorrencias">("manifesto");
   const [isReportCompleted, setIsReportCompleted] = useState<boolean>(false);
 
-  // Only count APPROVED passengers — consistent with check-in counter
+  // Only count APPROVED passengers
   const approvedPassengers = passengers.filter(
     (p) => p.payment_status === "APPROVED"
   );
@@ -60,6 +59,7 @@ export default function ManifestoClient({
     (p) => p.check_in_status === true
   ).length;
   const totalApproved = approvedPassengers.length;
+  const progressPercentage = totalApproved > 0 ? (totalBoarded / totalApproved) * 100 : 0;
 
   // ── Real-time updates via Supabase channel ──
   useEffect(() => {
@@ -101,55 +101,44 @@ export default function ManifestoClient({
   }, [excursionId]);
 
   return (
-    <div className="bg-surface min-h-[calc(100dvh-56px-64px)]">
-      {/* Sticky Header — not overlapping content */}
-      <div className="bg-surface-container-lowest sticky top-0 z-30 px-4 py-3 border-b border-outline-variant/30 shadow-sm">
+    <div className="min-h-[calc(100dvh-56px-64px)] relative">
+      {/* Sticky Header and Tabs */}
+      <div className="bg-surface-container-lowest/90 backdrop-blur-md sticky top-16 md:top-20 z-30 px-4 md:px-6 py-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border-b border-outline-variant/20 -mx-4 md:-mx-0 md:rounded-t-3xl">
         <div className="flex items-center gap-3">
           <Link
             href="/motorista"
-            className="text-on-surface-variant hover:text-primary p-1 rounded-full transition-colors"
+            className="w-10 h-10 flex items-center justify-center bg-surface-container hover:bg-surface-container-high rounded-full transition-colors active:scale-95"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 text-on-surface" />
           </Link>
-          <h1 className="font-bold text-on-surface text-base leading-tight truncate flex-1">
+          <h1 className="font-headline font-bold text-lg text-on-surface leading-tight truncate flex-1 tracking-tight">
             {excursionTitle}
           </h1>
-          <Link
-            href={`/motorista/checkin/${excursionId}`}
-            className="bg-cta text-on-cta p-2 rounded-xl shadow-sm active:scale-95 transition-transform"
-            title="Ir para Check-in"
-          >
-            <QrCode className="w-5 h-5" />
-          </Link>
         </div>
 
-        {/* Progress Bar — only counts APPROVED */}
-        <div className="mt-3">
-          <div className="flex justify-between text-xs font-bold mb-1">
-            <span className="text-on-surface-variant">Embarcados</span>
-            <span className="text-primary">
-              {totalBoarded} / {totalApproved}
+        {/* Progress Bar */}
+        <div className="mt-5">
+          <div className="flex justify-between items-end mb-2">
+            <span className="text-on-surface-variant font-label text-xs uppercase tracking-wider font-bold">Embarcados</span>
+            <span className="font-headline font-bold text-primary">
+              <span className="text-lg">{totalBoarded}</span>
+              <span className="text-sm text-on-surface-variant mx-1">/</span>
+              <span className="text-sm text-on-surface-variant">{totalApproved}</span>
             </span>
           </div>
-          <div className="w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-surface-container-highest rounded-full h-2 overflow-hidden shadow-inner">
             <div
-              className="bg-primary h-1.5 rounded-full transition-all duration-500"
-              style={{
-                width: `${
-                  totalApproved > 0
-                    ? (totalBoarded / totalApproved) * 100
-                    : 0
-                }%`,
-              }}
+              className="bg-primary h-full rounded-full transition-all duration-700 ease-out"
+              style={{ width: `${progressPercentage}%` }}
             />
           </div>
         </div>
 
         {/* TABS */}
-        <div className="flex items-center gap-4 mt-4 border-b border-outline-variant/30">
+        <div className="flex items-center gap-6 mt-6 border-b border-outline-variant/30">
           <button
             onClick={() => setActiveTab("manifesto")}
-            className={`pb-2 text-sm font-bold flex items-center gap-2 transition-all border-b-2 ${
+            className={`pb-3 text-sm font-bold flex items-center gap-2 transition-all border-b-2 ${
               activeTab === "manifesto"
                 ? "border-primary text-primary"
                 : "border-transparent text-on-surface-variant hover:text-on-surface"
@@ -160,7 +149,7 @@ export default function ManifestoClient({
           </button>
           <button
             onClick={() => setActiveTab("ocorrencias")}
-            className={`pb-2 text-sm font-bold flex items-center gap-2 transition-all border-b-2 relative ${
+            className={`pb-3 text-sm font-bold flex items-center gap-2 transition-all border-b-2 relative ${
               activeTab === "ocorrencias"
                 ? "border-primary text-primary"
                 : "border-transparent text-on-surface-variant hover:text-on-surface"
@@ -169,26 +158,26 @@ export default function ManifestoClient({
             <ClipboardCheck className="w-4 h-4" />
             Ocorrências
             {!isReportCompleted && (
-              <span className="absolute top-0 -right-2 w-2 h-2 bg-warning rounded-full animate-pulse" />
+              <span className="absolute top-1 -right-2 w-2 h-2 bg-warning rounded-full animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
             )}
           </button>
         </div>
       </div>
 
       {activeTab === "manifesto" ? (
-        <div className="p-4 space-y-3 pb-20">
+        <div className="py-6 px-1 md:px-0 space-y-4 pb-28">
           {approvedPassengers.length > 0 ? (
             approvedPassengers.map((passenger) => (
               <div
                 key={passenger.ticket_id}
-                className={`border rounded-2xl p-4 flex items-start gap-4 transition-all duration-300 shadow-sm ${
+                className={`rounded-3xl p-4 md:p-5 flex items-center gap-4 transition-all duration-300 shadow-[0_4px_16px_rgb(25,28,30,0.04)] border ${
                   passenger.check_in_status
-                    ? "bg-success/5 border-success/30"
-                    : "bg-surface-container-lowest border-outline-variant/30"
+                    ? "bg-success/5 border-success/20"
+                    : "bg-surface-container-lowest border-transparent hover:border-outline-variant/30"
                 }`}
               >
                 <div
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
+                  className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0 shadow-sm ${
                     passenger.check_in_status
                       ? "bg-success text-on-primary"
                       : "bg-surface-container-high text-on-surface-variant"
@@ -198,48 +187,65 @@ export default function ManifestoClient({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold text-on-surface text-sm truncate">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-headline font-bold text-on-surface text-base truncate">
                       {passenger.full_name}
                     </h3>
                     {passenger.check_in_status ? (
                       <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
                     ) : (
-                      <Clock className="w-5 h-5 text-outline-variant shrink-0" />
+                      <Clock className="w-4 h-4 text-on-surface-variant shrink-0" />
                     )}
                   </div>
 
-                  <p className="text-xs text-on-surface-variant mt-0.5 font-mono">
-                    {passenger.masked_cpf}
+                  <p className="text-sm text-on-surface-variant mt-1 font-body">
+                    CPF: {passenger.masked_cpf}
                   </p>
 
-                  {/* Check-in timestamp */}
-                  {passenger.check_in_status && passenger.checked_in_at && (
-                    <p className="text-xs text-success mt-1 font-medium">
-                      Embarcou às {formatTime(passenger.checked_in_at)}
-                    </p>
-                  )}
+                  <div className="flex items-center gap-3 mt-2 flex-wrap">
+                    {/* Check-in timestamp */}
+                    {passenger.check_in_status && passenger.checked_in_at && (
+                      <div className="text-[11px] font-bold tracking-wide uppercase text-success bg-success/10 px-2 py-1 rounded-md">
+                        Embarcou às {formatTime(passenger.checked_in_at)}
+                      </div>
+                    )}
 
-                  {passenger.emergency_contact_phone && (
-                    <div className="mt-1.5 flex items-center gap-1 text-xs text-primary bg-primary/10 w-max px-2 py-0.5 rounded-md">
-                      <Phone className="w-3 h-3" />
-                      {passenger.emergency_contact_phone}
-                    </div>
-                  )}
+                    {passenger.emergency_contact_phone && (
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-2 py-1 rounded-md">
+                        <Phone className="w-3 h-3" />
+                        {passenger.emergency_contact_phone}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-center py-10 bg-surface-container-lowest rounded-2xl border border-outline-variant/30">
+            <div className="text-center py-12 bg-surface-container-lowest rounded-3xl border border-outline-variant/30 shadow-sm">
+              <div className="w-16 h-16 bg-surface-container mx-auto rounded-full flex items-center justify-center mb-4">
+                <Users className="w-8 h-8 text-on-surface-variant" />
+              </div>
+              <h3 className="font-headline font-bold text-lg text-on-surface mb-2">Nenhum passageiro</h3>
               <p className="text-on-surface-variant">
-                Nenhum passageiro confirmado ainda.
+                Não há passageiros confirmados para esta viagem ainda.
               </p>
             </div>
           )}
         </div>
       ) : (
-        <VistoriaForm excursionId={excursionId} onStatusChange={(status) => setIsReportCompleted(status)} />
+        <div className="py-6 px-1 md:px-0 pb-28">
+          <VistoriaForm excursionId={excursionId} onStatusChange={(status) => setIsReportCompleted(status)} />
+        </div>
       )}
+
+      {/* FAB - Botão Flutuante de Atalho */}
+      <Link
+        href={`/motorista/checkin/${excursionId}`}
+        className="fixed bottom-24 right-6 w-14 h-14 bg-cta hover:bg-cta/90 text-on-cta rounded-full shadow-[0_8px_24px_rgb(249,115,22,0.4)] flex items-center justify-center transition-transform active:scale-90 z-40 group"
+        title="Escanear QR Code"
+      >
+        <QrCode className="w-6 h-6 group-hover:scale-110 transition-transform" />
+      </Link>
     </div>
   );
 }

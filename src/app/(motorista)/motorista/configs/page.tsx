@@ -29,7 +29,7 @@ export default async function ConfigsPage() {
   try {
     if (Array.isArray(settings?.driver_contact_numbers)) {
       driverContacts = settings?.driver_contact_numbers as any[];
-    } else if (typeof settings?.driver_contact_numbers === 'string') {
+    } else if (typeof settings?.driver_contact_numbers === "string") {
       driverContacts = JSON.parse(settings?.driver_contact_numbers);
     }
   } catch (e) {}
@@ -39,52 +39,55 @@ export default async function ConfigsPage() {
     : "MO";
 
   return (
-    <div className="p-4 space-y-8 pb-24">
-      <h1 className="font-bold text-on-surface text-xl px-2">Ajustes</h1>
-
+    <div className="pt-24 px-6 max-w-md mx-auto pb-32 font-sans bg-slate-50 min-h-[calc(100dvh-56px)]">
       {/* ── Perfil do Motorista ── */}
-      <section className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/30 shadow-sm flex flex-col items-center text-center relative overflow-hidden">
-        {/* Decorative background shape */}
-        <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
-        <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cta/5 rounded-full blur-xl" />
-
-        {profile?.avatar_url ? (
-          <div className="w-20 h-20 relative rounded-full overflow-hidden mb-4 border-2 border-surface shadow-md">
-            {/* Using standard img instead of next/image to avoid unconfigured domains errors */}
-            <img
-              src={profile.avatar_url}
-              alt="Avatar"
-              className="w-full h-full object-cover"
-            />
+      <section className="mb-12">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#1E40AF] to-[#001a66] p-8 shadow-[0_16px_40px_rgba(0,40,142,0.15)] flex flex-col items-center text-center">
+          {/* Abstract Decorative Shapes */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-300/30 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
+          
+          <div className="relative z-10 w-24 h-24 rounded-full overflow-hidden mb-5 border-[3px] border-white/20 shadow-lg bg-white/10 flex items-center justify-center text-white text-3xl font-bold">
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt="Avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              initials
+            )}
           </div>
-        ) : (
-          <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center text-2xl font-bold mb-4 border-2 border-primary/20 shadow-sm">
-            {initials}
+          
+          <h1 className="relative z-10 font-extrabold text-2xl text-white mb-1 tracking-tight leading-tight">
+            {profile?.full_name || "Motorista"}
+          </h1>
+          <p className="relative z-10 text-blue-200 text-sm font-medium">
+            {user.email}
+          </p>
+          
+          <div className="relative z-10 mt-6 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
+            <span className="material-symbols-outlined text-cyan-300 text-sm">verified</span>
+            <span className="text-white text-xs font-semibold uppercase tracking-wider">Motorista</span>
           </div>
-        )}
-        <h2 className="text-lg font-bold text-on-surface relative z-10">
-          {profile?.full_name || "Motorista"}
-        </h2>
-        <p className="text-sm text-on-surface-variant relative z-10">
-          {user.email}
-        </p>
+        </div>
       </section>
 
       {/* ── Números Úteis ── */}
-      <section className="space-y-3">
-        <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider ml-2">
-          Números Úteis
-        </h3>
+      <section className="mb-12">
+        <h2 className="font-bold text-[0.85rem] tracking-[0.15em] text-[#1E40AF] uppercase mb-6 pl-2">
+          NÚMEROS ÚTEIS
+        </h2>
         
         {driverContacts.length > 0 ? (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-4">
             {driverContacts.map((contact) => (
               <DriverContactCard key={contact.id} contact={contact} />
             ))}
           </div>
         ) : (
-          <div className="bg-surface-container border border-outline-variant/30 rounded-2xl p-4 text-center">
-            <p className="text-xs text-on-surface-variant italic">
+          <div className="bg-white border border-slate-200/60 rounded-[1.5rem] p-6 text-center shadow-sm">
+            <p className="text-sm text-slate-500 italic">
               Nenhum número de suporte configurado. Peça ao administrador para cadastrar os contatos.
             </p>
           </div>
@@ -92,10 +95,7 @@ export default async function ConfigsPage() {
       </section>
 
       {/* ── Conta ── */}
-      <section className="space-y-3">
-        <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider ml-2">
-          Conta
-        </h3>
+      <section>
         <LogoutButton />
       </section>
     </div>

@@ -14,6 +14,8 @@ import {
   Users,
   Loader2,
   List,
+  CheckCircle2,
+  X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { performCheckin, fetchCheckinCount } from "../actions";
@@ -207,89 +209,121 @@ export default function CheckinPage() {
 
   return (
     <div
-      className={`min-h-[calc(100dvh-56px-64px)] bg-surface flex flex-col transition-colors duration-300 ${
-        flashSuccess ? "!bg-success/10" : ""
+      className={`min-h-[calc(100dvh-56px-64px)] bg-slate-50 flex flex-col relative transition-colors duration-300 font-sans ${
+        flashSuccess ? "!bg-green-50" : ""
       }`}
     >
-      {/* ── Compact header ── */}
-      <div className="bg-surface-container-lowest px-4 py-2.5 border-b border-outline-variant/30 shadow-sm shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/motorista/manifesto/${excursionId}`}
-              className="text-on-surface-variant hover:text-primary p-1.5 rounded-full transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <h1 className="font-bold text-on-surface text-base">Check-in</h1>
+      {/* ── Header Top Area ── */}
+      <header className="w-full z-50 flex flex-col px-6 py-4 bg-white/80 backdrop-blur-md rounded-b-[2rem] shadow-[0_32px_64px_rgba(25,28,30,0.06)] shrink-0">
+        <div className="flex justify-between items-center w-full mb-3">
+          <Link
+            href={`/motorista/manifesto/${excursionId}`}
+            className="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition-colors active:scale-95 duration-200"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div className="flex flex-col items-center">
+            <h1 className="font-bold tracking-tight text-[#1E40AF] text-lg">
+              Check-in
+            </h1>
           </div>
-
-          <div className="flex items-center gap-2">
-            {/* Live counter pill */}
-            <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-full">
-              <Users className="w-3.5 h-3.5" />
-              <span className="text-xs font-bold tabular-nums">
-                {boarded}/{total}
-              </span>
-            </div>
-            {/* Quick link to manifest */}
-            <Link
-              href={`/motorista/manifesto/${excursionId}`}
-              className="p-1.5 text-on-surface-variant hover:text-primary rounded-full transition-colors"
-              title="Ver lista de passageiros"
-            >
-              <List className="w-5 h-5" />
-            </Link>
-          </div>
+          <Link
+            href={`/motorista/manifesto/${excursionId}`}
+            className="text-slate-500 hover:text-[#1E40AF] transition-colors flex items-center justify-center p-2 rounded-full hover:bg-slate-100"
+            title="Ver lista de passageiros"
+          >
+            <List className="w-5 h-5" />
+          </Link>
         </div>
 
-        {/* Thin progress bar */}
-        <div className="mt-2 w-full bg-surface-container-high rounded-full h-1 overflow-hidden">
-          <div
-            className="bg-primary h-1 rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${progressPercent}%` }}
-          />
+        {/* Status & Progress */}
+        <div className="w-full max-w-sm mx-auto flex flex-col gap-2">
+          <div className="flex justify-between items-center px-4 py-1.5 bg-blue-100/50 rounded-full">
+            <span className="text-xs font-semibold text-[#1E40AF]">
+              Passageiros
+            </span>
+            <span className="font-bold text-sm text-[#1E40AF] tabular-nums">
+              {boarded} / {total}
+            </span>
+          </div>
+          <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-[#1E40AF] h-1.5 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            ></div>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* ── Tab switcher ── */}
-      <div className="px-4 pt-3 pb-1 shrink-0">
-        <div className="bg-surface-container-high rounded-2xl p-1 flex gap-1">
+      {/* ── Main Content Canvas ── */}
+      <main className="flex-grow pb-32 px-4 flex flex-col items-center pt-6 overflow-y-auto">
+        {/* Tabs */}
+        <div className="bg-slate-200/50 p-1.5 rounded-full flex gap-1 w-full max-w-xs shadow-inner mb-6 shrink-0">
           <button
             onClick={() => setActiveTab("camera")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-full transition-all ${
               activeTab === "camera"
-                ? "bg-primary text-on-primary shadow-sm"
-                : "text-on-surface-variant hover:text-on-surface"
+                ? "bg-white shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            <Camera className="w-4 h-4" />
-            Câmera
+            <Camera
+              className={`w-5 h-5 ${
+                activeTab === "camera" ? "text-[#1E40AF]" : ""
+              }`}
+            />
+            <span
+              className={`text-sm font-semibold ${
+                activeTab === "camera" ? "text-[#1E40AF]" : ""
+              }`}
+            >
+              Câmera
+            </span>
           </button>
           <button
             onClick={() => {
               setActiveTab("manual");
               setTimeout(() => inputRef.current?.focus(), 100);
             }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-full transition-all ${
               activeTab === "manual"
-                ? "bg-primary text-on-primary shadow-sm"
-                : "text-on-surface-variant hover:text-on-surface"
+                ? "bg-white shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            <Keyboard className="w-4 h-4" />
-            Manual
+            <Keyboard
+              className={`w-5 h-5 ${
+                activeTab === "manual" ? "text-[#1E40AF]" : ""
+              }`}
+            />
+            <span
+              className={`text-sm font-semibold ${
+                activeTab === "manual" ? "text-[#1E40AF]" : ""
+              }`}
+            >
+              Manual
+            </span>
           </button>
         </div>
-      </div>
 
-      {/* ── Content area ── */}
-      <div className="flex-1 flex flex-col px-4 pb-4 pt-2 overflow-y-auto">
-        {/* ── Camera mode ── */}
+        {/* ── Camera Viewport ── */}
         {activeTab === "camera" && (
-          <div className="flex flex-col flex-1 gap-3">
-            {/* Scanner fills available space */}
-            <div className="relative rounded-2xl overflow-hidden bg-black flex-1 min-h-0 shadow-lg">
+          <div className="w-full max-w-sm flex flex-col items-center gap-6 flex-1 min-h-0">
+            <div className="relative w-full aspect-[3/4] bg-slate-900 rounded-[2rem] overflow-hidden shadow-[0_16px_48px_rgba(0,40,142,0.15)] flex items-center justify-center flex-1 min-h-0">
+              {/* Scanning Frame lines overlay (visual only, actual scanner below) */}
+              <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
+                <div className="relative w-48 h-48 border-2 border-dashed border-white/40 rounded-xl">
+                  <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-xl"></div>
+                  <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-xl"></div>
+                  <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl-xl"></div>
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-xl"></div>
+                  {/* Scan Line effect */}
+                  {!scannerPaused && (
+                    <div className="absolute top-1/2 left-0 w-full h-0.5 bg-[#F97316] shadow-[0_0_8px_#F97316] animate-[scan_2s_ease-in-out_infinite]"></div>
+                  )}
+                </div>
+              </div>
+
               {!scannerPaused ? (
                 <Scanner
                   onScan={handleScan}
@@ -310,61 +344,42 @@ export default function CheckinPage() {
                     },
                   }}
                   components={{
-                    finder: true,
+                    finder: false, // We use our custom finder overlay above
                   }}
                 />
               ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-10">
-                  <Loader2 className="w-10 h-10 text-primary animate-spin mb-3" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-30">
+                  <Loader2 className="w-10 h-10 text-white animate-spin mb-3" />
                   <p className="text-white/80 text-sm font-medium">
                     Processando...
                   </p>
                 </div>
               )}
+
+              {/* Floating Swap Camera Action */}
+              <button
+                onClick={() =>
+                  setFacingMode((prev) =>
+                    prev === "environment" ? "user" : "environment"
+                  )
+                }
+                className="absolute bottom-4 right-4 w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 z-30 hover:bg-white/30 transition-colors"
+                title="Trocar Câmera"
+              >
+                <RefreshCcw className="w-5 h-5" />
+              </button>
             </div>
-
-            {/* Camera toggle — compact */}
-            <button
-              onClick={() =>
-                setFacingMode((prev) =>
-                  prev === "environment" ? "user" : "environment"
-                )
-              }
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-xl text-xs font-bold text-on-surface-variant hover:text-primary transition-colors shrink-0"
-            >
-              <RefreshCcw className="w-3.5 h-3.5" />
-              {facingMode === "environment"
-                ? "Usar câmera frontal"
-                : "Usar câmera traseira"}
-            </button>
-
-            {/* Last result feedback — inline at bottom */}
-            {lastResult && (
-              <div className="bg-success/10 border border-success/30 p-3 rounded-xl flex items-center gap-3 shrink-0">
-                <div className="w-10 h-10 bg-success text-on-primary rounded-lg flex items-center justify-center text-sm font-bold shrink-0">
-                  {lastResult.seat}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-success font-bold">
-                    Último check-in
-                  </p>
-                  <p className="text-sm font-bold text-on-surface truncate">
-                    {lastResult.name}
-                  </p>
-                </div>
-              </div>
-            )}
+            <p className="text-sm font-medium text-slate-500 text-center max-w-xs shrink-0">
+              Aponte para o QR Code do passageiro para realizar o check-in automático.
+            </p>
           </div>
         )}
 
-        {/* ── Manual mode ── */}
+        {/* ── Manual Mode ── */}
         {activeTab === "manual" && (
-          <div className="space-y-4">
-            <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
-              <label className="block text-sm font-bold text-on-surface mb-3">
-                Código do Voucher (6 caracteres)
-              </label>
-              <form onSubmit={handleManualSubmit} className="flex gap-2">
+          <div className="w-full max-w-sm flex flex-col gap-4 mt-4 flex-1">
+            <div className="relative w-full">
+              <form onSubmit={handleManualSubmit} className="relative">
                 <input
                   ref={inputRef}
                   type="text"
@@ -372,46 +387,70 @@ export default function CheckinPage() {
                   onChange={(e) =>
                     setManualCode(e.target.value.toUpperCase().slice(0, 6))
                   }
-                  placeholder="EX: M9HZ6E"
+                  placeholder="CÓDIGO"
                   maxLength={6}
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="characters"
-                  className="flex-1 px-4 py-3 bg-surface-container border border-outline-variant/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 text-lg font-mono uppercase tracking-widest text-center"
+                  className="w-full bg-white border-none rounded-[1.5rem] py-5 pl-6 pr-16 font-mono text-2xl tracking-[0.2em] text-center text-[#1E40AF] shadow-[0_8px_24px_rgba(25,28,30,0.06)] focus:ring-2 focus:ring-[#1E40AF]/20 placeholder:text-slate-300 outline-none transition-all"
                 />
                 <button
                   type="submit"
                   disabled={isSubmitting || manualCode.length < 6}
-                  className="px-5 bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-[#1E40AF]/10 rounded-full flex items-center justify-center text-[#1E40AF] disabled:opacity-50 disabled:bg-slate-100 disabled:text-slate-400 hover:bg-[#1E40AF]/20 transition-colors"
                 >
                   {isSubmitting ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-6 h-6 animate-spin" />
                   ) : (
-                    <Search className="w-5 h-5" />
+                    <Search className="w-6 h-6" />
                   )}
                 </button>
               </form>
             </div>
-
-            {/* Last result feedback */}
-            {lastResult && (
-              <div className="bg-success/10 border border-success/30 p-4 rounded-2xl flex items-center gap-4">
-                <div className="w-12 h-12 bg-success text-on-primary rounded-xl flex items-center justify-center text-lg font-bold shrink-0">
-                  {lastResult.seat}
-                </div>
-                <div>
-                  <p className="text-sm text-success font-bold">
-                    Último check-in
-                  </p>
-                  <p className="text-base font-bold text-on-surface">
-                    {lastResult.name}
-                  </p>
-                </div>
-              </div>
-            )}
+            <p className="text-sm font-medium text-slate-500 text-center max-w-xs mx-auto mt-4 shrink-0">
+              Digite o código de 6 caracteres do voucher para realizar o check-in manual.
+            </p>
           </div>
         )}
-      </div>
+      </main>
+
+      {/* ── Feedback Card (Bottom Floating) ── */}
+      {lastResult && (
+        <div className="fixed bottom-0 left-0 w-full p-4 z-40 bg-gradient-to-t from-slate-50 via-slate-50/90 to-transparent pb-6 animate-in slide-in-from-bottom-10 fade-in duration-300">
+          <div className="max-w-sm mx-auto bg-white rounded-3xl p-4 shadow-[0_-16px_48px_rgba(25,28,30,0.08)] flex items-center gap-4">
+            <div className="w-14 h-14 bg-green-100 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 relative overflow-hidden">
+              <span className="font-extrabold text-green-800 text-xl z-10">
+                {lastResult.seat}
+              </span>
+              {/* Optional: Add an icon or pattern in the background like the reference */}
+            </div>
+            <div className="flex flex-col flex-grow min-w-0">
+              <h3 className="font-bold text-slate-900 text-base leading-tight truncate">
+                {lastResult.name}
+              </h3>
+              <div className="flex items-center gap-1.5 mt-1 text-green-600">
+                <CheckCircle2 className="w-4 h-4" />
+                <span className="font-semibold text-sm">Check-in Realizado</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setLastResult(null)}
+              className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors shrink-0"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Required style for scan line animation */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes scan {
+          0% { transform: translateY(-48px); }
+          50% { transform: translateY(48px); }
+          100% { transform: translateY(-48px); }
+        }
+      `}} />
     </div>
   );
 }

@@ -26,14 +26,14 @@ export function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={isLoading}
-      className="w-full flex items-center justify-between p-4 bg-error/10 text-error rounded-2xl border border-error/20 hover:bg-error/20 transition-colors disabled:opacity-50"
+      className="w-full bg-white rounded-[1rem] p-5 shadow-[0_8px_30px_rgba(25,28,30,0.04)] flex items-center justify-center gap-3 text-red-600 hover:bg-red-50 transition-colors font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <span className="font-bold text-base">Sair da conta</span>
       {isLoading ? (
-        <Loader2 className="w-5 h-5 animate-spin" />
+        <Loader2 className="w-6 h-6 animate-spin" />
       ) : (
-        <LogOut className="w-5 h-5" />
+        <LogOut className="w-6 h-6" />
       )}
+      <span>Sair da conta</span>
     </button>
   );
 }
