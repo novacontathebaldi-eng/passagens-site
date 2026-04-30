@@ -209,7 +209,7 @@ export default function CheckinPage() {
 
   return (
     <div
-      className={`h-[calc(100dvh-80px-72px)] bg-slate-50 flex flex-col relative transition-colors duration-300 font-sans overflow-hidden ${
+      className={`h-[calc(100dvh-72px-96px)] bg-slate-50 flex flex-col relative transition-colors duration-300 font-sans overflow-hidden ${
         flashSuccess ? "!bg-green-50" : ""
       }`}
     >

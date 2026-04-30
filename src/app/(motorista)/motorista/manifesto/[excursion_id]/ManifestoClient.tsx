@@ -134,9 +134,9 @@ export default function ManifestoClient({
   }, [excursionId]);
 
   return (
-    <div className="min-h-[calc(100dvh-56px-64px)] relative">
+    <div className="min-h-[calc(100dvh-72px-96px)] relative">
       {/* Sticky Header and Tabs */}
-      <div className="bg-white sticky top-[80px] z-30 px-4 py-3 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border-b border-slate-200 -mx-4 md:-mx-0 md:rounded-t-[2rem]">
+      <div className="bg-white sticky top-[72px] z-30 px-4 py-2.5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border-b border-slate-200 -mx-4 md:mx-0 md:rounded-t-[2rem]">
         <div className="flex items-center gap-2 md:gap-3">
           <Link
             href="/motorista"
@@ -166,16 +166,14 @@ export default function ManifestoClient({
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-3 md:mt-5">
-          <div className="flex justify-between items-end mb-1 md:mb-2">
-            <span className="text-slate-500 font-label text-[10px] md:text-xs uppercase tracking-wider font-bold">Embarcados</span>
-            <span className="font-headline font-bold text-blue-800 leading-none">
-              <span className="text-base md:text-lg">{totalBoarded}</span>
-              <span className="text-xs md:text-sm text-slate-400 mx-1">/</span>
-              <span className="text-xs md:text-sm text-slate-500">{totalApproved}</span>
+        <div className="mt-2">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-slate-500 font-label text-[10px] uppercase tracking-wider font-bold">Embarcados</span>
+            <span className="font-headline font-bold text-blue-800 text-sm leading-none tabular-nums">
+              {totalBoarded}<span className="text-slate-400 mx-0.5">/</span>{totalApproved}
             </span>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2 overflow-hidden shadow-inner">
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
             <div
               className="bg-blue-600 h-full rounded-full transition-all duration-700 ease-out"
               style={{ width: `${progressPercentage}%` }}
@@ -184,7 +182,7 @@ export default function ManifestoClient({
         </div>
 
         {/* TABS */}
-        <div className="flex items-center gap-4 md:gap-6 mt-4 md:mt-6 border-b border-slate-200">
+        <div className="flex items-center gap-4 mt-2.5 border-b border-slate-200">
           <button
             onClick={() => setActiveTab("manifesto")}
             className={`pb-2 md:pb-3 text-xs md:text-sm font-bold flex items-center gap-1.5 md:gap-2 transition-all border-b-2 ${
@@ -214,7 +212,7 @@ export default function ManifestoClient({
       </div>
 
       {activeTab === "manifesto" ? (
-        <div className="pt-4 px-0 md:px-0 space-y-3 pb-28">
+        <div className="pt-3 space-y-2.5 pb-24">
           {/* Filtros Rápidos */}
           <div className="flex gap-2 mb-2 overflow-x-auto pb-2 scrollbar-hide">
             <button
@@ -310,7 +308,7 @@ export default function ManifestoClient({
           )}
         </div>
       ) : (
-        <div className="pt-4 px-0 md:px-0 pb-28">
+        <div className="pt-3 pb-24">
           <VistoriaForm excursionId={excursionId} onStatusChange={(status) => setIsReportCompleted(status)} />
         </div>
       )}

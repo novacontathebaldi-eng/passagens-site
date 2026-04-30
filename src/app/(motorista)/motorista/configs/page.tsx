@@ -39,7 +39,7 @@ export default async function ConfigsPage() {
     : "MO";
 
   return (
-    <div className="pt-24 px-6 max-w-md mx-auto pb-32 font-sans bg-slate-50 min-h-[calc(100dvh-56px)]">
+    <div className="pt-4 max-w-md mx-auto pb-32 font-sans">
       {/* ── Perfil do Motorista ── */}
       <section className="mb-12">
         <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#1E40AF] to-[#001a66] p-8 shadow-[0_16px_40px_rgba(0,40,142,0.15)] flex flex-col items-center text-center">

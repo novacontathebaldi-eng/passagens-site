@@ -35,7 +35,7 @@ export default async function MotoristaHomePage() {
   const firstName = profile?.full_name?.split(" ")[0] || "Motorista";
 
   return (
-    <div className="p-4 md:p-6 space-y-8">
+    <div className="py-4 md:py-6 space-y-8">
       
       {/* Header Section */}
       <section className="pt-2">

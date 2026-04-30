@@ -68,8 +68,8 @@ export default async function MotoristaLayout({
       <Toaster position="top-center" richColors toastOptions={{ style: { fontSize: '16px', fontWeight: 600 } }} />
 
       {/* Main Content Area */}
-      <main className="flex-1 pt-20">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <main className="flex-1 pt-[72px]">
+        <div className="max-w-4xl mx-auto px-4 md:px-6">
           {children}
         </div>
       </main>
