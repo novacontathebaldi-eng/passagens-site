@@ -103,15 +103,15 @@ export default function ManifestoClient({
   return (
     <div className="min-h-[calc(100dvh-56px-64px)] relative">
       {/* Sticky Header and Tabs */}
-      <div className="bg-surface-container-lowest/90 backdrop-blur-md sticky top-16 md:top-20 z-30 px-4 md:px-6 py-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border-b border-outline-variant/20 -mx-4 md:-mx-0 md:rounded-t-3xl">
+      <div className="bg-white sticky top-[72px] z-30 px-4 md:px-6 py-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border-b border-slate-200 -mx-4 md:-mx-0 md:rounded-t-[2rem]">
         <div className="flex items-center gap-3">
           <Link
             href="/motorista"
-            className="w-10 h-10 flex items-center justify-center bg-surface-container hover:bg-surface-container-high rounded-full transition-colors active:scale-95"
+            className="w-10 h-10 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full transition-colors active:scale-95"
           >
-            <ArrowLeft className="w-5 h-5 text-on-surface" />
+            <ArrowLeft className="w-5 h-5 text-slate-800" />
           </Link>
-          <h1 className="font-headline font-bold text-lg text-on-surface leading-tight truncate flex-1 tracking-tight">
+          <h1 className="font-headline font-bold text-lg text-slate-900 leading-tight truncate flex-1 tracking-tight">
             {excursionTitle}
           </h1>
         </div>
@@ -119,29 +119,29 @@ export default function ManifestoClient({
         {/* Progress Bar */}
         <div className="mt-5">
           <div className="flex justify-between items-end mb-2">
-            <span className="text-on-surface-variant font-label text-xs uppercase tracking-wider font-bold">Embarcados</span>
-            <span className="font-headline font-bold text-primary">
+            <span className="text-slate-500 font-label text-xs uppercase tracking-wider font-bold">Embarcados</span>
+            <span className="font-headline font-bold text-blue-800">
               <span className="text-lg">{totalBoarded}</span>
-              <span className="text-sm text-on-surface-variant mx-1">/</span>
-              <span className="text-sm text-on-surface-variant">{totalApproved}</span>
+              <span className="text-sm text-slate-400 mx-1">/</span>
+              <span className="text-sm text-slate-500">{totalApproved}</span>
             </span>
           </div>
-          <div className="w-full bg-surface-container-highest rounded-full h-2 overflow-hidden shadow-inner">
+          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden shadow-inner">
             <div
-              className="bg-primary h-full rounded-full transition-all duration-700 ease-out"
+              className="bg-blue-600 h-full rounded-full transition-all duration-700 ease-out"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
         </div>
 
         {/* TABS */}
-        <div className="flex items-center gap-6 mt-6 border-b border-outline-variant/30">
+        <div className="flex items-center gap-6 mt-6 border-b border-slate-200">
           <button
             onClick={() => setActiveTab("manifesto")}
             className={`pb-3 text-sm font-bold flex items-center gap-2 transition-all border-b-2 ${
               activeTab === "manifesto"
-                ? "border-primary text-primary"
-                : "border-transparent text-on-surface-variant hover:text-on-surface"
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
             <Users className="w-4 h-4" />
@@ -151,36 +151,36 @@ export default function ManifestoClient({
             onClick={() => setActiveTab("ocorrencias")}
             className={`pb-3 text-sm font-bold flex items-center gap-2 transition-all border-b-2 relative ${
               activeTab === "ocorrencias"
-                ? "border-primary text-primary"
-                : "border-transparent text-on-surface-variant hover:text-on-surface"
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
             <ClipboardCheck className="w-4 h-4" />
             Ocorrências
             {!isReportCompleted && (
-              <span className="absolute top-1 -right-2 w-2 h-2 bg-warning rounded-full animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
+              <span className="absolute top-1 -right-2 w-2 h-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
             )}
           </button>
         </div>
       </div>
 
       {activeTab === "manifesto" ? (
-        <div className="py-6 px-1 md:px-0 space-y-4 pb-28">
+        <div className="pt-6 px-1 md:px-0 space-y-4 pb-36">
           {approvedPassengers.length > 0 ? (
             approvedPassengers.map((passenger) => (
               <div
                 key={passenger.ticket_id}
                 className={`rounded-3xl p-4 md:p-5 flex items-center gap-4 transition-all duration-300 shadow-[0_4px_16px_rgb(25,28,30,0.04)] border ${
                   passenger.check_in_status
-                    ? "bg-success/5 border-success/20"
-                    : "bg-surface-container-lowest border-transparent hover:border-outline-variant/30"
+                    ? "bg-green-50 border-green-200"
+                    : "bg-white border-transparent hover:border-slate-200"
                 }`}
               >
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0 shadow-sm ${
                     passenger.check_in_status
-                      ? "bg-success text-on-primary"
-                      : "bg-surface-container-high text-on-surface-variant"
+                      ? "bg-green-500 text-white"
+                      : "bg-slate-100 text-slate-500"
                   }`}
                 >
                   {passenger.seat_code}
@@ -188,30 +188,30 @@ export default function ManifestoClient({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="font-headline font-bold text-on-surface text-base truncate">
+                    <h3 className="font-headline font-bold text-slate-900 text-base truncate">
                       {passenger.full_name}
                     </h3>
                     {passenger.check_in_status ? (
-                      <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
                     ) : (
-                      <Clock className="w-4 h-4 text-on-surface-variant shrink-0" />
+                      <Clock className="w-4 h-4 text-slate-400 shrink-0" />
                     )}
                   </div>
 
-                  <p className="text-sm text-on-surface-variant mt-1 font-body">
+                  <p className="text-sm text-slate-500 mt-1 font-body">
                     CPF: {passenger.masked_cpf}
                   </p>
 
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
                     {/* Check-in timestamp */}
                     {passenger.check_in_status && passenger.checked_in_at && (
-                      <div className="text-[11px] font-bold tracking-wide uppercase text-success bg-success/10 px-2 py-1 rounded-md">
+                      <div className="text-[11px] font-bold tracking-wide uppercase text-green-700 bg-green-100 px-2 py-1 rounded-md">
                         Embarcou às {formatTime(passenger.checked_in_at)}
                       </div>
                     )}
 
                     {passenger.emergency_contact_phone && (
-                      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-2 py-1 rounded-md">
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-blue-700 bg-blue-100 px-2 py-1 rounded-md">
                         <Phone className="w-3 h-3" />
                         {passenger.emergency_contact_phone}
                       </div>
@@ -221,19 +221,19 @@ export default function ManifestoClient({
               </div>
             ))
           ) : (
-            <div className="text-center py-12 bg-surface-container-lowest rounded-3xl border border-outline-variant/30 shadow-sm">
-              <div className="w-16 h-16 bg-surface-container mx-auto rounded-full flex items-center justify-center mb-4">
-                <Users className="w-8 h-8 text-on-surface-variant" />
+            <div className="text-center py-12 bg-white rounded-3xl border border-slate-200 shadow-sm">
+              <div className="w-16 h-16 bg-slate-50 mx-auto rounded-full flex items-center justify-center mb-4">
+                <Users className="w-8 h-8 text-slate-400" />
               </div>
-              <h3 className="font-headline font-bold text-lg text-on-surface mb-2">Nenhum passageiro</h3>
-              <p className="text-on-surface-variant">
+              <h3 className="font-headline font-bold text-lg text-slate-900 mb-2">Nenhum passageiro</h3>
+              <p className="text-slate-500">
                 Não há passageiros confirmados para esta viagem ainda.
               </p>
             </div>
           )}
         </div>
       ) : (
-        <div className="py-6 px-1 md:px-0 pb-28">
+        <div className="pt-6 px-1 md:px-0 pb-36">
           <VistoriaForm excursionId={excursionId} onStatusChange={(status) => setIsReportCompleted(status)} />
         </div>
       )}
@@ -241,7 +241,7 @@ export default function ManifestoClient({
       {/* FAB - Botão Flutuante de Atalho */}
       <Link
         href={`/motorista/checkin/${excursionId}`}
-        className="fixed bottom-24 right-6 w-14 h-14 bg-cta hover:bg-cta/90 text-on-cta rounded-full shadow-[0_8px_24px_rgb(249,115,22,0.4)] flex items-center justify-center transition-transform active:scale-90 z-40 group"
+        className="fixed bottom-32 md:bottom-28 right-6 w-14 h-14 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-full shadow-[0_8px_24px_rgb(249,115,22,0.4)] flex items-center justify-center transition-transform active:scale-90 z-40 group"
         title="Escanear QR Code"
       >
         <QrCode className="w-6 h-6 group-hover:scale-110 transition-transform" />
