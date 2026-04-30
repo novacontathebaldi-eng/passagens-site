@@ -11,7 +11,8 @@ import {
   QrCode,
   ClipboardCheck,
   Users,
-  Share2
+  Share2,
+  FileDown
 } from "lucide-react";
 import VistoriaForm from "./VistoriaForm";
 
@@ -74,20 +75,20 @@ export default function ManifestoClient({
     const missing = approvedPassengers.filter(p => !p.check_in_status);
     const date = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
     
-    let text = `🚍 *Relatório de Embarque*\n`;
-    text += `📍 *${excursionTitle}*\n`;
-    text += `✅ Embarcados: ${totalBoarded}/${totalApproved}\n`;
+    let text = `\uD83D\uDE8D *Relatório de Embarque*\n`;
+    text += `\uD83D\uDCCD *${excursionTitle}*\n`;
+    text += `\u2705 Embarcados: ${totalBoarded}/${totalApproved}\n`;
     
     if (missing.length > 0) {
-      text += `\n⏳ *Faltam (${missing.length}):*\n`;
+      text += `\n\u23F3 *Faltam (${missing.length}):*\n`;
       missing.forEach(p => {
         text += `- P${p.seat_code}: ${p.full_name}\n`;
       });
     } else {
-      text += `\n🎉 *Todos os passageiros embarcados!*\n`;
+      text += `\n\uD83C\uDF89 *Todos os passageiros embarcados!*\n`;
     }
     
-    text += `\n⏱️ Gerado em: ${date}`;
+    text += `\n\u23F1\uFE0F Gerado em: ${date}`;
     
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
@@ -146,6 +147,15 @@ export default function ManifestoClient({
           <h1 className="font-headline font-bold text-base md:text-lg text-slate-900 leading-tight truncate flex-1 tracking-tight">
             {excursionTitle}
           </h1>
+          <a
+            href={`/api/manifesto/download-pdf?excursion_id=${excursionId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-blue-50 hover:bg-blue-100 rounded-full transition-colors active:scale-95 text-blue-600 shrink-0"
+            title="Baixar PDF do Manifesto"
+          >
+            <FileDown className="w-4 h-4 md:w-5 md:h-5" />
+          </a>
           <button
             onClick={handleShareReport}
             className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-green-50 hover:bg-green-100 rounded-full transition-colors active:scale-95 text-green-600 shrink-0"
