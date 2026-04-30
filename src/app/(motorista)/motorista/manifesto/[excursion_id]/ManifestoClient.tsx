@@ -135,37 +135,37 @@ export default function ManifestoClient({
   return (
     <div className="min-h-[calc(100dvh-56px-64px)] relative">
       {/* Sticky Header and Tabs */}
-      <div className="bg-white sticky top-[72px] z-30 px-4 md:px-6 py-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border-b border-slate-200 -mx-4 md:-mx-0 md:rounded-t-[2rem]">
-        <div className="flex items-center gap-3">
+      <div className="bg-white sticky top-[72px] z-30 px-4 md:px-6 py-3 md:py-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border-b border-slate-200 -mx-4 md:-mx-0 md:rounded-t-[2rem]">
+        <div className="flex items-center gap-2 md:gap-3">
           <Link
             href="/motorista"
-            className="w-10 h-10 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full transition-colors active:scale-95"
+            className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full transition-colors active:scale-95"
           >
-            <ArrowLeft className="w-5 h-5 text-slate-800" />
+            <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 text-slate-800" />
           </Link>
-          <h1 className="font-headline font-bold text-lg text-slate-900 leading-tight truncate flex-1 tracking-tight">
+          <h1 className="font-headline font-bold text-base md:text-lg text-slate-900 leading-tight truncate flex-1 tracking-tight">
             {excursionTitle}
           </h1>
           <button
             onClick={handleShareReport}
-            className="w-10 h-10 flex items-center justify-center bg-green-50 hover:bg-green-100 rounded-full transition-colors active:scale-95 text-green-600 shrink-0"
+            className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-green-50 hover:bg-green-100 rounded-full transition-colors active:scale-95 text-green-600 shrink-0"
             title="Compartilhar Relatório no WhatsApp"
           >
-            <Share2 className="w-5 h-5" />
+            <Share2 className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-5">
-          <div className="flex justify-between items-end mb-2">
-            <span className="text-slate-500 font-label text-xs uppercase tracking-wider font-bold">Embarcados</span>
-            <span className="font-headline font-bold text-blue-800">
-              <span className="text-lg">{totalBoarded}</span>
-              <span className="text-sm text-slate-400 mx-1">/</span>
-              <span className="text-sm text-slate-500">{totalApproved}</span>
+        <div className="mt-3 md:mt-5">
+          <div className="flex justify-between items-end mb-1 md:mb-2">
+            <span className="text-slate-500 font-label text-[10px] md:text-xs uppercase tracking-wider font-bold">Embarcados</span>
+            <span className="font-headline font-bold text-blue-800 leading-none">
+              <span className="text-base md:text-lg">{totalBoarded}</span>
+              <span className="text-xs md:text-sm text-slate-400 mx-1">/</span>
+              <span className="text-xs md:text-sm text-slate-500">{totalApproved}</span>
             </span>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden shadow-inner">
+          <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2 overflow-hidden shadow-inner">
             <div
               className="bg-blue-600 h-full rounded-full transition-all duration-700 ease-out"
               style={{ width: `${progressPercentage}%` }}
@@ -174,30 +174,30 @@ export default function ManifestoClient({
         </div>
 
         {/* TABS */}
-        <div className="flex items-center gap-6 mt-6 border-b border-slate-200">
+        <div className="flex items-center gap-4 md:gap-6 mt-4 md:mt-6 border-b border-slate-200">
           <button
             onClick={() => setActiveTab("manifesto")}
-            className={`pb-3 text-sm font-bold flex items-center gap-2 transition-all border-b-2 ${
+            className={`pb-2 md:pb-3 text-xs md:text-sm font-bold flex items-center gap-1.5 md:gap-2 transition-all border-b-2 ${
               activeTab === "manifesto"
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
-            <Users className="w-4 h-4" />
+            <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
             Passageiros
           </button>
           <button
             onClick={() => setActiveTab("ocorrencias")}
-            className={`pb-3 text-sm font-bold flex items-center gap-2 transition-all border-b-2 relative ${
+            className={`pb-2 md:pb-3 text-xs md:text-sm font-bold flex items-center gap-1.5 md:gap-2 transition-all border-b-2 relative ${
               activeTab === "ocorrencias"
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
-            <ClipboardCheck className="w-4 h-4" />
+            <ClipboardCheck className="w-3.5 h-3.5 md:w-4 md:h-4" />
             Ocorrências
             {!isReportCompleted && (
-              <span className="absolute top-1 -right-2 w-2 h-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+              <span className="absolute top-0.5 -right-2 w-1.5 h-1.5 md:w-2 md:h-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
             )}
           </button>
         </div>
