@@ -10,7 +10,8 @@ import {
   Phone,
   QrCode,
   ClipboardCheck,
-  Users
+  Users,
+  Share2
 } from "lucide-react";
 import VistoriaForm from "./VistoriaForm";
 
@@ -50,6 +51,7 @@ export default function ManifestoClient({
   const [passengers, setPassengers] = useState<Passenger[]>(initialPassengers);
   const [activeTab, setActiveTab] = useState<"manifesto" | "ocorrencias">("manifesto");
   const [isReportCompleted, setIsReportCompleted] = useState<boolean>(false);
+  const [filter, setFilter] = useState<"todos" | "faltantes" | "embarcados">("todos");
 
   // Only count APPROVED passengers
   const approvedPassengers = passengers.filter(
@@ -60,6 +62,36 @@ export default function ManifestoClient({
   ).length;
   const totalApproved = approvedPassengers.length;
   const progressPercentage = totalApproved > 0 ? (totalBoarded / totalApproved) * 100 : 0;
+
+  const filteredPassengers = approvedPassengers.filter((p) => {
+    if (filter === "todos") return true;
+    if (filter === "faltantes") return !p.check_in_status;
+    if (filter === "embarcados") return p.check_in_status;
+    return true;
+  });
+
+  const handleShareReport = () => {
+    const missing = approvedPassengers.filter(p => !p.check_in_status);
+    const date = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+    
+    let text = `🚍 *Relatório de Embarque*\n`;
+    text += `📍 *${excursionTitle}*\n`;
+    text += `✅ Embarcados: ${totalBoarded}/${totalApproved}\n`;
+    
+    if (missing.length > 0) {
+      text += `\n⏳ *Faltam (${missing.length}):*\n`;
+      missing.forEach(p => {
+        text += `- P${p.seat_code}: ${p.full_name}\n`;
+      });
+    } else {
+      text += `\n🎉 *Todos os passageiros embarcados!*\n`;
+    }
+    
+    text += `\n⏱️ Gerado em: ${date}`;
+    
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  };
 
   // ── Real-time updates via Supabase channel ──
   useEffect(() => {
@@ -114,6 +146,13 @@ export default function ManifestoClient({
           <h1 className="font-headline font-bold text-lg text-slate-900 leading-tight truncate flex-1 tracking-tight">
             {excursionTitle}
           </h1>
+          <button
+            onClick={handleShareReport}
+            className="w-10 h-10 flex items-center justify-center bg-green-50 hover:bg-green-100 rounded-full transition-colors active:scale-95 text-green-600 shrink-0"
+            title="Compartilhar Relatório no WhatsApp"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Progress Bar */}
@@ -166,8 +205,36 @@ export default function ManifestoClient({
 
       {activeTab === "manifesto" ? (
         <div className="pt-6 px-1 md:px-0 space-y-4 pb-36">
-          {approvedPassengers.length > 0 ? (
-            approvedPassengers.map((passenger) => (
+          {/* Filtros Rápidos */}
+          <div className="flex gap-2 mb-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              onClick={() => setFilter("todos")}
+              className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
+                filter === "todos" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Todos ({totalApproved})
+            </button>
+            <button
+              onClick={() => setFilter("faltantes")}
+              className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
+                filter === "faltantes" ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Faltam ({totalApproved - totalBoarded})
+            </button>
+            <button
+              onClick={() => setFilter("embarcados")}
+              className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
+                filter === "embarcados" ? "bg-green-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Embarcados ({totalBoarded})
+            </button>
+          </div>
+
+          {filteredPassengers.length > 0 ? (
+            filteredPassengers.map((passenger) => (
               <div
                 key={passenger.ticket_id}
                 className={`rounded-3xl p-4 md:p-5 flex items-center gap-4 transition-all duration-300 shadow-[0_4px_16px_rgb(25,28,30,0.04)] border ${
@@ -227,7 +294,7 @@ export default function ManifestoClient({
               </div>
               <h3 className="font-headline font-bold text-lg text-slate-900 mb-2">Nenhum passageiro</h3>
               <p className="text-slate-500">
-                Não há passageiros confirmados para esta viagem ainda.
+                Nenhum passageiro encontrado para este filtro.
               </p>
             </div>
           )}
