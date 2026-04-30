@@ -39,11 +39,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Excursão não encontrada" }, { status: 404 });
   }
 
-  // Fetch Manifesto Data (Usando a View LGPD segura)
+  // Fetch Manifesto Data (View LGPD + filtro defensivo APPROVED)
   const { data: passengers, error } = await supabase
     .from("driver_manifest_view")
     .select("seat_code, full_name, masked_cpf, emergency_contact_name, emergency_contact_phone, check_in_status")
     .eq("excursion_id", excursionId)
+    .eq("payment_status", "APPROVED")
     .order("seat_code", { ascending: true });
 
   if (error || !passengers) {
