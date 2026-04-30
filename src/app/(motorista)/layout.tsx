@@ -38,11 +38,11 @@ export default async function MotoristaLayout({
   const initials = profile?.full_name?.substring(0, 2).toUpperCase() || "DR";
 
   return (
-    <div className="min-h-[100dvh] bg-surface-container-lowest font-body flex flex-col pb-24 md:pb-0">
+    <div className="min-h-[100dvh] bg-slate-50 font-body flex flex-col pb-24">
       {/* Top App Bar Mobile */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none flex items-center px-6 py-4">
+      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm flex items-center px-6 py-4">
         <div className="flex items-center gap-3 z-10">
-          <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden flex items-center justify-center font-bold text-primary">
+          <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center font-bold text-blue-900">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="Driver" className="w-full h-full object-cover" />
             ) : (
@@ -51,14 +51,14 @@ export default async function MotoristaLayout({
           </div>
         </div>
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none">
-          <h1 className="font-headline font-bold text-xl text-blue-900 dark:text-blue-100 tracking-tight whitespace-nowrap">
+          <h1 className="font-headline font-bold text-xl text-blue-900 tracking-tight whitespace-nowrap">
             Partiu Turismo
           </h1>
         </div>
         <div className="ml-auto z-10">
           <form action={logout}>
-            <button type="submit" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest transition-colors hover:opacity-80 scale-95 duration-200">
-              <LogOut className="w-5 h-5 text-blue-900 dark:text-blue-400" />
+            <button type="submit" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors hover:opacity-80 scale-95 duration-200">
+              <LogOut className="w-5 h-5 text-blue-900" />
             </button>
           </form>
         </div>
