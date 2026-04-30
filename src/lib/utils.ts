@@ -129,3 +129,8 @@ export const USER_ROLE_LABELS: Record<string, string> = {
   DRIVER: "Motorista",
   CLIENT: "Cliente",
 };
+
+/** Combine class names */
+export function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(" ");
+}
