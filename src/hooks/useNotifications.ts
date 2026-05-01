@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export type NotificationType =
@@ -33,31 +33,49 @@ export function useNotifications(limit = 20) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
 
-  const fetchNotifications = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(limit);
+  // Stable supabase reference — createClient() is a singleton but the
+  // reference identity can change between renders, so we memoize it.
+  const supabase = useMemo(() => createClient(), []);
 
-    if (!error && data) {
-      setNotifications(data as Notification[]);
-      setUnreadCount(data.filter((n) => !n.is_read).length);
-    }
-    setIsLoading(false);
-  }, [supabase, limit]);
+  // Keep limit in a ref so the realtime callback always sees the latest value
+  // without needing it in the dependency array.
+  const limitRef = useRef(limit);
+  limitRef.current = limit;
 
   // Initial fetch
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    let cancelled = false;
 
-  // Real-time subscription
+    async function load() {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(limitRef.current);
+
+      if (cancelled) return;
+
+      if (!error && data) {
+        const typed = data as Notification[];
+        setNotifications(typed);
+        setUnreadCount(typed.filter((n) => !n.is_read).length);
+      }
+      setIsLoading(false);
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase]);
+
+  // Real-time subscription — create channel, attach listeners, THEN subscribe.
+  // Cleanup removes the channel before React re-runs the effect (StrictMode).
   useEffect(() => {
     const channel = supabase
-      .channel("notifications-realtime")
+      .channel(`notifications-rt-${Date.now()}`)
       .on(
         "postgres_changes",
         {
@@ -66,8 +84,10 @@ export function useNotifications(limit = 20) {
           table: "notifications",
         },
         (payload) => {
-          const newNotification = payload.new as Notification;
-          setNotifications((prev) => [newNotification, ...prev].slice(0, limit));
+          const incoming = payload.new as Notification;
+          setNotifications((prev) =>
+            [incoming, ...prev].slice(0, limitRef.current)
+          );
           setUnreadCount((prev) => prev + 1);
         }
       )
@@ -80,13 +100,10 @@ export function useNotifications(limit = 20) {
         },
         (payload) => {
           const updated = payload.new as Notification;
-          setNotifications((prev) =>
-            prev.map((n) => (n.id === updated.id ? updated : n))
-          );
-          // Recalculate unread
           setNotifications((prev) => {
-            setUnreadCount(prev.filter((n) => !n.is_read).length);
-            return prev;
+            const next = prev.map((n) => (n.id === updated.id ? updated : n));
+            setUnreadCount(next.filter((n) => !n.is_read).length);
+            return next;
           });
         }
       )
@@ -95,7 +112,7 @@ export function useNotifications(limit = 20) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, limit]);
+  }, [supabase]);
 
   const markAsRead = useCallback(
     async (notificationId: string) => {
@@ -141,12 +158,26 @@ export function useNotifications(limit = 20) {
     return { error };
   }, [supabase, notifications]);
 
+  const refresh = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limitRef.current);
+
+    if (!error && data) {
+      const typed = data as Notification[];
+      setNotifications(typed);
+      setUnreadCount(typed.filter((n) => !n.is_read).length);
+    }
+  }, [supabase]);
+
   return {
     notifications,
     unreadCount,
     isLoading,
     markAsRead,
     markAllAsRead,
-    refresh: fetchNotifications,
+    refresh,
   };
 }
