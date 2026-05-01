@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSiteSettings } from "@/lib/get-settings";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
+import { SocialLinks } from "@/components/SocialLinks";
 
 
 export const metadata: Metadata = {
@@ -102,6 +103,9 @@ export default async function B2CLayout({
                 Excursões turísticas rodoviárias premium. Pacotes completos
                 com guia, ônibus executivo e tudo incluso.
               </p>
+              <div className="mt-6">
+                <SocialLinks links={settings.social_links} className="flex gap-4" iconClassName="w-5 h-5 text-outline-variant hover:text-white transition-colors" />
+              </div>
             </div>
 
             {/* Links */}

@@ -4,11 +4,29 @@ import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { convertToWebP, getExtForType, getOldFilePaths } from "@/lib/image-utils";
 import Image from "next/image";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type PixKeyEntry = { type: string; key: string; label: string };
 type HeroStatEntry = { number: string; label: string; iconPath: string };
 type DriverContactEntry = { id: string; label: string; number: string; whatsapp: boolean };
 type ChecklistItem = { id: string; label: string };
+type SocialLinkEntry = { id: string; platform: string; name: string; url: string; isActive: boolean; };
 
 const PIX_KEY_TYPES = [
   { value: "TELEFONE", label: "Telefone" },
@@ -60,6 +78,7 @@ type GlobalSettings = {
   administrative_address: string;
   hold_ttl_hours: number;
   hero_stats: HeroStatEntry[];
+  social_links: SocialLinkEntry[];
   // Dynamic images
   logo_url: string | null;
   hero_image_url: string | null;
@@ -194,6 +213,105 @@ function ImageUploader({
   );
 }
 
+function SortableSocialItem({
+  link,
+  index,
+  total,
+  updateSocialLink,
+  removeSocialLink,
+  moveSocialLink,
+}: {
+  link: SocialLinkEntry;
+  index: number;
+  total: number;
+  updateSocialLink: (index: number, field: keyof SocialLinkEntry, value: any) => void;
+  removeSocialLink: (index: number) => void;
+  moveSocialLink: (index: number, direction: -1 | 1) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: link.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 1,
+    opacity: isDragging ? 0.8 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className={`flex flex-col sm:flex-row gap-3 items-start sm:items-center p-4 bg-surface rounded-xl border ${isDragging ? 'border-primary shadow-lg' : 'border-outline-variant/30'}`}>
+      <div {...attributes} {...listeners} className="cursor-grab text-on-surface-variant hover:text-on-surface p-1 touch-none">
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
+      </div>
+
+      <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-2 w-full items-center">
+        <div className="sm:col-span-3">
+          <label className="text-[11px] font-semibold text-on-surface-variant block mb-1">Plataforma</label>
+          <select
+            value={link.platform}
+            onChange={(e) => updateSocialLink(index, "platform", e.target.value)}
+            className="w-full bg-surface border border-outline-variant rounded-xl px-2 py-2 text-sm focus:border-primary outline-none"
+          >
+            <option value="instagram">Instagram</option>
+            <option value="facebook">Facebook</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="youtube">YouTube</option>
+            <option value="tiktok">TikTok</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="twitter">X (Twitter)</option>
+            <option value="telegram">Telegram</option>
+            <option value="other">Outro / Site</option>
+          </select>
+        </div>
+        <div className="sm:col-span-3">
+          <label className="text-[11px] font-semibold text-on-surface-variant block mb-1">Nome (Op.)</label>
+          <input
+            type="text"
+            value={link.name}
+            onChange={(e) => updateSocialLink(index, "name", e.target.value)}
+            placeholder="Ex: Partiu Turismo"
+            className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+          />
+        </div>
+        <div className="sm:col-span-5">
+          <label className="text-[11px] font-semibold text-on-surface-variant block mb-1">URL Completa</label>
+          <input
+            type="text"
+            value={link.url}
+            onChange={(e) => updateSocialLink(index, "url", e.target.value)}
+            placeholder="https://"
+            className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+          />
+        </div>
+        <div className="sm:col-span-1 flex items-center justify-center pt-5">
+          <label className="flex items-center gap-1 cursor-pointer">
+            <input type="checkbox" checked={link.isActive} onChange={(e) => updateSocialLink(index, "isActive", e.target.checked)} className="rounded text-primary focus:ring-primary" />
+            <span className="text-xs">Ativo</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="flex sm:flex-col gap-1 shrink-0 pt-4 sm:pt-0">
+        <button type="button" onClick={() => moveSocialLink(index, -1)} disabled={index === 0} className="p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para cima">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+        </button>
+        <button type="button" onClick={() => moveSocialLink(index, 1)} disabled={index === total - 1} className="p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para baixo">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+        <button type="button" onClick={() => removeSocialLink(index)} className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" title="Remover">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function ConfiguracoesPage() {
   const [settings, setSettings] = useState<GlobalSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -255,11 +373,21 @@ export default function ConfiguracoesPage() {
           }
         } catch (e) { }
 
+        let socialLinks: SocialLinkEntry[] = [];
+        try {
+          if (Array.isArray(data.social_links)) {
+            socialLinks = data.social_links as SocialLinkEntry[];
+          } else if (typeof data.social_links === 'string') {
+            socialLinks = JSON.parse(data.social_links);
+          }
+        } catch (e) { }
+
         setSettings({
           ...data,
           whatsapp_support_numbers: numbers.length > 0 ? numbers : [""],
           driver_contact_numbers: driverContacts,
           driver_checklist_items: checklistItems,
+          social_links: socialLinks,
           pix_keys: pixKeys,
           hero_stats: heroStats,
           pix_key: data.pix_key ?? "",
@@ -303,6 +431,7 @@ export default function ConfiguracoesPage() {
           whatsapp_support_numbers: [""],
           driver_contact_numbers: [],
           driver_checklist_items: [],
+          social_links: [],
           hold_ttl_hours: 24,
           hero_stats: [],
           logo_url: null,
@@ -335,6 +464,7 @@ export default function ConfiguracoesPage() {
         return { ...c, number: num };
       })),
       driver_checklist_items: JSON.stringify(settings.driver_checklist_items),
+      social_links: JSON.stringify(settings.social_links),
       updated_at: new Date().toISOString()
     };
 
@@ -442,6 +572,45 @@ export default function ConfiguracoesPage() {
     const newStats = [...settings.hero_stats];
     [newStats[index], newStats[newIndex]] = [newStats[newIndex], newStats[index]];
     setSettings({ ...settings, hero_stats: newStats });
+  };
+
+  // Social Links handlers
+  const addSocialLink = () => {
+    if (!settings) return;
+    setSettings({ ...settings, social_links: [...settings.social_links, { id: crypto.randomUUID(), platform: "instagram", name: "Instagram", url: "", isActive: true }] });
+  };
+
+  const updateSocialLink = (index: number, field: keyof SocialLinkEntry, value: any) => {
+    if (!settings) return;
+    const newLinks = [...settings.social_links];
+    newLinks[index] = { ...newLinks[index], [field]: value };
+    setSettings({ ...settings, social_links: newLinks });
+  };
+
+  const removeSocialLink = (index: number) => {
+    if (!settings) return;
+    setSettings({ ...settings, social_links: settings.social_links.filter((_, i) => i !== index) });
+  };
+
+  const moveSocialLink = (index: number, direction: -1 | 1) => {
+    if (!settings) return;
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= settings.social_links.length) return;
+    const newLinks = [...settings.social_links];
+    [newLinks[index], newLinks[newIndex]] = [newLinks[newIndex], newLinks[index]];
+    setSettings({ ...settings, social_links: newLinks });
+  };
+
+  const handleDragEndSocial = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id && settings) {
+      const oldIndex = settings.social_links.findIndex(l => l.id === active.id);
+      const newIndex = settings.social_links.findIndex(l => l.id === over.id);
+      setSettings({
+        ...settings,
+        social_links: arrayMove(settings.social_links, oldIndex, newIndex),
+      });
+    }
   };
 
   // QR Code image upload
@@ -803,6 +972,59 @@ export default function ConfiguracoesPage() {
               className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-sm"
               placeholder="Descreva as regras de cancelamento. Visível na tela de pagamento para o cliente estar ciente."
             />
+          </div>
+        </section>
+
+        {/* REDES SOCIAIS */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            Redes Sociais
+          </h2>
+          <p className="text-xs text-on-surface-variant">
+            Gerencie os links das redes sociais que aparecerão no rodapé do site B2C e na página de contato. Arraste para reordenar.
+          </p>
+
+          <div className="space-y-3">
+            <DndContext
+              sensors={useSensors(
+                useSensor(PointerSensor),
+                useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+              )}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEndSocial}
+            >
+              <SortableContext items={settings.social_links.map(l => l.id)} strategy={verticalListSortingStrategy}>
+                {settings.social_links.map((link, i) => (
+                  <SortableSocialItem
+                    key={link.id}
+                    link={link}
+                    index={i}
+                    total={settings.social_links.length}
+                    updateSocialLink={updateSocialLink}
+                    removeSocialLink={removeSocialLink}
+                    moveSocialLink={moveSocialLink}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+
+            {settings.social_links.length === 0 && (
+              <div className="p-4 bg-surface rounded-xl border border-outline-variant/30 text-center">
+                <p className="text-sm text-on-surface-variant">Nenhuma rede social configurada.</p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={addSocialLink}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 border-2 border-dashed border-outline-variant/40 rounded-2xl text-sm font-semibold text-primary hover:border-primary/50 hover:bg-primary/5 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+              Adicionar Rede Social
+            </button>
           </div>
         </section>
 

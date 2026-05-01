@@ -1,5 +1,6 @@
 import { Mail, MessageCircle, MapPin, Clock } from "lucide-react";
 import { getSiteSettings } from "@/lib/get-settings";
+import { SocialLinks } from "@/components/SocialLinks";
 
 export default async function ContatoPage() {
   const settings = await getSiteSettings();
@@ -79,8 +80,14 @@ export default async function ContatoPage() {
                 </div>
               </div>
             </div>
-
           </div>
+
+          {settings.social_links && settings.social_links.filter(l => l.isActive).length > 0 && (
+            <div className="mt-12 pt-8 border-t border-outline-variant/30 flex flex-col items-center">
+              <h2 className="text-lg font-bold text-on-surface mb-6">Acompanhe nossas Redes Sociais</h2>
+              <SocialLinks links={settings.social_links} iconClassName="w-7 h-7 text-on-surface-variant hover:text-primary transition-colors" className="flex flex-wrap justify-center gap-6" />
+            </div>
+          )}
         </div>
       </div>
     </div>

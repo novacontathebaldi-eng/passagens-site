@@ -13,6 +13,14 @@ export type HeroStat = {
   iconPath: string;
 };
 
+export type SocialLinkEntry = {
+  id: string;
+  platform: string;
+  name: string;
+  url: string;
+  isActive: boolean;
+};
+
 export type SiteSettings = {
   company_name: string;
   logo_url: string | null;
@@ -42,7 +50,7 @@ export type SiteSettings = {
   operating_hours: string | null;
   administrative_address: string | null;
   cancellation_policy_text: string | null;
-  social_links: Record<string, string> | null;
+  social_links: SocialLinkEntry[] | null;
   hero_stats: HeroStat[] | null;
   updated_at: string;
 };
@@ -153,7 +161,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     operating_hours: settings.operating_hours ?? null,
     administrative_address: settings.administrative_address ?? null,
     cancellation_policy_text: settings.cancellation_policy_text ?? null,
-    social_links: typeof parsedSocialLinks === "object" ? parsedSocialLinks : null,
+    social_links: Array.isArray(parsedSocialLinks) ? parsedSocialLinks : null,
     hero_stats: Array.isArray(parsedHeroStats) ? parsedHeroStats : null,
     updated_at: settings.updated_at ?? new Date().toISOString(),
   };
