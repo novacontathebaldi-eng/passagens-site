@@ -126,7 +126,7 @@ Deno.serve(async (req: Request) => {
 
     if (!brevoRes.ok) {
       console.error("Brevo Error:", brevoData);
-      throw new Error(`Failed to send email via Brevo: ${brevoData.message}`);
+      throw new Error("Failed to send email via Brevo: " + brevoData.message);
     }
 
     return new Response(JSON.stringify({ success: true, brevo: brevoData }), {
