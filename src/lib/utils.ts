@@ -58,7 +58,8 @@ export function formatBRL(value: number): string {
 }
 
 /** Format a date in pt-BR locale */
-export function formatDate(date: string | Date): string {
+export function formatDate(date?: string | Date | null): string {
+  if (!date) return "Data a definir";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "long",
@@ -67,7 +68,8 @@ export function formatDate(date: string | Date): string {
 }
 
 /** Format a date as short: 19/04/2026 */
-export function formatDateShort(date: string | Date): string {
+export function formatDateShort(date?: string | Date | null): string {
+  if (!date) return "Data a definir";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
@@ -76,7 +78,8 @@ export function formatDateShort(date: string | Date): string {
 }
 
 /** Format a datetime: 19/04/2026 às 14:30 */
-export function formatDateTime(date: string | Date): string {
+export function formatDateTime(date?: string | Date | null): string {
+  if (!date) return "Data a definir";
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",

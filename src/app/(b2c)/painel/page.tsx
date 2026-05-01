@@ -161,7 +161,7 @@ export default async function PainelClientePage({
                       
                       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                         <div>
-                          <h3 className={`font-bold text-lg text-on-surface leading-tight ${cardHref ? 'group-hover:text-primary transition-colors' : ''}`}>{pkg?.title}</h3>
+                          <h3 className={`font-bold text-lg text-on-surface leading-tight ${cardHref ? 'group-hover:text-primary transition-colors' : ''}`}>{pkg?.title || "Excursão indisponível"}</h3>
                           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-on-surface-variant">
                             <span className="flex items-center gap-1"><CalendarDays className="w-4 h-4" /> {formatDate(date)}</span>
                             <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {res.passenger_tickets?.length} Passageiro(s)</span>
@@ -218,7 +218,7 @@ export default async function PainelClientePage({
                     return (
                       <div key={w.id} className="border border-outline-variant/50 rounded-xl p-3 flex justify-between items-center text-sm">
                         <div>
-                          <p className="font-semibold text-on-surface">{title}</p>
+                          <p className="font-semibold text-on-surface">{title || "Excursão indisponível"}</p>
                           <p className="text-xs text-on-surface-variant">{formatDate(w.excursions?.departure_date)}</p>
                         </div>
                         <div className="bg-surface-container px-2 py-1 rounded text-xs font-bold text-outline">
