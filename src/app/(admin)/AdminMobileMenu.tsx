@@ -174,7 +174,6 @@ export function AdminMobileMenu({ navItems, profile, initials, logoUrl, companyN
                 <div className="space-y-1">
                   <Link
                     href="/"
-                    target="_blank"
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 text-white/60 hover:text-white hover:bg-white/5"
                   >
                     <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
