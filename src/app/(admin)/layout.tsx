@@ -70,8 +70,8 @@ export default async function AdminLayout({
             </span>
           </div>
           
-          <div className="px-4 pb-4">
-            <div className="flex items-center gap-2.5 p-2 px-3 rounded-[10px] bg-white/5 border border-white/10 shadow-sm">
+          <div className="px-6 pb-4 -mt-1">
+            <div className="flex items-center gap-3">
               {profile.avatar_url ? (
                 <img
                   src={profile.avatar_url}
