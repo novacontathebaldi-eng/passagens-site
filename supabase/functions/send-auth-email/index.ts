@@ -10,44 +10,51 @@ const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
 const SENDER_EMAIL = "suporte@othebaldi.me";
 
 Deno.serve(async (req: Request) => {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
-  }
-
-  const payload = await req.text();
-  const headers = Object.fromEntries(req.headers);
-  const wh = new Webhook(hookSecret);
-  
-  let user: any;
-  let email_data: any;
-  
   try {
-    const verified = wh.verify(payload, headers) as {
-      user: any;
-      email_data: any;
-    };
-    user = verified.user;
-    email_data = verified.email_data;
-  } catch (err) {
-    return new Response(JSON.stringify({ error: "Invalid signature" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
+    if (req.method !== "POST") {
+      return new Response("Method not allowed", { status: 405 });
+    }
 
-  const emailType = email_data.email_action_type;
+    const payload = await req.text();
+    const headers = Object.fromEntries(req.headers);
 
-  // Nós só vamos processar o e-mail de recovery nesta função no momento
-  if (emailType !== "recovery") {
-    // Para outros tipos (como signup), podemos retornar um e-mail default ou 
-    // retornar as strings do próprio Auth do Supabase. Como queremos substituir o de recovery:
-    console.log(`Skipping email type: ${emailType}`);
-    return new Response(JSON.stringify({ skipped: true, reason: `Type ${emailType} not handled` }), {
-      headers: { "Content-Type": "application/json" }
-    });
-  }
+    if (!hookSecret) {
+      throw new Error("SEND_EMAIL_HOOK_SECRET is missing or empty.");
+    }
 
-  try {
+    let wh;
+    try {
+      wh = new Webhook(hookSecret);
+    } catch (e) {
+      throw new Error("Failed to initialize Webhook: " + (e as Error).message);
+    }
+    
+    let user: any;
+    let email_data: any;
+    
+    try {
+      const verified = wh.verify(payload, headers) as {
+        user: any;
+        email_data: any;
+      };
+      user = verified.user;
+      email_data = verified.email_data;
+    } catch (err) {
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    const emailType = email_data.email_action_type;
+
+    if (emailType !== "recovery") {
+      console.log(`Skipping email type: ${emailType}`);
+      return new Response(JSON.stringify({ skipped: true, reason: `Type ${emailType} not handled` }), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
     const supabase = createClient(supabaseUrl, serviceKey);
     const { data: settings } = await supabase
       .from("global_settings")
@@ -63,8 +70,6 @@ Deno.serve(async (req: Request) => {
 
     const subject = `Recuperação de Senha - ${companyName}`;
     
-    // Constrói o actionLink
-    // Redireciona o usuário para o verify do Supabase, passando o token_hash
     const actionLink = `${supabaseUrl}/auth/v1/verify?token=${email_data.token_hash}&type=${emailType}&redirect_to=${encodeURIComponent(email_data.redirect_to)}`;
 
     const headerHtml = logoUrl 
@@ -107,7 +112,6 @@ Deno.serve(async (req: Request) => {
       </div>
     `;
 
-    // Send email via Brevo API
     const brevoRes = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
@@ -125,7 +129,6 @@ Deno.serve(async (req: Request) => {
     const brevoData = await brevoRes.json();
 
     if (!brevoRes.ok) {
-      console.error("Brevo Error:", brevoData);
       throw new Error("Failed to send email via Brevo: " + brevoData.message);
     }
 
