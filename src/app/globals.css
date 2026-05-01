@@ -156,6 +156,22 @@ h1, h2, h3, h4, h5, h6 {
   .voucher-card * { color-adjust: exact; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
+/* ── Notification Dropdown Animation ── */
+@keyframes notif-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-in {
+  animation: notif-slide-in 0.2s ease-out forwards;
+}
+
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

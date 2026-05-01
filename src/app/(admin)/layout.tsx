@@ -7,6 +7,7 @@ import { LiveAlerts } from "@/components/LiveAlerts";
 import { AdminMobileMenu } from "./AdminMobileMenu";
 import { AdminDesktopNav } from "./AdminDesktopNav";
 import { getSiteSettings } from "@/lib/get-settings";
+import NotificationCenter from "@/components/admin/NotificationCenter";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
@@ -172,8 +173,15 @@ export default async function AdminLayout({
           <span className="font-bold text-primary font-[family-name:var(--font-display)] truncate">
             {settings.company_name}
           </span>
-          <div className="ml-auto"></div>
+          <div className="ml-auto">
+            <NotificationCenter />
+          </div>
         </header>
+
+        {/* Desktop Top Bar */}
+        <div className="hidden lg:flex h-12 bg-surface-container-lowest border-b border-outline-variant/20 items-center justify-end px-6 shrink-0">
+          <NotificationCenter />
+        </div>
 
         {/* Scrollable Content */}
         <main className="flex-1 overflow-y-auto">

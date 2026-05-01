@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSiteSettings } from "@/lib/get-settings";
 import { formatBRL } from "@/lib/utils";
 import Link from "next/link";
+import ActivityFeed from "@/components/admin/ActivityFeed";
 
 const RESERVATION_STATUS_COLORS: Record<string, string> = {
   PENDING_PIX: "bg-warning-light text-warning",
@@ -312,6 +313,9 @@ export default async function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Activity Feed — Real-Time */}
+      <ActivityFeed />
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
