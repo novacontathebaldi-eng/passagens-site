@@ -144,16 +144,6 @@ Deno.serve(async (req: Request) => {
     });
   } catch (error) {
     console.error("Internal Error:", error);
-    try {
-      const dbUrl = Deno.env.get("SUPABASE_URL");
-      const dbKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-      if (dbUrl && dbKey) {
-        const fallbackClient = createClient(dbUrl, dbKey);
-        await fallbackClient.from("debug_logs").insert([{ message: String((error as Error).message), payload: { stack: (error as Error).stack } }]);
-      }
-    } catch (dbErr) {
-      // Ignora erro no log de fallback
-    }
     return new Response(
       JSON.stringify({ error: (error as Error).message }),
       {
