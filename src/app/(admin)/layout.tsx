@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
 import { LiveAlerts } from "@/components/LiveAlerts";
 import { AdminMobileMenu } from "./AdminMobileMenu";
+import { AdminDesktopNav } from "./AdminDesktopNav";
 
 export const metadata: Metadata = {
   title: "Admin — Partiu Turismo",
@@ -72,50 +73,54 @@ export default async function AdminLayout({
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-              </svg>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <AdminDesktopNav navItems={NAV_ITEMS} />
 
         {/* User */}
-        <div className="p-4 border-t border-white/10">
-          <div className="flex items-center gap-3">
+        <div className="p-4 border-t border-white/10 bg-white/[0.02]">
+          <div className="flex items-center gap-3 px-2 mb-4">
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt=""
-                className="w-9 h-9 rounded-full object-cover"
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10"
               />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-white">
+              <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold ring-2 ring-primary/30">
                 {initials}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
+              <p className="text-sm font-semibold text-white truncate">
                 {profile.full_name}
               </p>
-              <p className="text-xs text-white/50">{profile.role}</p>
+              <p className="text-xs text-white/50 truncate">{profile.role}</p>
             </div>
           </div>
-          <form action={logout} className="mt-3">
-            <button
-              type="submit"
-              className="w-full text-xs text-white/40 hover:text-white/80 transition-colors text-left"
+          
+          <div className="space-y-1">
+            <Link
+              href="/"
+              target="_blank"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-white/60 hover:text-white hover:bg-white/5"
             >
-              ← Sair
-            </button>
-          </form>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              Voltar ao Site
+            </Link>
+
+            <form action={logout}>
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:text-white hover:bg-red-500/20 transition-colors"
+              >
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sair da conta
+              </button>
+            </form>
+          </div>
         </div>
       </aside>
 
@@ -135,12 +140,7 @@ export default async function AdminLayout({
           <span className="font-bold text-primary font-[family-name:var(--font-display)]">
             Admin
           </span>
-          <Link
-            href="/"
-            className="ml-auto text-xs text-on-surface-variant hover:text-primary"
-          >
-            Ver site →
-          </Link>
+          <div className="ml-auto"></div>
         </header>
 
         {/* Scrollable Content */}

@@ -130,8 +130,8 @@ export function AdminMobileMenu({ navItems, profile, initials }: AdminMobileMenu
                 })}
               </nav>
 
-              <div className="p-6 border-t border-white/10 bg-white/[0.02]">
-                <div className="flex items-center gap-3">
+              <div className="p-4 border-t border-white/10 bg-white/[0.02]">
+                <div className="flex items-center gap-3 px-2 mb-4">
                   {profile.avatar_url ? (
                     <img
                       src={profile.avatar_url}
@@ -150,17 +150,31 @@ export function AdminMobileMenu({ navItems, profile, initials }: AdminMobileMenu
                     <p className="text-xs text-white/50 truncate">{profile.role}</p>
                   </div>
                 </div>
-                <form action={logout} className="mt-4">
-                  <button
-                    type="submit"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:text-white hover:bg-red-500/20 transition-colors"
+
+                <div className="space-y-1">
+                  <Link
+                    href="/"
+                    target="_blank"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-white/60 hover:text-white hover:bg-white/5"
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                     </svg>
-                    Sair da conta
-                  </button>
-                </form>
+                    Voltar ao Site
+                  </Link>
+
+                  <form action={logout}>
+                    <button
+                      type="submit"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:text-white hover:bg-red-500/20 transition-colors"
+                    >
+                      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Sair da conta
+                    </button>
+                  </form>
+                </div>
               </div>
             </motion.aside>
           </div>

@@ -142,7 +142,7 @@ export default async function AdminDashboard() {
   return (
     <div className="p-6 lg:p-8 space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl lg:text-3xl font-extrabold text-on-surface font-[family-name:var(--font-display)]">
             Dashboard
@@ -153,7 +153,7 @@ export default async function AdminDashboard() {
         </div>
         <Link
           href="/admin/excursoes"
-          className="hidden sm:inline-flex px-4 py-2 rounded-xl gradient-cta text-on-cta text-sm font-semibold shadow-sm hover:shadow-glow-cta transition-all"
+          className="inline-flex w-fit px-4 py-2 rounded-xl gradient-cta text-on-cta text-sm font-semibold shadow-sm hover:shadow-glow-cta transition-all"
         >
           + Nova Excursão
         </Link>
