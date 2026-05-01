@@ -1,10 +1,5 @@
 import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Motorista — Partiu Turismo",
-  robots: "noindex, nofollow",
-};
-
+import { getSiteSettings } from "@/lib/get-settings";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { LogOut } from "lucide-react";
@@ -12,12 +7,21 @@ import { logout } from "@/app/(auth)/actions";
 import { Toaster } from "sonner";
 import { MotoristaBottomNav } from "./MotoristaBottomNav";
 
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: `Motorista — ${settings.company_name || "Partiu Turismo"}`,
+    robots: "noindex, nofollow",
+  };
+}
+
 export default async function MotoristaLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
+  const settings = await getSiteSettings();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -50,9 +54,16 @@ export default async function MotoristaLayout({
             )}
           </div>
         </div>
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none">
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none gap-2">
+          {settings.logo_url && (
+            <img 
+              src={settings.logo_url} 
+              alt={settings.company_name || "Partiu Turismo"} 
+              className="w-6 h-6 object-cover rounded-full ring-1 ring-blue-900/20"
+            />
+          )}
           <h1 className="font-headline font-bold text-xl text-blue-900 tracking-tight whitespace-nowrap">
-            Partiu Turismo
+            {settings.company_name || "Partiu Turismo"}
           </h1>
         </div>
         <div className="ml-auto z-10">

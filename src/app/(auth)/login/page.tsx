@@ -5,5 +5,5 @@ export default async function LoginPage() {
   const settings = await getSiteSettings();
   const v = new Date(settings.updated_at).getTime();
 
-  return <LoginClient v={v} />;
+  return <LoginClient v={v} logoUrl={settings.logo_url} companyName={settings.company_name} />;
 }

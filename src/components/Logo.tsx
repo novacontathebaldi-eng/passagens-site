@@ -2,6 +2,7 @@ import Image from "next/image";
 
 type LogoProps = {
   logoUrl?: string | null;
+  companyName?: string | null;
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
 };
@@ -44,7 +45,7 @@ function LogoIcon({ size = 24 }: { size?: number }) {
   );
 }
 
-export function Logo({ logoUrl, size = "md", className = "" }: LogoProps) {
+export function Logo({ logoUrl, companyName, size = "md", className = "" }: LogoProps) {
   const s = SIZES[size];
 
   return (
@@ -52,7 +53,7 @@ export function Logo({ logoUrl, size = "md", className = "" }: LogoProps) {
       {logoUrl ? (
         <Image
           src={logoUrl}
-          alt="Partiu Turismo"
+          alt={companyName || "Partiu Turismo"}
           width={s.icon}
           height={s.icon}
           className="object-contain"
@@ -62,15 +63,15 @@ export function Logo({ logoUrl, size = "md", className = "" }: LogoProps) {
         <LogoIcon size={s.icon} />
       )}
       <span
-        className={`${s.text} font-extrabold font-[family-name:var(--font-display)] text-primary`}
+        className={`${s.text} font-extrabold font-[family-name:var(--font-display)] text-primary truncate`}
       >
-        Partiu Turismo
+        {companyName || "Partiu Turismo"}
       </span>
     </span>
   );
 }
 
-export function LogoWhite({ logoUrl, size = "md", className = "" }: LogoProps) {
+export function LogoWhite({ logoUrl, companyName, size = "md", className = "" }: LogoProps) {
   const s = SIZES[size];
 
   return (
@@ -78,7 +79,7 @@ export function LogoWhite({ logoUrl, size = "md", className = "" }: LogoProps) {
       {logoUrl ? (
         <Image
           src={logoUrl}
-          alt="Partiu Turismo"
+          alt={companyName || "Partiu Turismo"}
           width={s.icon}
           height={s.icon}
           className="object-contain"
@@ -112,9 +113,9 @@ export function LogoWhite({ logoUrl, size = "md", className = "" }: LogoProps) {
         </svg>
       )}
       <span
-        className={`${s.text} font-extrabold font-[family-name:var(--font-display)] text-white`}
+        className={`${s.text} font-extrabold font-[family-name:var(--font-display)] text-white truncate`}
       >
-        Partiu Turismo
+        {companyName || "Partiu Turismo"}
       </span>
     </span>
   );

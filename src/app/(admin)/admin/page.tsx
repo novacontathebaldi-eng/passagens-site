@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSiteSettings } from "@/lib/get-settings";
 import { formatBRL } from "@/lib/utils";
 import Link from "next/link";
 
@@ -22,6 +23,7 @@ const EXCURSION_STATUS_COLORS: Record<string, string> = {
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
+  const settings = await getSiteSettings();
 
   // Fetch all KPIs in parallel
   const [
@@ -148,7 +150,7 @@ export default async function AdminDashboard() {
             Dashboard
           </h1>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Visão geral do Partiu Turismo — Atualizado em tempo real
+            Visão geral de {settings.company_name} — Atualizado em tempo real
           </p>
         </div>
         <Link

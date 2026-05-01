@@ -5,15 +5,17 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { login, signInWithGoogle } from "../actions";
 
-export default function LoginClient({ v }: { v: number }) {
+import { Logo } from "@/components/Logo";
+
+export default function LoginClient({ v, logoUrl, companyName }: { v: number, logoUrl?: string | null, companyName?: string }) {
   return (
     <Suspense>
-      <LoginContent v={v} />
+      <LoginContent v={v} logoUrl={logoUrl} companyName={companyName} />
     </Suspense>
   );
 }
 
-function LoginContent({ v }: { v: number }) {
+function LoginContent({ v, logoUrl, companyName }: { v: number, logoUrl?: string | null, companyName?: string }) {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const success = searchParams.get("success");
@@ -95,16 +97,7 @@ function LoginContent({ v }: { v: number }) {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center">
-            <div className="inline-flex items-center gap-2">
-              <svg width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                <rect width="32" height="32" rx="8" className="fill-primary" />
-                <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M12 10L16 18L20 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-              </svg>
-              <span className="text-2xl font-extrabold font-[family-name:var(--font-display)] text-primary">
-                Partiu Turismo
-              </span>
-            </div>
+            <Logo logoUrl={logoUrl} companyName={companyName} size="xl" />
           </div>
 
           <div>

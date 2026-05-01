@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSiteSettings } from "@/lib/get-settings";
 import { notFound } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { formatBRL, formatDate } from "@/lib/utils";
@@ -12,6 +13,7 @@ export default async function VoucherPage({
 }) {
   const { ticket_id } = await params;
   const supabase = await createClient();
+  const settings = await getSiteSettings();
 
   // Fetch the specific ticket
   const { data: ticket } = await supabase
@@ -66,7 +68,7 @@ export default async function VoucherPage({
             <div>
               <div className="flex items-center gap-2 mb-2 justify-center sm:justify-start">
                 <Bus className="w-6 h-6" />
-                <span className="font-extrabold tracking-widest uppercase text-sm opacity-80">Partiu Turismo</span>
+                <span className="font-extrabold tracking-widest uppercase text-sm opacity-80">{settings.company_name}</span>
               </div>
               <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-center sm:text-left">{title}</h1>
             </div>

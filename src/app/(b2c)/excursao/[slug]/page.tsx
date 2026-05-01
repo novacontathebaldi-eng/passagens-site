@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteSettings } from "@/lib/get-settings";
 import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { CheckCircle2, CalendarDays, Bus, ShieldCheck } from "lucide-react";
@@ -26,8 +27,10 @@ export async function generateMetadata({ params }: { params: Params }) {
 
   if (!pkg) return { title: "Excursão não encontrada" };
 
+  const settings = await getSiteSettings();
+
   return {
-    title: `${pkg.title} | Partiu Turismo`,
+    title: `${pkg.title} | ${settings.company_name}`,
     description: pkg.short_description,
     openGraph: {
       images: pkg.tour_package_images?.length > 0
@@ -41,6 +44,7 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
   const resolvedParams = await params;
   const slug = resolvedParams.slug;
   const supabase = await createClient();
+  const settings = await getSiteSettings();
 
   // Buscar Pacote e Excursões Relacionadas
   const { data: pkg } = await supabase
@@ -231,7 +235,7 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
               <div className="flex items-center gap-3 bg-surface-container-low p-4 rounded-2xl">
                 <CalendarDays className="w-8 h-8 text-primary" />
                 <div>
-                  <h4 className="font-bold text-sm text-on-surface">Garantia Partiu Turismo</h4>
+                  <h4 className="font-bold text-sm text-on-surface">Garantia {settings.company_name}</h4>
                   <p className="text-xs text-on-surface-variant">Cancelamento fácil</p>
                 </div>
               </div>

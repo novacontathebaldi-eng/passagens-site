@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteSettings } from "@/lib/get-settings";
 import { redirect } from "next/navigation";
 import { PeriodFilters } from "./PeriodFilters";
 import { FinanceiroChart } from "./FinanceiroChart";
@@ -7,10 +8,13 @@ import { ExportReportButton } from "./ExportReportButton";
 import Link from "next/link";
 import { startOfDay, subDays, startOfMonth, startOfYear, format } from "date-fns";
 
-export const metadata: Metadata = {
-  title: "Financeiro — Admin Partiu Turismo",
-  robots: "noindex, nofollow",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: `Financeiro — Admin ${settings.company_name}`,
+    robots: "noindex, nofollow",
+  };
+}
 
 interface SearchParams {
   period?: string;
@@ -44,10 +48,7 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: P
   }
 
   // 3. Configurações Globais (Nome e Logo)
-  const { data: settings } = await supabase
-    .from("global_settings")
-    .select("company_name, logo_url")
-    .single();
+  const settings = await getSiteSettings();
 
   // 4. Calcular Datas Baseado no Período
   const now = new Date();
@@ -178,8 +179,8 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: P
         <div className="flex items-center gap-2">
           <ExportReportButton 
             transactions={formattedTransactions}
-            companyName={settings?.company_name || "Partiu Turismo"}
-            logoUrl={settings?.logo_url || ""}
+            companyName={settings.company_name}
+            logoUrl={settings.logo_url || ""}
             periodLabel={periodLabel}
             kpis={{
               receita: receitaAprovada,

@@ -8,10 +8,13 @@ import { AdminMobileMenu } from "./AdminMobileMenu";
 import { AdminDesktopNav } from "./AdminDesktopNav";
 import { getSiteSettings } from "@/lib/get-settings";
 
-export const metadata: Metadata = {
-  title: "Admin — Partiu Turismo",
-  robots: "noindex, nofollow",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: `Admin — ${settings.company_name}`,
+    robots: "noindex, nofollow",
+  };
+}
 
 const NAV_ITEMS = [
   { href: "/admin", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z", label: "Dashboard" },

@@ -8,21 +8,24 @@ import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 import { SocialLinks } from "@/components/SocialLinks";
 
 
-export const metadata: Metadata = {
-  title: "Partiu Turismo — Excursões Turísticas Rodoviárias",
-  description:
-    "Descubra destinos incríveis com excursões turísticas de ônibus premium. Pacotes completos com guia, ônibus executivo e tudo incluso.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: `${settings.company_name} — Excursões Turísticas Rodoviárias`,
+    description:
+      "Descubra destinos incríveis com excursões turísticas de ônibus premium. Pacotes completos com guia, ônibus executivo e tudo incluso.",
+  };
+}
 
-function LogoMarkWhite({ logoUrl, size = 28 }: { logoUrl?: string | null; size?: number }) {
+function LogoMarkWhite({ logoUrl, companyName, size = 28 }: { logoUrl?: string | null; companyName?: string; size?: number }) {
   if (logoUrl) {
     return (
       <Image
         src={logoUrl}
-        alt="Partiu Turismo"
+        alt={companyName || "Partiu Turismo"}
         width={size}
         height={size}
-        className="object-contain"
+        className="object-cover rounded-full ring-1 ring-white/20"
         unoptimized
       />
     );
@@ -94,7 +97,7 @@ export default async function B2CLayout({
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <LogoMarkWhite logoUrl={settings.logo_url} size={28} />
+                <LogoMarkWhite logoUrl={settings.logo_url} companyName={settings.company_name} size={28} />
                 <span className="text-xl font-extrabold font-[family-name:var(--font-display)] text-white">
                   {settings.company_name}
                 </span>
