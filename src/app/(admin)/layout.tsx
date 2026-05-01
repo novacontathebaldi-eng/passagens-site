@@ -58,45 +58,50 @@ export default async function AdminLayout({
     <div className="flex h-screen bg-surface-container-low overflow-hidden">
       {/* ── Sidebar ── */}
       <aside className="hidden lg:flex lg:w-64 flex-col bg-on-surface text-white">
-        {/* Logo */}
-        <div className="h-16 flex items-center gap-3 px-6 border-b border-white/10">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="white" fillOpacity="0.15" />
-            <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="text-lg font-extrabold font-[family-name:var(--font-display)]">
-            Partiu Turismo
-          </span>
-          <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-primary/80 font-semibold">
-            ADMIN
-          </span>
+        {/* Logo & Profile */}
+        <div className="flex flex-col border-b border-white/10 bg-white/[0.02]">
+          <div className="h-16 flex items-center gap-3 px-6 shrink-0">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="shrink-0">
+              <rect width="32" height="32" rx="8" fill="white" fillOpacity="0.15" />
+              <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-lg font-extrabold font-[family-name:var(--font-display)] truncate">
+              Partiu Turismo
+            </span>
+          </div>
+          
+          <div className="px-4 pb-4">
+            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 shadow-sm">
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt=""
+                  className="w-9 h-9 rounded-full object-cover ring-2 ring-white/10 shrink-0"
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold ring-2 ring-primary/30 shrink-0">
+                  {initials}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate">
+                  {profile.full_name}
+                </p>
+                <div className="flex items-center mt-0.5">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-primary/20 text-primary font-bold uppercase tracking-wider">
+                    {profile.role}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Nav */}
         <AdminDesktopNav navItems={NAV_ITEMS} />
 
-        {/* User */}
+        {/* Footer Actions */}
         <div className="p-3 border-t border-white/10 bg-white/[0.02]">
-          <div className="flex flex-col items-center justify-center gap-1.5 mb-3 mt-1">
-            {profile.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt=""
-                className="w-8 h-8 rounded-full object-cover ring-1 ring-white/20"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold ring-1 ring-primary/30">
-                {initials}
-              </div>
-            )}
-            <div className="text-center w-full px-2">
-              <p className="text-xs font-semibold text-white truncate">
-                {profile.full_name}
-              </p>
-              <p className="text-[10px] font-medium text-primary/80 uppercase tracking-wider mt-0.5 truncate">{profile.role}</p>
-            </div>
-          </div>
-          
           <div className="space-y-1">
             <Link
               href="/"
