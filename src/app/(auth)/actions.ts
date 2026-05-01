@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { sendConfirmationEmail } from "@/lib/auth-emails";
 import { addContactToBrevo } from "@/lib/brevo";
+import { translateAuthError } from "@/lib/auth-errors";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -23,7 +24,7 @@ export async function login(formData: FormData) {
 
   if (error) {
     const searchParams = new URLSearchParams();
-    searchParams.set("error", error.message);
+    searchParams.set("error", translateAuthError(error.message));
     if (safeRedirect) searchParams.set("redirect", safeRedirect);
     redirect(`/login?${searchParams.toString()}`);
   }
@@ -86,7 +87,7 @@ export async function signup(formData: FormData) {
 
   if (error) {
     const searchParams = new URLSearchParams();
-    searchParams.set("error", error.message);
+    searchParams.set("error", translateAuthError(error.message));
     redirect(`/cadastro?${searchParams.toString()}`);
   }
 
@@ -129,7 +130,7 @@ export async function signInWithGoogle(nextUrl?: string | null) {
   });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    redirect(`/login?error=${encodeURIComponent(translateAuthError(error.message))}`);
   }
 
   if (data.url) {
@@ -157,7 +158,7 @@ export async function resetPassword(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/esqueci-senha?error=${encodeURIComponent(error.message)}`);
+    redirect(`/esqueci-senha?error=${encodeURIComponent(translateAuthError(error.message))}`);
   }
 
   redirect("/esqueci-senha?success=true");
@@ -188,7 +189,7 @@ export async function completeProfile(formData: FormData) {
     .eq("id", user.id);
 
   if (error) {
-    redirect(`/completar-cadastro?error=${encodeURIComponent(error.message)}`);
+    redirect(`/completar-cadastro?error=${encodeURIComponent(translateAuthError(error.message))}`);
   }
 
   // Redirect based on role
@@ -225,7 +226,7 @@ export async function updatePassword(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/redefinir-senha?error=${encodeURIComponent(error.message)}`);
+    redirect(`/redefinir-senha?error=${encodeURIComponent(translateAuthError(error.message))}`);
   }
 
   // Se deu certo, desloga para forçar login com a nova senha ou redireciona

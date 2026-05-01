@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { translateAuthError } from "@/lib/auth-errors";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -57,5 +58,5 @@ export async function GET(request: Request) {
   }
 
   // Auth error — redirect to login with error
-  return NextResponse.redirect(`${origin}/login?error=auth_code_error`);
+  return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(translateAuthError("auth_code_error"))}`);
 }
