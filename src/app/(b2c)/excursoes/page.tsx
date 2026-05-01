@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { CalendarDays, Search } from "lucide-react";
+import { CalendarDays, Search, Bus } from "lucide-react";
 import { getCoverImage } from "@/lib/tour-images";
 
 export const dynamic = "force-dynamic";
@@ -56,7 +56,8 @@ export default async function CatalogoPage({
         )
       ),
       vehicle_layouts (
-        capacity
+        capacity,
+        bus_type
       )
     `
     )
@@ -100,7 +101,8 @@ export default async function CatalogoPage({
           )
         ),
         vehicle_layouts (
-          capacity
+          capacity,
+          bus_type
         )
       `
       )
@@ -133,7 +135,7 @@ export default async function CatalogoPage({
     const capacity = vl?.capacity || 0;
     const occupied = occupiedByExcursion[exc.id] || 0;
     const availableCount = Math.max(0, capacity - occupied);
-    return { ...exc, availableCount };
+    return { ...exc, availableCount, busType: vl?.bus_type || "" };
   });
 
   return (
@@ -282,6 +284,12 @@ export default async function CatalogoPage({
                             <CalendarDays className="w-4 h-4 mr-2 text-primary" />
                             {formatDate(exc.departure_date)}
                           </div>
+                          {exc.busType && (
+                            <div className="flex items-center text-sm text-on-surface-variant capitalize">
+                              <Bus className="w-4 h-4 mr-2 text-primary" />
+                              Ônibus {exc.busType.toLowerCase()}
+                            </div>
+                          )}
                           <div className="text-xs font-medium">
                             {exc.availableCount <= 0 ? (
                               <span className="text-error">Esgotado</span>

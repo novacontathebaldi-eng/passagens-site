@@ -689,6 +689,12 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
               <span className="text-on-surface-variant">Quantidade</span>
               <span className="font-medium text-on-surface">{quantity}x</span>
             </div>
+            {excursion.vehicle_layouts?.bus_type && (
+              <div className="flex justify-between text-sm">
+                <span className="text-on-surface-variant">Tipo de Ônibus</span>
+                <span className="font-medium text-on-surface capitalize">{`${excursion.vehicle_layouts.bus_type.charAt(0).toUpperCase()}${excursion.vehicle_layouts.bus_type.slice(1).toLowerCase()}`}</span>
+              </div>
+            )}
           </div>
 
           <div className="pt-4 border-t border-outline-variant/30 flex justify-between items-end">

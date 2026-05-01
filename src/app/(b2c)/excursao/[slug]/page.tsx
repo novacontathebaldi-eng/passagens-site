@@ -61,7 +61,7 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
         return_date,
         status,
         allow_seat_selection,
-        vehicle_layouts (capacity, amenities)
+        vehicle_layouts (capacity, amenities, bus_type)
       )
     `)
     .eq("slug", slug)
@@ -278,7 +278,7 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
                       </div>
 
                       <div className="flex items-center gap-4 text-xs text-on-surface-variant mb-4 flex-wrap">
-                        <span className="flex items-center gap-1"><Bus className="w-3 h-3" /> Ônibus Executivo</span>
+                        <span className="flex items-center gap-1"><Bus className="w-3 h-3" /> {exc.vehicle_layouts?.bus_type ? `Ônibus ${exc.vehicle_layouts.bus_type.charAt(0).toUpperCase()}${exc.vehicle_layouts.bus_type.slice(1).toLowerCase()}` : 'Ônibus Padrão'}</span>
                         <span className="flex items-center gap-1">•</span>
                         {exc.allow_seat_selection ? (
                           <span className="text-success font-medium">Escolha sua Poltrona</span>
