@@ -17,6 +17,12 @@ Deno.serve(async (req: Request) => {
 
     const payload = await req.text();
     const headers = Object.fromEntries(req.headers);
+    let hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET")?.trim() || "";
+    
+    // Supabase Auth Hooks add a "v1," prefix to the secret, which standardwebhooks doesn't expect natively
+    if (hookSecret.startsWith("v1,")) {
+      hookSecret = hookSecret.substring(3);
+    }
 
     if (!hookSecret) {
       throw new Error("SEND_EMAIL_HOOK_SECRET is missing or empty.");
@@ -24,9 +30,10 @@ Deno.serve(async (req: Request) => {
 
     let wh;
     try {
+      // Remove any whitespace or newlines that might have been accidentally pasted
       wh = new Webhook(hookSecret);
     } catch (e) {
-      throw new Error("Failed to initialize Webhook: " + (e as Error).message);
+      throw new Error(`Failed to initialize Webhook. Secret starts with: ${hookSecret.substring(0, 8)}... Error: ${(e as Error).message}`);
     }
     
     let user: any;
@@ -137,6 +144,16 @@ Deno.serve(async (req: Request) => {
     });
   } catch (error) {
     console.error("Internal Error:", error);
+    try {
+      const dbUrl = Deno.env.get("SUPABASE_URL");
+      const dbKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (dbUrl && dbKey) {
+        const fallbackClient = createClient(dbUrl, dbKey);
+        await fallbackClient.from("debug_logs").insert([{ message: String((error as Error).message), payload: { stack: (error as Error).stack } }]);
+      }
+    } catch (dbErr) {
+      // Ignora erro no log de fallback
+    }
     return new Response(
       JSON.stringify({ error: (error as Error).message }),
       {
