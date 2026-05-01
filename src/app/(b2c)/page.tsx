@@ -45,24 +45,19 @@ export default async function HomePage() {
     .eq("status", "PUBLISHED")
     .order("departure_date", { ascending: true });
 
-  // Calcular ocupação real das poltronas
+  // Calcular ocupação real das poltronas via RPC seguro
   const allIds = (excursionsRaw ?? []).map((e: any) => e.id);
   let occupiedMap: Record<string, number> = {};
   if (allIds.length > 0) {
-    const { data: ticketsData } = await supabase
-      .from('passenger_tickets')
-      .select('excursion_id, reservations!inner(status)')
-      .in('excursion_id', allIds);
+    const { data: occupancyData } = await supabase
+      .rpc('get_occupied_seats', { exc_ids: allIds });
 
-    occupiedMap = allIds.reduce((acc: Record<string, number>, id: string) => {
-      acc[id] = ticketsData?.filter(t => {
-        if (t.excursion_id !== id) return false;
-        const res = t.reservations as any;
-        const status = Array.isArray(res) ? res[0]?.status : res?.status;
-        return ['PENDING_PIX', 'AWAITING_MANUAL_CHECK', 'APPROVED'].includes(status);
-      }).length || 0;
-      return acc;
-    }, {});
+    occupiedMap = (occupancyData || []).reduce(
+      (acc: Record<string, number>, row: any) => {
+        acc[row.excursion_id] = Number(row.occupied_count);
+        return acc;
+      }, {} as Record<string, number>
+    );
   }
 
   // Transform raw data into clean ExcursionItem[] for client components

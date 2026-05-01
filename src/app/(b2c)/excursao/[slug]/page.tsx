@@ -9,6 +9,8 @@ import LightboxGallery from "./LightboxGallery";
 import StickyExcursionTitle from "@/components/StickyExcursionTitle";
 import { getCoverImage, getGalleryImages } from "@/lib/tour-images";
 
+export const dynamic = "force-dynamic";
+
 type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
@@ -69,22 +71,17 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
     notFound();
   }
 
-  // Buscar ocupação real das poltronas para as excursões ativas
+  // Buscar ocupação real das poltronas via RPC seguro (bypassa RLS, retorna apenas contagem)
   const excursionIds = pkg.excursions.map((e: any) => e.id);
-  const { data: ticketsData } = await supabase
-    .from('passenger_tickets')
-    .select('excursion_id, reservations!inner(status)')
-    .in('excursion_id', excursionIds);
+  const { data: occupancyData } = await supabase
+    .rpc('get_occupied_seats', { exc_ids: excursionIds });
 
-  const occupiedByExcursion = pkg.excursions.reduce((acc: any, exc: any) => {
-    acc[exc.id] = ticketsData?.filter(t => {
-      if (t.excursion_id !== exc.id) return false;
-      const res = t.reservations as any;
-      const status = Array.isArray(res) ? res[0]?.status : res?.status;
-      return ['PENDING_PIX', 'AWAITING_MANUAL_CHECK', 'APPROVED'].includes(status);
-    }).length || 0;
-    return acc;
-  }, {});
+  const occupiedByExcursion = (occupancyData || []).reduce(
+    (acc: Record<string, number>, row: any) => {
+      acc[row.excursion_id] = Number(row.occupied_count);
+      return acc;
+    }, {} as Record<string, number>
+  );
 
   const excursionsWithAvailability = pkg.excursions.map((exc: any) => {
     const capacity = exc.vehicle_layouts?.capacity || 0;
