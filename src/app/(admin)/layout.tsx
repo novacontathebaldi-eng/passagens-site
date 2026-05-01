@@ -71,24 +71,24 @@ export default async function AdminLayout({
           </div>
           
           <div className="px-4 pb-4">
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 shadow-sm">
+            <div className="flex items-center gap-2.5 p-2 px-3 rounded-[10px] bg-white/5 border border-white/10 shadow-sm">
               {profile.avatar_url ? (
                 <img
                   src={profile.avatar_url}
                   alt=""
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-white/10 shrink-0"
+                  className="w-7 h-7 rounded-full object-cover ring-1 ring-white/10 shrink-0"
                 />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold ring-2 ring-primary/30 shrink-0">
+                <div className="w-7 h-7 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold ring-1 ring-primary/30 shrink-0">
                   {initials}
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
+                <p className="text-xs font-semibold text-white/90 truncate leading-tight">
                   {profile.full_name}
                 </p>
                 <div className="flex items-center mt-0.5">
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-primary/20 text-primary font-bold uppercase tracking-wider">
+                  <span className="text-[8px] px-1 py-[1px] rounded bg-primary/10 text-primary font-bold uppercase tracking-wider leading-none">
                     {profile.role}
                   </span>
                 </div>
