@@ -269,17 +269,19 @@ function SortableSocialItem({
             <option value="other">Outro / Site</option>
           </select>
         </div>
-        <div className="sm:col-span-3">
-          <label className="text-[11px] font-semibold text-on-surface-variant block mb-1">Nome (Op.)</label>
-          <input
-            type="text"
-            value={link.name}
-            onChange={(e) => updateSocialLink(index, "name", e.target.value)}
-            placeholder="Ex: Partiu Turismo"
-            className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-        <div className="sm:col-span-5">
+        {link.platform === 'other' && (
+          <div className="sm:col-span-3">
+            <label className="text-[11px] font-semibold text-on-surface-variant block mb-1">Rótulo do Link</label>
+            <input
+              type="text"
+              value={link.name || ""}
+              onChange={(e) => updateSocialLink(index, "name", e.target.value)}
+              placeholder="Ex: Acessar link"
+              className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            />
+          </div>
+        )}
+        <div className={link.platform === 'other' ? "sm:col-span-5" : "sm:col-span-8"}>
           <label className="text-[11px] font-semibold text-on-surface-variant block mb-1">URL Completa</label>
           <input
             type="text"
@@ -577,13 +579,23 @@ export default function ConfiguracoesPage() {
   // Social Links handlers
   const addSocialLink = () => {
     if (!settings) return;
-    setSettings({ ...settings, social_links: [...settings.social_links, { id: crypto.randomUUID(), platform: "instagram", name: "Instagram", url: "", isActive: true }] });
+    setSettings({ ...settings, social_links: [...settings.social_links, { id: crypto.randomUUID(), platform: "instagram", name: "", url: "", isActive: true }] });
   };
 
   const updateSocialLink = (index: number, field: keyof SocialLinkEntry, value: any) => {
     if (!settings) return;
     const newLinks = [...settings.social_links];
     newLinks[index] = { ...newLinks[index], [field]: value };
+    
+    // Automatically manage the 'name' field based on platform selection
+    if (field === "platform") {
+      if (value === "other" && (!newLinks[index].name || newLinks[index].name.trim() === "")) {
+        newLinks[index].name = "Acessar link";
+      } else if (value !== "other") {
+        newLinks[index].name = "";
+      }
+    }
+
     setSettings({ ...settings, social_links: newLinks });
   };
 
