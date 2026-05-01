@@ -617,6 +617,11 @@ export default function ConfiguracoesPage() {
   const qrInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingQr, setIsUploadingQr] = useState(false);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
   const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !settings) return;
@@ -989,10 +994,7 @@ export default function ConfiguracoesPage() {
 
           <div className="space-y-3">
             <DndContext
-              sensors={useSensors(
-                useSensor(PointerSensor),
-                useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-              )}
+              sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEndSocial}
             >
