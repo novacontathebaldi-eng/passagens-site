@@ -10,6 +10,8 @@ interface AdminMobileMenuProps {
   navItems: { href: string; icon: string; label: string }[];
   profile: { full_name: string; role: string; avatar_url: string | null };
   initials: string;
+  logoUrl?: string | null;
+  companyName?: string | null;
 }
 
 const panelVariants: Variants = {
@@ -39,7 +41,7 @@ const itemVariants: Variants = {
   }
 };
 
-export function AdminMobileMenu({ navItems, profile, initials }: AdminMobileMenuProps) {
+export function AdminMobileMenu({ navItems, profile, initials, logoUrl, companyName }: AdminMobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -89,12 +91,22 @@ export function AdminMobileMenu({ navItems, profile, initials }: AdminMobileMenu
               <div className="flex flex-col border-b border-white/10 shrink-0 bg-white/[0.02]">
                 <div className="h-16 flex items-center justify-between px-6">
                   <div className="flex items-center gap-3">
-                    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="shrink-0">
-                      <rect width="32" height="32" rx="8" fill="white" fillOpacity="0.15" />
-                      <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    {logoUrl ? (
+                      <div className="w-9 h-9 rounded-full ring-1 ring-white/10 shadow-sm shrink-0 overflow-hidden bg-white">
+                        <img
+                          src={logoUrl}
+                          alt="Logo"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="shrink-0">
+                        <rect width="32" height="32" rx="8" fill="white" fillOpacity="0.15" />
+                        <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
                     <span className="font-bold text-lg font-[family-name:var(--font-display)] truncate">
-                      Partiu Turismo
+                      {companyName || "Partiu Turismo"}
                     </span>
                   </div>
                   <button 

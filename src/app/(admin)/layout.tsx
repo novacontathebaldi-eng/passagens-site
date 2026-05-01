@@ -6,6 +6,7 @@ import { logout } from "@/app/(auth)/actions";
 import { LiveAlerts } from "@/components/LiveAlerts";
 import { AdminMobileMenu } from "./AdminMobileMenu";
 import { AdminDesktopNav } from "./AdminDesktopNav";
+import { getSiteSettings } from "@/lib/get-settings";
 
 export const metadata: Metadata = {
   title: "Admin — Partiu Turismo",
@@ -54,6 +55,8 @@ export default async function AdminLayout({
     .join("")
     .toUpperCase();
 
+  const settings = await getSiteSettings();
+
   return (
     <div className="flex h-screen bg-surface-container-low overflow-hidden">
       {/* ── Sidebar ── */}
@@ -61,12 +64,22 @@ export default async function AdminLayout({
         {/* Logo & Profile */}
         <div className="flex flex-col border-b border-white/10 bg-white/[0.02]">
           <div className="h-16 flex items-center gap-3 px-6 shrink-0">
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="shrink-0">
-              <rect width="32" height="32" rx="8" fill="white" fillOpacity="0.15" />
-              <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            {settings.logo_url ? (
+              <div className="w-9 h-9 rounded-full ring-1 ring-white/10 shadow-sm shrink-0 overflow-hidden bg-white">
+                <img
+                  src={settings.logo_url}
+                  alt="Logo"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="shrink-0">
+                <rect width="32" height="32" rx="8" fill="white" fillOpacity="0.15" />
+                <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
             <span className="text-lg font-extrabold font-[family-name:var(--font-display)] truncate">
-              Partiu Turismo
+              {settings.company_name}
             </span>
           </div>
           
@@ -137,13 +150,25 @@ export default async function AdminLayout({
             navItems={NAV_ITEMS}
             profile={profile}
             initials={initials}
+            logoUrl={settings.logo_url}
+            companyName={settings.company_name}
           />
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="ml-1">
-            <rect width="32" height="32" rx="8" className="fill-primary" />
-            <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="font-bold text-primary font-[family-name:var(--font-display)]">
-            Admin
+          {settings.logo_url ? (
+            <div className="w-8 h-8 ml-1 rounded-full ring-1 ring-white/10 shadow-sm shrink-0 overflow-hidden bg-white">
+              <img
+                src={settings.logo_url}
+                alt="Logo"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="ml-1">
+              <rect width="32" height="32" rx="8" className="fill-primary" />
+              <path d="M8 10L16 24L24 10" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+          <span className="font-bold text-primary font-[family-name:var(--font-display)] truncate">
+            {settings.company_name}
           </span>
           <div className="ml-auto"></div>
         </header>
