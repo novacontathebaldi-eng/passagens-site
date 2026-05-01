@@ -267,7 +267,7 @@ export default function NovaFrotaPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-on-surface mb-3">Amenidades Inclusas</label>
+              <label className="block text-sm font-medium text-on-surface mb-3">Comodidades Inclusas</label>
               <div className="space-y-3">
                 {Object.entries({
                   wifi: "Wi-Fi a bordo",

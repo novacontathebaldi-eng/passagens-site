@@ -262,7 +262,7 @@ export default function EditarFrotaPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-on-surface mb-3">Amenidades Inclusas</label>
+                <label className="block text-sm font-medium text-on-surface mb-3">Comodidades Inclusas</label>
                 <div className="space-y-3">
                   {Object.entries({ wifi: "Wi-Fi a bordo", ac: "Ar Condicionado", bathroom: "Banheiro", usb: "Tomadas USB", tv: "TV", blanket: "Cobertor", reclining_seats: "Reclinação de Assento" }).map(([key, label]) => (
                     <label key={key} className="flex items-center gap-3 cursor-pointer">

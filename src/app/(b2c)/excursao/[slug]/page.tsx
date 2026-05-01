@@ -177,19 +177,29 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
 
             {/* Conforto a Bordo (Amenidades do Veículo) */}
             {(() => {
-              const firstWithAmenities = excursionsWithAvailability.find(
-                (e: any) => e.vehicle_layouts?.amenities
-              );
-              const amenities = firstWithAmenities?.vehicle_layouts?.amenities;
-              if (!amenities) return null;
-              const hasActive = Object.values(amenities).some((v: any) => v === true);
-              if (!hasActive) return null;
+              // Merge all amenities from all active excursions
+              const mergedAmenities: Record<string, boolean> = {};
+              excursionsWithAvailability.forEach((e: any) => {
+                if (activeStatuses.includes(e.status) && e.vehicle_layouts?.amenities) {
+                  Object.entries(e.vehicle_layouts.amenities).forEach(([key, value]) => {
+                    if (value === true) {
+                      mergedAmenities[key] = true;
+                    }
+                  });
+                }
+              });
+              
+              if (Object.keys(mergedAmenities).length === 0) return null;
+
               return (
                 <section className="bg-surface-container-lowest rounded-3xl p-6 md:p-8 border border-outline-variant/30 shadow-sm">
                   <h2 className="text-2xl font-bold text-on-surface mb-6 flex items-center gap-2">
                     <Bus className="text-primary w-6 h-6" /> Conforto a Bordo
                   </h2>
-                  <AmenityBadges amenities={amenities} variant="pills" size="md" />
+                  <AmenityBadges amenities={mergedAmenities} variant="pills" size="md" />
+                  <p className="mt-6 text-xs text-on-surface-variant italic">
+                    * As comodidades disponíveis podem variar de acordo com a data escolhida e o tipo de ônibus.
+                  </p>
                 </section>
               );
             })()}
@@ -277,9 +287,16 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
                         </div>
                       </div>
 
+                      <div className="flex items-center justify-between text-xs text-on-surface-variant mb-3 flex-wrap gap-y-2">
+                        <span className="flex items-center gap-1 font-medium"><Bus className="w-3 h-3" /> {exc.vehicle_layouts?.bus_type ? `Ônibus ${exc.vehicle_layouts.bus_type.charAt(0).toUpperCase()}${exc.vehicle_layouts.bus_type.slice(1).toLowerCase()}` : 'Ônibus Padrão'}</span>
+                        {exc.vehicle_layouts?.amenities && Object.values(exc.vehicle_layouts.amenities).some((v: any) => v === true) && (
+                          <div className="flex items-center">
+                            <AmenityBadges amenities={exc.vehicle_layouts.amenities} variant="icons" size="sm" />
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex items-center gap-4 text-xs text-on-surface-variant mb-4 flex-wrap">
-                        <span className="flex items-center gap-1"><Bus className="w-3 h-3" /> {exc.vehicle_layouts?.bus_type ? `Ônibus ${exc.vehicle_layouts.bus_type.charAt(0).toUpperCase()}${exc.vehicle_layouts.bus_type.slice(1).toLowerCase()}` : 'Ônibus Padrão'}</span>
-                        <span className="flex items-center gap-1">•</span>
                         {exc.allow_seat_selection ? (
                           <span className="text-success font-medium">Escolha sua Poltrona</span>
                         ) : (
