@@ -142,7 +142,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 glass border-b border-outline-variant/30">
+      <header className="sticky top-0 z-50 bg-surface/95 md:bg-surface/70 md:backdrop-blur-md border-b border-outline-variant/30">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 
           {/* Logo */}
@@ -289,7 +289,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
             </div>
 
             {/* Mobile User Icon (Quick Access) */}
-            <div className="md:hidden flex items-center">
+            <div className={`md:hidden flex items-center transition-all duration-200 ${isOpen ? "opacity-0 pointer-events-none scale-90" : "opacity-100"}`}>
               <Link
                 href={user ? "/painel" : "/login"}
                 className="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high"
