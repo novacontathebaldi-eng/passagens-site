@@ -245,17 +245,17 @@ function SortableSocialItem({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={`flex flex-col sm:flex-row gap-4 sm:gap-3 items-start sm:items-center p-4 bg-surface rounded-xl border ${isDragging ? 'border-primary shadow-lg' : 'border-outline-variant/30'}`}>
+    <div ref={setNodeRef} style={style} className={`flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center p-3 sm:p-4 bg-surface rounded-xl border ${isDragging ? 'border-primary shadow-lg' : 'border-outline-variant/30'}`}>
       
       {/* ZONA PRINCIPAL: Drag Handle + Inputs */}
-      <div className="flex gap-3 w-full sm:flex-1">
+      <div className="flex gap-2 sm:gap-3 w-full sm:flex-1">
         {/* Drag Handle */}
-        <div {...attributes} {...listeners} className="cursor-grab text-on-surface-variant hover:text-on-surface p-1 touch-none shrink-0 mt-[26px] sm:mt-0">
+        <div {...attributes} {...listeners} className="cursor-grab text-on-surface-variant hover:text-on-surface p-1 touch-none shrink-0 mt-[22px] sm:mt-0">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
         </div>
 
         {/* Inputs */}
-        <div className="flex-1 flex flex-col sm:grid sm:grid-cols-11 gap-3 sm:gap-2 w-full">
+        <div className="flex-1 flex flex-col sm:grid sm:grid-cols-11 gap-2 w-full">
           <div className="sm:col-span-3">
             <label className="text-[11px] font-semibold text-on-surface-variant block mb-1">Plataforma</label>
             <select
@@ -300,20 +300,20 @@ function SortableSocialItem({
       </div>
 
       {/* ZONA DE CONTROLES: Ativo + Botões */}
-      <div className="flex items-center justify-between w-full sm:w-auto gap-4 pt-4 mt-2 border-t border-outline-variant/20 sm:border-0 sm:pt-0 sm:mt-0 shrink-0">
+      <div className="flex items-center justify-between w-full sm:w-auto gap-4 pt-3 mt-1 border-t border-outline-variant/20 sm:border-0 sm:pt-0 sm:mt-0 shrink-0">
         <label className="flex items-center gap-2 cursor-pointer sm:mr-2">
           <input type="checkbox" checked={link.isActive} onChange={(e) => updateSocialLink(index, "isActive", e.target.checked)} className="w-4 h-4 rounded text-primary focus:ring-primary" />
           <span className="text-sm font-medium sm:text-xs sm:font-normal">Ativo</span>
         </label>
 
         <div className="flex sm:flex-col gap-1.5 sm:gap-1 shrink-0">
-          <button type="button" onClick={() => moveSocialLink(index, -1)} disabled={index === 0} className="p-2 sm:p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para cima">
+          <button type="button" onClick={() => moveSocialLink(index, -1)} disabled={index === 0} className="p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para cima">
             <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
           </button>
-          <button type="button" onClick={() => moveSocialLink(index, 1)} disabled={index === total - 1} className="p-2 sm:p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para baixo">
+          <button type="button" onClick={() => moveSocialLink(index, 1)} disabled={index === total - 1} className="p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para baixo">
             <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
           </button>
-          <button type="button" onClick={() => removeSocialLink(index)} className="p-2 sm:p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" title="Remover">
+          <button type="button" onClick={() => removeSocialLink(index)} className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" title="Remover">
             <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           </button>
         </div>
