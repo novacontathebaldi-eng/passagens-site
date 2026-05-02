@@ -675,14 +675,16 @@ export default function ConfiguracoesPage() {
   if (!settings) return null;
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-on-surface">
-          Configurações Globais
-        </h1>
-        <p className="text-on-surface-variant text-sm mt-1">
-          Gerencie imagens, chaves PIX, TTL de reservas e automações. Alterações refletem no site instantaneamente.
-        </p>
+    <div className="p-4 lg:p-8 space-y-6 lg:space-y-8 max-w-7xl mx-auto w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-extrabold text-on-surface font-[family-name:var(--font-display)] flex items-center gap-3">
+            Configurações Globais
+          </h1>
+          <p className="mt-1 text-sm text-on-surface-variant">
+            Gerencie imagens, chaves PIX, TTL de reservas e automações. Alterações refletem no site instantaneamente.
+          </p>
+        </div>
       </div>
 
       {/* Success/Error Message */}
@@ -695,7 +697,7 @@ export default function ConfiguracoesPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8 bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/30">
+      <form onSubmit={handleSubmit} className="space-y-8 bg-surface-container-lowest p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-outline-variant/30">
 
         {/* IMAGENS DO SITE */}
         <section className="space-y-4">
