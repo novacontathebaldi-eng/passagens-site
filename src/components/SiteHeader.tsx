@@ -305,13 +305,14 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               className="md:hidden p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high relative z-50"
               aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
             >
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                 <motion.div
                   key={isOpen ? "close" : "menu"}
-                  initial={{ opacity: 0, rotate: -90 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: 90 }}
-                  transition={{ duration: 0.2 }}
+                  initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                  exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+                  transition={{ duration: 0.15 }}
+                  style={{ willChange: "transform, opacity" }}
                 >
                   {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </motion.div>
@@ -330,8 +331,10 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               onClick={closeMenu}
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-40 bg-black/50 md:hidden"
+              style={{ willChange: "opacity" }}
               aria-hidden="true"
             />
 
@@ -340,8 +343,9 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               className="fixed top-0 left-0 bottom-0 w-[80%] max-w-sm bg-surface z-50 md:hidden flex flex-col shadow-2xl overflow-y-auto"
+              style={{ willChange: "transform" }}
               role="dialog"
               aria-modal="true"
             >
