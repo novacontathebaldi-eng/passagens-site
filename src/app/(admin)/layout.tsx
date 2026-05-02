@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
-import { LiveAlerts } from "@/components/LiveAlerts";
+
 import { AdminMobileMenu } from "./AdminMobileMenu";
 import { AdminDesktopNav } from "./AdminDesktopNav";
 import { getSiteSettings } from "@/lib/get-settings";
@@ -185,7 +185,6 @@ export default async function AdminLayout({
 
         {/* Scrollable Content */}
         <main className="flex-1 overflow-y-auto">
-          <LiveAlerts />
           {children}
         </main>
       </div>

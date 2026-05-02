@@ -1,45 +1,64 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Bell } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-export function LiveAlerts() {
-  const [alert, setAlert] = useState<{ id: string; message: string } | null>(null);
-  const router = useRouter();
+type NotificationType =
+  | "NEW_RESERVATION"
+  | "RESERVATION_APPROVED"
+  | "RESERVATION_EXPIRED"
+  | "RESERVATION_CANCELLED"
+  | "RESERVATION_REFUNDED"
+  | "NEW_CLIENT"
+  | "EXCURSION_SOLD_OUT"
+  | "WAITLIST_SPOT_OPENED"
+  | "SYSTEM_ALERT";
+
+const TOAST_VARIANT: Record<NotificationType, "info" | "success" | "warning" | "error"> = {
+  NEW_RESERVATION: "info",
+  RESERVATION_APPROVED: "success",
+  RESERVATION_EXPIRED: "warning",
+  RESERVATION_CANCELLED: "error",
+  RESERVATION_REFUNDED: "info",
+  NEW_CLIENT: "info",
+  EXCURSION_SOLD_OUT: "warning",
+  WAITLIST_SPOT_OPENED: "success",
+  SYSTEM_ALERT: "info",
+};
+
+interface LiveAlertsProps {
+  role?: string;
+}
+
+export function LiveAlerts({ role }: LiveAlertsProps) {
+  const isAdmin = role === "ADMIN" || role === "AGENT";
+  const supabase = useMemo(() => (isAdmin ? createClient() : null), [isAdmin]);
 
   useEffect(() => {
-    const supabase = createClient();
+    if (!supabase) return;
+
+    const channelId = `live-alerts-toast-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
 
     const channel = supabase
-      .channel("global_alerts")
+      .channel(channelId)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "reservations" },
+        { event: "INSERT", schema: "public", table: "notifications" },
         (payload) => {
-          setAlert({
-            id: payload.new.id,
-            message: `Nova reserva recebida! Valor: R$ ${payload.new.total_amount}`,
-          });
-          router.refresh();
-          
-          setTimeout(() => setAlert(null), 5000);
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "reservations", filter: "status=eq.APPROVED" },
-        (payload) => {
-          if (payload.old.status !== "APPROVED") {
-            setAlert({
-              id: payload.new.id,
-              message: `Reserva aprovada! (PIX confirmado)`,
-            });
-            router.refresh();
+          const n = payload.new as {
+            type: NotificationType;
+            title: string;
+            message: string;
+          };
 
-            setTimeout(() => setAlert(null), 5000);
-          }
+          const variant = TOAST_VARIANT[n.type] || "info";
+          toast[variant](n.title, {
+            description: n.message,
+            duration: 5000,
+          });
         }
       )
       .subscribe();
@@ -47,25 +66,8 @@ export function LiveAlerts() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [router]);
+  }, [supabase]);
 
-  if (!alert) return null;
-
-  return (
-    <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-right fade-in duration-300">
-      <div className="bg-primary text-on-primary px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3 pr-12 relative border border-white/20">
-        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-          <Bell className="w-4 h-4 animate-bounce" />
-        </div>
-        <p className="font-bold text-sm">{alert.message}</p>
-        
-        <button 
-          onClick={() => setAlert(null)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100"
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  );
+  // Rendering is handled by the global <Toaster /> in the root layout
+  return null;
 }

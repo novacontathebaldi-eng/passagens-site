@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
-import { Toaster } from "sonner";
+
 import { MotoristaBottomNav } from "./MotoristaBottomNav";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -75,8 +75,6 @@ export default async function MotoristaLayout({
         </div>
       </header>
 
-      {/* Toast notifications */}
-      <Toaster position="top-center" richColors toastOptions={{ style: { fontSize: '16px', fontWeight: 600 } }} />
 
       {/* Main Content Area */}
       <main className="flex-1 pt-[72px]">

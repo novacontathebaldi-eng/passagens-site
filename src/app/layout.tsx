@@ -74,12 +74,17 @@ export async function generateMetadata(): Promise<Metadata> {
 import { RefCatcher } from "@/components/RefCatcher";
 import { Suspense } from "react";
 import { GlobalRealtimeProvider } from "@/components/providers/GlobalRealtimeProvider";
+import { Toaster } from "sonner";
+import { LiveAlerts } from "@/components/LiveAlerts";
+import { getCachedProfile } from "@/lib/get-profile";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const profile = await getCachedProfile();
+
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body
@@ -92,6 +97,12 @@ export default function RootLayout({
           </Suspense>
           {children}
         </GlobalRealtimeProvider>
+        <LiveAlerts role={profile?.role} />
+        <Toaster
+          position="bottom-left"
+          richColors
+          toastOptions={{ style: { fontSize: '14px', fontWeight: 500 } }}
+        />
       </body>
     </html>
   );
