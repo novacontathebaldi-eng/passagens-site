@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type AuditLog = {
@@ -116,8 +116,8 @@ export default function AuditoriaPage() {
                 </td></tr>
               ) : (
                 logs.map(log => (
-                  <>
-                    <tr key={log.id} className="border-b border-outline-variant/10 hover:bg-surface-container-low/50 transition-colors cursor-pointer" onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}>
+                  <Fragment key={log.id}>
+                    <tr className="border-b border-outline-variant/10 hover:bg-surface-container-low/50 transition-colors cursor-pointer" onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}>
                       <td className="px-6 py-3 whitespace-nowrap text-on-surface-variant">
                         {new Date(log.created_at).toLocaleString("pt-BR")}
                       </td>
@@ -151,7 +151,7 @@ export default function AuditoriaPage() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 ))
               )}
             </tbody>
