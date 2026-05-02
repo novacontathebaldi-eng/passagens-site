@@ -47,14 +47,11 @@ export default async function CheckoutPage({ params }: { params: Params }) {
     notFound();
   }
 
-  // Buscar poltronas ocupadas — usa lista de inclusão (mesma lógica da RPC get_occupied_seats)
-  const { data: tickets } = await supabase
-    .from("passenger_tickets")
-    .select("seat_code, reservations!inner(status)")
-    .eq("excursion_id", excursionId)
-    .in("reservations.status", ["PENDING_PIX", "AWAITING_MANUAL_CHECK", "APPROVED"]);
+  // Buscar poltronas ocupadas via RPC SECURITY DEFINER (bypassa RLS — vê seats de TODOS os clientes)
+  const { data: occupiedSeats } = await supabase
+    .rpc('get_occupied_seat_codes', { p_excursion_id: excursionId });
 
-  const occupiedSeats = tickets?.map(t => t.seat_code) || [];
+  const safeOccupiedSeats: string[] = occupiedSeats || [];
 
   const backHref = excursion.tour_packages?.slug
     ? `/excursao/${excursion.tour_packages.slug}`
@@ -80,7 +77,7 @@ export default async function CheckoutPage({ params }: { params: Params }) {
           user={user} 
           profile={profile}
           savedPassengers={savedPassengers || []}
-          occupiedSeats={occupiedSeats}
+          occupiedSeats={safeOccupiedSeats}
           backHref={backHref}
         />
 

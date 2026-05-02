@@ -45,23 +45,21 @@ export async function createReservation(data: CheckoutData) {
       return { error: "Excursão indisponível." };
     }
 
-    const { data: existingTickets } = await supabase
-      .from("passenger_tickets")
-      .select("seat_code, reservations!inner(status)")
-      .eq("excursion_id", data.excursionId)
-      .in("reservations.status", ["PENDING_PIX", "AWAITING_MANUAL_CHECK", "APPROVED"]);
+    // Buscar poltronas ocupadas via RPC SECURITY DEFINER (vê seats de TODOS os clientes)
+    const { data: occupiedSeats } = await supabase
+      .rpc('get_occupied_seat_codes', { p_excursion_id: data.excursionId });
 
-    const occupiedSeats = existingTickets?.map(t => t.seat_code) || [];
+    const safeOccupiedSeats: string[] = occupiedSeats || [];
     const vehLayout = Array.isArray(excursion.vehicle_layouts) ? excursion.vehicle_layouts[0] : excursion.vehicle_layouts;
     const capacity = vehLayout?.capacity || 0;
 
-    if (capacity - occupiedSeats.length < data.quantity) {
+    if (capacity - safeOccupiedSeats.length < data.quantity) {
       return { error: "Não há vagas suficientes disponíveis." };
     }
 
     // 2. Verificar conflito de poltronas
     if (excursion.allow_seat_selection) {
-      const conflict = data.selectedSeats.some(seat => occupiedSeats.includes(seat));
+      const conflict = data.selectedSeats.some(seat => safeOccupiedSeats.includes(seat));
       if (conflict) {
         return { error: "Uma ou mais poltronas selecionadas já foram ocupadas. Por favor, tente novamente." };
       }

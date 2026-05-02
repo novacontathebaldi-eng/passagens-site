@@ -83,14 +83,14 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
 
   const watchedPassengers = watch("passengers");
 
-  // Load draft from LocalStorage on mount
+  // Load draft from LocalStorage on mount (only if no fields exist yet)
   useEffect(() => {
+    if (fields.length > 0) return; // Already initialized, don't overwrite
     const draft = localStorage.getItem(`checkout_draft_${excursion.id}`);
     if (draft) {
       try {
         const parsed = JSON.parse(draft);
         if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-          // Only restore if valid array
           if ('full_name' in parsed[0]) {
             setQuantity(parsed.length);
             replace(parsed);
@@ -100,30 +100,42 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
         // ignore
       }
     }
-  }, [excursion.id, replace]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [excursion.id]);
 
-  // Save draft whenever passengers change
+  // Save draft whenever passengers change (clear when empty)
   useEffect(() => {
     if (watchedPassengers && watchedPassengers.length > 0) {
-       localStorage.setItem(`checkout_draft_${excursion.id}`, JSON.stringify(watchedPassengers));
+      localStorage.setItem(`checkout_draft_${excursion.id}`, JSON.stringify(watchedPassengers));
+    } else {
+      localStorage.removeItem(`checkout_draft_${excursion.id}`);
     }
   }, [watchedPassengers, excursion.id]);
 
-  // Sync passengers count with quantity when moving from step 1
+  // Sync passengers count with quantity (runs on ANY step, not just step 2)
+  // Also trims selectedSeats when quantity decreases
   useEffect(() => {
-    if (step === 2) {
-      const currentCount = fields.length;
-      if (quantity > currentCount) {
-        for (let i = currentCount; i < quantity; i++) {
-          append({ full_name: "", cpf: "", rg: "", orgao_emissor: "", save_passenger: true, source: "manual" });
-        }
-      } else if (quantity < currentCount) {
-        for (let i = currentCount - 1; i >= quantity; i--) {
-          remove(i);
-        }
+    const currentCount = fields.length;
+    if (currentCount === 0 && step === 1) return; // Initial mount, not yet initialized
+
+    if (quantity > currentCount) {
+      for (let i = currentCount; i < quantity; i++) {
+        append({ full_name: "", cpf: "", rg: "", orgao_emissor: "", save_passenger: true, source: "manual" });
+      }
+    } else if (quantity < currentCount) {
+      for (let i = currentCount - 1; i >= quantity; i--) {
+        remove(i);
       }
     }
-  }, [step, quantity, append, remove, fields.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quantity]);
+
+  // Trim selectedSeats when quantity decreases
+  useEffect(() => {
+    if (selectedSeats.length > quantity) {
+      setSelectedSeats(prev => prev.slice(0, quantity));
+    }
+  }, [quantity, selectedSeats.length]);
 
   const handleNextStep = async () => {
     setGlobalError(null);

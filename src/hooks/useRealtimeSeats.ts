@@ -12,15 +12,10 @@ export function useRealtimeSeats(excursionId: string, initialOccupiedSeats: stri
   }, [JSON.stringify(initialOccupiedSeats)]);
 
   const fetchSeats = useCallback(async () => {
-    const { data: tickets } = await supabase
-      .from("passenger_tickets")
-      .select("seat_code, reservations!inner(status)")
-      .eq("excursion_id", excursionId)
-      .neq("reservations.status", "CANCELLED")
-      .neq("reservations.status", "EXPIRED");
+    const { data: seats } = await supabase
+      .rpc('get_occupied_seat_codes', { p_excursion_id: excursionId });
       
-    if (tickets) {
-      const seats = tickets.map(t => t.seat_code);
+    if (seats) {
       setOccupiedSeats(seats);
     }
   }, [excursionId, supabase]);
