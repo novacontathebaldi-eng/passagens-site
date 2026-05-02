@@ -305,17 +305,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               className="md:hidden p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high relative z-50"
               aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
             >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={isOpen ? "close" : "menu"}
-                  initial={{ opacity: 0, rotate: -90 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: 90 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </motion.div>
-              </AnimatePresence>
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </nav>
@@ -324,14 +314,15 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
       {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {isOpen && (
-          <>
+          <div className="fixed inset-0 z-40 md:hidden flex">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               onClick={closeMenu}
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+              className="absolute inset-0 bg-black/60"
               aria-hidden="true"
             />
 
@@ -341,7 +332,8 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 w-[80%] max-w-sm bg-surface z-50 md:hidden flex flex-col shadow-2xl overflow-y-auto"
+              style={{ willChange: "transform" }}
+              className="relative w-[80%] max-w-sm bg-surface flex flex-col shadow-2xl overflow-y-auto"
               role="dialog"
               aria-modal="true"
             >
@@ -457,7 +449,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
                 </div>
               </div>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
     </>
