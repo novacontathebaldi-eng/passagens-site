@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ExcursionItem } from "@/lib/search-utils";
 import { filterExcursions } from "@/components/CategoryPills";
 import { formatBRL, formatDate } from "@/lib/utils";
+import { useRealtimeOccupancy } from "@/hooks/useRealtimeOccupancy";
 
 interface ExcursionGridProps {
   excursions: ExcursionItem[];
@@ -13,6 +14,7 @@ interface ExcursionGridProps {
 
 export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
   const [activeCategory, setActiveCategory] = useState("");
+  const occupancyMap = useRealtimeOccupancy(excursions);
 
   useEffect(() => {
     const handleCategory = (e: CustomEvent<string>) => setActiveCategory(e.detail);
@@ -81,7 +83,11 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
         {/* Cards Grid */}
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((exc) => (
+            {filtered.map((exc) => {
+              const currentOccupancy = occupancyMap[exc.id] ?? (exc.vehicle_capacity ? exc.vehicle_capacity - (exc.available_count || 0) : 0);
+              const currentAvailable = exc.vehicle_capacity !== null ? Math.max(0, exc.vehicle_capacity - currentOccupancy) : exc.available_count;
+
+              return (
               <article
                 key={exc.id}
                 className="group relative bg-surface-container-lowest rounded-2xl overflow-hidden shadow-md transition-shadow duration-300 hover:shadow-xl flex flex-col cursor-pointer"
@@ -155,11 +161,11 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
                       </svg>
                       {formatDate(exc.departure_date)}
                     </span>
-                    {exc.available_count !== null && exc.available_count !== undefined && (
+                    {currentAvailable !== null && currentAvailable !== undefined && (
                       <span className={`flex items-center gap-1 font-medium ${
-                        exc.available_count <= 0
+                        currentAvailable <= 0
                           ? 'text-error'
-                          : exc.available_count <= 5
+                          : currentAvailable <= 5
                           ? 'text-error animate-pulse'
                           : 'text-success'
                       }`}>
@@ -176,11 +182,11 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
                           />
                         </svg>
-                        {exc.available_count <= 0
+                        {currentAvailable <= 0
                           ? 'Esgotado'
-                          : exc.available_count <= 5
-                          ? `🔥 Últimas ${exc.available_count} vagas!`
-                          : `${exc.available_count} vagas`}
+                          : currentAvailable <= 5
+                          ? `🔥 Últimas ${currentAvailable} vagas!`
+                          : `${currentAvailable} vagas`}
                       </span>
                     )}
                   </div>
@@ -194,7 +200,7 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
                   </Link>
                 </div>
               </article>
-            ))}
+            )})}
           </div>
         ) : (
           <div className="text-center py-16">

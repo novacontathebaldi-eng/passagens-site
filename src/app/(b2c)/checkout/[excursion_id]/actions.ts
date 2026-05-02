@@ -47,12 +47,11 @@ export async function createReservation(data: CheckoutData) {
 
     const { data: existingTickets } = await supabase
       .from("passenger_tickets")
-      .select("seat_code, reservations(status)")
+      .select("seat_code, reservations!inner(status)")
       .eq("excursion_id", data.excursionId)
-      .neq("reservations.status", "CANCELLED")
-      .neq("reservations.status", "EXPIRED");
+      .in("reservations.status", ["PENDING_PIX", "AWAITING_MANUAL_CHECK", "APPROVED"]);
 
-    const occupiedSeats = existingTickets?.filter(t => t.reservations !== null).map(t => t.seat_code) || [];
+    const occupiedSeats = existingTickets?.map(t => t.seat_code) || [];
     const vehLayout = Array.isArray(excursion.vehicle_layouts) ? excursion.vehicle_layouts[0] : excursion.vehicle_layouts;
     const capacity = vehLayout?.capacity || 0;
 
