@@ -444,13 +444,13 @@ export default function CheckinPage() {
       )}
       
       {/* Required style for scan line animation */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style>{`
         @keyframes scan {
           0% { transform: translateY(-48px); }
           50% { transform: translateY(48px); }
           100% { transform: translateY(-48px); }
         }
-      `}} />
+      `}</style>
     </div>
   );
 }
