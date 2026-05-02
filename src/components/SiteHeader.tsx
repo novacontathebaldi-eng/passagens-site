@@ -299,13 +299,13 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               </Link>
             </div>
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile Menu Toggle (hamburger only — close button is inside the drawer) */}
             <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high relative z-50"
-              aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
+              onClick={() => setIsOpen(true)}
+              className="md:hidden p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high"
+              aria-label="Abrir menu"
             >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <Menu className="w-6 h-6" />
             </button>
           </div>
         </nav>
@@ -314,7 +314,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
       {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-40 md:hidden flex">
+          <div className="fixed inset-0 z-[60] md:hidden flex">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -337,14 +337,21 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               role="dialog"
               aria-modal="true"
             >
-              {/* Drawer Header (Logo inside drawer) */}
-              <div className="h-16 px-4 flex items-center border-b border-outline-variant/30 shrink-0">
+              {/* Drawer Header (Logo + Close button inside drawer) */}
+              <div className="h-16 px-4 flex items-center justify-between border-b border-outline-variant/30 shrink-0">
                 <Link href="/" className="flex items-center gap-2" onClick={closeMenu}>
                   <LogoMark logoUrl={settings.logo_url} companyName={settings.company_name} size={28} />
                   <span className="text-xl font-extrabold font-[family-name:var(--font-display)] text-primary">
                     {settings.company_name}
                   </span>
                 </Link>
+                <button
+                  onClick={closeMenu}
+                  className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-xl transition-colors shrink-0 -mr-2"
+                  aria-label="Fechar menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
               {/* Drawer Links */}
