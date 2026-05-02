@@ -112,11 +112,11 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
     }
   }, [watchedPassengers, excursion.id]);
 
-  // Sync passengers count with quantity (runs on ANY step, not just step 2)
-  // Also trims selectedSeats when quantity decreases
+  // Sync passengers count with quantity — fires on quantity change OR step transition
   useEffect(() => {
     const currentCount = fields.length;
-    if (currentCount === 0 && step === 1) return; // Initial mount, not yet initialized
+    // Skip only on initial mount (step 1, no fields, no draft loaded)
+    if (step === 1 && currentCount === 0) return;
 
     if (quantity > currentCount) {
       for (let i = currentCount; i < quantity; i++) {
@@ -128,7 +128,7 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quantity]);
+  }, [quantity, step]);
 
   // Trim selectedSeats when quantity decreases
   useEffect(() => {
