@@ -3,6 +3,7 @@ import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { CalendarDays, Search, Bus } from "lucide-react";
 import { getCoverImage } from "@/lib/tour-images";
+import RealtimeSeatCount from "@/components/RealtimeSeatCount";
 
 export const dynamic = "force-dynamic";
 
@@ -135,7 +136,7 @@ export default async function CatalogoPage({
     const capacity = vl?.capacity || 0;
     const occupied = occupiedByExcursion[exc.id] || 0;
     const availableCount = Math.max(0, capacity - occupied);
-    return { ...exc, availableCount, busType: vl?.bus_type || "" };
+    return { ...exc, availableCount, capacity, occupied, busType: vl?.bus_type || "" };
   });
 
   return (
@@ -291,13 +292,11 @@ export default async function CatalogoPage({
                             </div>
                           )}
                           <div className="text-xs font-medium">
-                            {exc.availableCount <= 0 ? (
-                              <span className="text-error">Esgotado</span>
-                            ) : exc.availableCount <= 5 ? (
-                              <span className="text-error animate-pulse">🔥 Últimas {exc.availableCount} vagas!</span>
-                            ) : (
-                              <span className="text-success">{exc.availableCount} vagas disponíveis</span>
-                            )}
+                            <RealtimeSeatCount
+                              excursionId={exc.id}
+                              capacity={exc.capacity}
+                              initialOccupied={exc.occupied}
+                            />
                           </div>
                         </div>
 

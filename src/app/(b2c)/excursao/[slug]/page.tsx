@@ -5,6 +5,7 @@ import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { CheckCircle2, CalendarDays, Bus, ShieldCheck } from "lucide-react";
 import AmenityBadges from "@/components/AmenityBadges";
+import RealtimeSeatCount from "@/components/RealtimeSeatCount";
 import WaitlistButton from "./WaitlistButton";
 import LightboxGallery from "./LightboxGallery";
 import StickyExcursionTitle from "@/components/StickyExcursionTitle";
@@ -307,11 +308,11 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
                           <span>Alocação automática</span>
                         )}
                         <span className="flex items-center gap-1">•</span>
-                        {exc.availableCount <= 5 ? (
-                          <span className="text-error font-bold flex items-center gap-1 animate-pulse">🔥 Últimas {exc.availableCount} vagas!</span>
-                        ) : (
-                          <span className="text-success font-medium">{exc.availableCount} vagas</span>
-                        )}
+                        <RealtimeSeatCount
+                          excursionId={exc.id}
+                          capacity={exc.capacity}
+                          initialOccupied={exc.occupied}
+                        />
                       </div>
 
                       <Link

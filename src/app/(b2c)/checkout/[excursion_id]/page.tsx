@@ -47,16 +47,14 @@ export default async function CheckoutPage({ params }: { params: Params }) {
     notFound();
   }
 
-  // Buscar poltronas já ocupadas para esta excursão
+  // Buscar poltronas ocupadas — usa lista de inclusão (mesma lógica da RPC get_occupied_seats)
   const { data: tickets } = await supabase
     .from("passenger_tickets")
-    .select("seat_code, reservations(status)")
+    .select("seat_code, reservations!inner(status)")
     .eq("excursion_id", excursionId)
-    .neq("reservations.status", "CANCELLED")
-    .neq("reservations.status", "EXPIRED");
+    .in("reservations.status", ["PENDING_PIX", "AWAITING_MANUAL_CHECK", "APPROVED"]);
 
-  // Apenas as cadeiras que não estão canceladas nem expiradas contam como ocupadas
-  const occupiedSeats = tickets?.filter(t => t.reservations !== null).map(t => t.seat_code) || [];
+  const occupiedSeats = tickets?.map(t => t.seat_code) || [];
 
   const backHref = excursion.tour_packages?.slug
     ? `/excursao/${excursion.tour_packages.slug}`
