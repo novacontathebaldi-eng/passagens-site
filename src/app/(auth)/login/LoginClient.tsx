@@ -93,7 +93,7 @@ function LoginContent({ v, logoUrl, companyName }: { v: number, logoUrl?: string
       </div>
 
       {/* Right: Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
+      <div className="flex-1 flex items-start sm:items-center justify-center p-6 pt-16 sm:p-12">
         <div className="w-full max-w-md space-y-8">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center">
