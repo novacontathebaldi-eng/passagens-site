@@ -68,9 +68,18 @@ export async function createReservation(data: CheckoutData) {
       }
     }
 
-    // [SECURITY PATCH] Calcular valor total no servidor (Server-Side Trust)
-    // Nunca confiar no total enviado pelo client.
-    const calculatedTotalAmount = Number(excursion.price_per_seat) * data.quantity;
+    // [SECURITY PATCH] Validação Matemática do Pagamento (Server-Side Trust)
+    const baseTotalAmount = Number(excursion.price_per_seat) * data.quantity;
+    let finalAmount = baseTotalAmount;
+
+    // Se houver regras de cupom/promotor no futuro, aplique o desconto aqui:
+    // if (promoterId) { finalAmount = baseTotalAmount - discount; }
+
+    // Rejeita tentativas de manipulação (Data Tampering) via Postman/Burp
+    if (Math.abs(data.totalAmount - finalAmount) > 0.01) {
+      console.warn(`[SECURITY] Tentativa de fraude ou divergência de preço interceptada: Cliente enviou ${data.totalAmount}, esperado ${finalAmount}`);
+      return { error: "Divergência de valores detectada. O preço da excursão pode ter sido atualizado." };
+    }
 
     // 3. Criar Reserva (PENDING_PIX) com TTL
     const { data: reservation, error: resError } = await supabase
@@ -79,7 +88,7 @@ export async function createReservation(data: CheckoutData) {
         user_id: user.id,
         excursion_id: data.excursionId,
         promoter_id: promoterId,
-        total_amount: calculatedTotalAmount,
+        total_amount: finalAmount, // Banco assume o controle matemático final
         // status is locked by DB privileges or defaults to PENDING_PIX
       })
       .select("id")
@@ -124,12 +133,18 @@ export async function createReservation(data: CheckoutData) {
         : allocatedSeats[idx]
     }));
 
-    const { error: ticketError } = await supabase
-      .from("passenger_tickets")
-      .insert(ticketsToInsert);
+    // [SECURITY PATCH] Ticket Capacity Bypass Mitigation
+    // A inserção direta foi revogada da role authenticated via SQL.
+    // Usamos uma RPC SECURITY DEFINER que valida matematicamente a lotação 
+    // máxima com base no valor pago pela reserva.
+    const { error: ticketError } = await supabase.rpc("insert_passenger_tickets_secure", {
+      p_reservation_id: reservation.id,
+      p_excursion_id: data.excursionId,
+      p_tickets: ticketsToInsert
+    });
 
     if (ticketError) {
-      console.error("Erro ao criar tickets:", ticketError);
+      console.error("[SECURITY] Erro na RPC de inserção de tickets:", ticketError);
       // Rollback manual
       await supabase.from("reservations").delete().eq("id", reservation.id);
       return { error: "Erro ao alocar passageiros." };
