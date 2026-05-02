@@ -747,8 +747,8 @@ export default function ConfiguracoesPage() {
             {settings.hero_stats.map((stat, i) => (
               <div key={i} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center p-4 bg-surface rounded-xl border border-outline-variant/30">
                 {/* Icon preview + selector */}
-                <div className="flex flex-col gap-1.5 shrink-0">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="flex flex-row items-center gap-3 w-full sm:w-auto shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d={stat.iconPath} />
                     </svg>
@@ -756,7 +756,7 @@ export default function ConfiguracoesPage() {
                   <select
                     value={ICON_OPTIONS.find(o => o.value === stat.iconPath) ? stat.iconPath : "__custom"}
                     onChange={(e) => { if (e.target.value !== "__custom") updateHeroStat(i, "iconPath", e.target.value); }}
-                    className="bg-surface border border-outline-variant rounded-lg px-2 py-1 text-[11px] focus:border-primary outline-none w-[110px]"
+                    className="flex-1 sm:w-[130px] bg-surface border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                   >
                     {ICON_OPTIONS.map(opt => <option key={opt.label} value={opt.value}>{opt.label}</option>)}
                     {!ICON_OPTIONS.find(o => o.value === stat.iconPath) && <option value="__custom">Personalizado</option>}
