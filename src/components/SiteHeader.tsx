@@ -142,7 +142,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-surface/95 md:bg-surface/70 md:backdrop-blur-md border-b border-outline-variant/30">
+      <header className="sticky top-0 z-50 glass border-b border-outline-variant/30">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 
           {/* Logo */}
