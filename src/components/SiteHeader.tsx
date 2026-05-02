@@ -144,7 +144,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
     <>
       <header className="sticky top-0 z-50 glass border-b border-outline-variant/30">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          
+
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group z-50 relative">
             <LogoMark logoUrl={settings.logo_url} companyName={settings.company_name} size={28} />
@@ -290,7 +290,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
 
             {/* Mobile User Icon (Quick Access) */}
             <div className="md:hidden flex items-center">
-              <Link 
+              <Link
                 href={user ? "/painel" : "/login"}
                 className="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high"
                 aria-label="Perfil"
@@ -299,13 +299,23 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               </Link>
             </div>
 
-            {/* Mobile Menu Toggle (hamburger only — close button is inside the drawer) */}
+            {/* Mobile Menu Toggle */}
             <button
-              onClick={() => setIsOpen(true)}
-              className="md:hidden p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high"
-              aria-label="Abrir menu"
+              onClick={() => setIsOpen(!isOpen)}
+              className="md:hidden p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high relative z-50"
+              aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
             >
-              <Menu className="w-6 h-6" />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={isOpen ? "close" : "menu"}
+                  initial={{ opacity: 0, rotate: -90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: 90 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </motion.div>
+              </AnimatePresence>
             </button>
           </div>
         </nav>
@@ -314,15 +324,14 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
       {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[60] md:hidden flex">
+          <>
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
               onClick={closeMenu}
-              className="absolute inset-0 bg-black/60"
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
               aria-hidden="true"
             />
 
@@ -332,26 +341,18 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              style={{ willChange: "transform" }}
-              className="relative w-[80%] max-w-sm bg-surface flex flex-col shadow-2xl overflow-y-auto"
+              className="fixed top-0 left-0 bottom-0 w-[80%] max-w-sm bg-surface z-50 md:hidden flex flex-col shadow-2xl overflow-y-auto"
               role="dialog"
               aria-modal="true"
             >
-              {/* Drawer Header (Logo + Close button inside drawer) */}
-              <div className="h-16 px-4 flex items-center justify-between border-b border-outline-variant/30 shrink-0">
+              {/* Drawer Header (Logo inside drawer) */}
+              <div className="h-16 px-4 flex items-center border-b border-outline-variant/30 shrink-0">
                 <Link href="/" className="flex items-center gap-2" onClick={closeMenu}>
                   <LogoMark logoUrl={settings.logo_url} companyName={settings.company_name} size={28} />
                   <span className="text-xl font-extrabold font-[family-name:var(--font-display)] text-primary">
                     {settings.company_name}
                   </span>
                 </Link>
-                <button
-                  onClick={closeMenu}
-                  className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-xl transition-colors shrink-0 -mr-2"
-                  aria-label="Fechar menu"
-                >
-                  <X className="w-5 h-5" />
-                </button>
               </div>
 
               {/* Drawer Links */}
@@ -359,7 +360,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
                 {navLinks.map((link) => {
                   const isActive = pathname === link.href && !link.isScroll;
                   const Icon = link.icon;
-                  
+
                   if (link.isScroll) {
                     return (
                       <SmoothScrollLink
@@ -373,17 +374,16 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
                       </SmoothScrollLink>
                     );
                   }
-                  
+
                   return (
                     <Link
                       key={link.name}
                       href={link.href}
                       onClick={closeMenu}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors font-medium ${
-                        isActive 
-                          ? "bg-primary/10 text-primary" 
+                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors font-medium ${isActive
+                          ? "bg-primary/10 text-primary"
                           : "text-on-surface hover:bg-surface-container-high"
-                      }`}
+                        }`}
                     >
                       <Icon className={`w-5 h-5 ${isActive ? "text-primary" : "text-on-surface-variant"}`} />
                       {link.name}
@@ -422,8 +422,8 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
                     )}
 
                     <form action={logout} className="w-full">
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         onClick={closeMenu}
                         className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-surface-container hover:bg-surface-container-high text-error font-medium transition-colors"
                       >
@@ -450,13 +450,13 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
                     </Link>
                   </div>
                 )}
-                
+
                 <div className="mt-6 text-center text-xs text-outline font-medium">
                   © {new Date().getFullYear()} {settings.company_name}
                 </div>
               </div>
             </motion.div>
-          </div>
+          </>
         )}
       </AnimatePresence>
     </>
