@@ -41,7 +41,7 @@ function CadastroContent({ v, logoUrl, companyName }: { v: number, logoUrl?: str
   return (
     <main className="min-h-screen bg-surface flex relative">
       {/* Botão Voltar (Mobile) */}
-      <Link href="/login" className="lg:hidden absolute top-5 left-5 flex items-center gap-2 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors z-50">
+      <Link href="/login" className="lg:hidden absolute top-6 left-6 sm:left-12 flex items-center gap-2 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors z-50">
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
