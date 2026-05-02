@@ -74,8 +74,19 @@ export function useNotifications(limit = 20) {
   // Real-time subscription — create channel, attach listeners, THEN subscribe.
   // Cleanup removes the channel before React re-runs the effect (StrictMode).
   useEffect(() => {
+    let isMounted = true;
+
+    // Generate a universally unique channel name for this specific hook instance/mount
+    // Combining Date.now() with Math.random() ensures that even if two components
+    // (e.g. mobile header and desktop sidebar) mount at the exact same millisecond,
+    // they won't collide and share the channel instance, preventing the 'cannot add
+    // postgres_changes callbacks after subscribe' error.
+    const channelId = `notifications-rt-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
+
     const channel = supabase
-      .channel(`notifications-rt-${Date.now()}`)
+      .channel(channelId)
       .on(
         "postgres_changes",
         {
@@ -84,6 +95,7 @@ export function useNotifications(limit = 20) {
           table: "notifications",
         },
         (payload) => {
+          if (!isMounted) return;
           const incoming = payload.new as Notification;
           setNotifications((prev) =>
             [incoming, ...prev].slice(0, limitRef.current)
@@ -99,6 +111,7 @@ export function useNotifications(limit = 20) {
           table: "notifications",
         },
         (payload) => {
+          if (!isMounted) return;
           const updated = payload.new as Notification;
           setNotifications((prev) => {
             const next = prev.map((n) => (n.id === updated.id ? updated : n));
@@ -110,6 +123,8 @@ export function useNotifications(limit = 20) {
       .subscribe();
 
     return () => {
+      isMounted = false;
+      // removeChannel handles the async cleanup internally
       supabase.removeChannel(channel);
     };
   }, [supabase]);
