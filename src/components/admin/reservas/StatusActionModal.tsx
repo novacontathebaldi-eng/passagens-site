@@ -37,7 +37,7 @@ export function StatusActionModal({ isOpen, action, onClose, onConfirm, isLoadin
       title = "Reembolsar Reserva";
       description = "Você está marcando esta reserva como reembolsada. Confirma o estorno do valor?";
       confirmText = "Confirmar Reembolso";
-      confirmColor = "bg-warning-dark hover:bg-warning text-white";
+      confirmColor = "bg-warning hover:bg-warning/80 text-white";
       break;
     case "REACTIVATE":
       title = "Reativar Reserva";

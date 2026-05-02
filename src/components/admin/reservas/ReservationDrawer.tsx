@@ -15,7 +15,7 @@ type FullReservation = {
   created_at: string;
   expires_at: string;
   notes: string | null;
-  profiles: { full_name: string; phone: string; cpf: string; email: string } | null;
+  profiles: { full_name: string; phone: string; cpf: string } | null;
   excursions: { 
     id: string;
     departure_date: string;
@@ -66,7 +66,7 @@ export function ReservationDrawer({ reservationId, isOpen, onClose }: Reservatio
           created_at,
           expires_at,
           notes,
-          profiles ( full_name, phone, cpf, email ),
+          profiles ( full_name, phone, cpf ),
           excursions ( 
             id,
             departure_date,
@@ -198,7 +198,7 @@ export function ReservationDrawer({ reservationId, isOpen, onClose }: Reservatio
                   </div>
                   <div>
                     <div className="text-xs text-outline mb-1">E-mail</div>
-                    <div className="font-medium text-on-surface">{profile?.email || 'N/A'}</div>
+                    <div className="font-medium text-on-surface">Protegido via Auth</div>
                   </div>
                   <div>
                     <div className="text-xs text-outline mb-1">CPF</div>
