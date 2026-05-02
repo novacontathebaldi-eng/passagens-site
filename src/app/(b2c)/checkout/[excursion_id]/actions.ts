@@ -37,7 +37,7 @@ export async function createReservation(data: CheckoutData) {
     // 1. Verificar disponibilidade de vagas
     const { data: excursion } = await supabase
       .from("excursions")
-      .select("allow_seat_selection, status, vehicle_layouts(capacity)")
+      .select("allow_seat_selection, status, price_per_seat, vehicle_layouts(capacity)")
       .eq("id", data.excursionId)
       .single();
 
@@ -68,6 +68,10 @@ export async function createReservation(data: CheckoutData) {
       }
     }
 
+    // [SECURITY PATCH] Calcular valor total no servidor (Server-Side Trust)
+    // Nunca confiar no total enviado pelo client.
+    const calculatedTotalAmount = Number(excursion.price_per_seat) * data.quantity;
+
     // 3. Criar Reserva (PENDING_PIX) com TTL
     const { data: reservation, error: resError } = await supabase
       .from("reservations")
@@ -75,10 +79,8 @@ export async function createReservation(data: CheckoutData) {
         user_id: user.id,
         excursion_id: data.excursionId,
         promoter_id: promoterId,
-        total_amount: data.totalAmount,
-        status: "PENDING_PIX",
-        gateway_provider: "MANUAL_ASYNC_V1",
-        // expires_at is set by DEFAULT to NOW() + 24 hours in DB
+        total_amount: calculatedTotalAmount,
+        // status is locked by DB privileges or defaults to PENDING_PIX
       })
       .select("id")
       .single();
