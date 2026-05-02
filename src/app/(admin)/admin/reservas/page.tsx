@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useRealtimeReservations, Reservation } from "@/hooks/useRealtimeReservations";
+import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
+import { ReservationStatus } from "@/app/actions/reservas";
+import { ReservasKanban } from "@/components/admin/reservas/ReservasKanban";
+import { ReservasList } from "@/components/admin/reservas/ReservasList";
+import { StatusActionModal } from "@/components/admin/reservas/StatusActionModal";
+import { ReservationDrawer } from "@/components/admin/reservas/ReservationDrawer";
 
 type ExcursionOption = {
   id: string;
@@ -11,16 +16,23 @@ type ExcursionOption = {
   tour_packages: { title: string } | null;
 };
 
-const COLUMNS = [
-  { id: "PENDING_PIX", title: "Aguardando PIX", color: "border-warning" },
-  { id: "AWAITING_MANUAL_CHECK", title: "Em Análise", color: "border-cta" },
-  { id: "APPROVED", title: "Aprovadas", color: "border-success" },
-  { id: "CANCELLED", title: "Canceladas", color: "border-error" },
-  { id: "EXPIRED", title: "Expiradas (TTL)", color: "border-outline" }
-];
+type ViewMode = "kanban" | "list";
+type ActionType = "APPROVE" | "CANCEL" | "REFUND" | "REACTIVATE";
 
-export default function KanbanReservasPage() {
+export default function ReservasPage() {
   const [excursions, setExcursions] = useState<ExcursionOption[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>("kanban");
+  
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalAction, setModalAction] = useState<ActionType | null>(null);
+  const [activeReservationId, setActiveReservationId] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  
+  // Drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerReservationId, setDrawerReservationId] = useState<string | null>(null);
+  
   const supabase = createClient();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -41,122 +53,134 @@ export default function KanbanReservasPage() {
     loadExcursions();
   }, [supabase]);
 
-  async function handleStatusChange(id: string, newStatus: Reservation["status"]) {
-    const { error } = await updateStatus(id, newStatus);
-    if (error) {
-      alert("Erro ao atualizar status: " + error.message);
+  const handleActionClick = (id: string, action: ActionType) => {
+    setActiveReservationId(id);
+    setModalAction(action);
+    
+    // Se for aprovação ou reativação, podemos até pular o modal, mas para manter a UI consistente:
+    if (action === "CANCEL" || action === "REFUND") {
+      setModalOpen(true);
+    } else {
+      // Para APPROVE e REACTIVATE, podemos perguntar ou ir direto. Vamos perguntar também no modal (opcional, o user pediu opcional para cancel/refund, mas pro approve é só clicar sim).
+      setModalOpen(true);
     }
-  }
+  };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(amount);
+  const handleModalConfirm = async (notes?: string) => {
+    if (!activeReservationId || !modalAction) return;
+
+    setIsUpdating(true);
+    let newStatus: ReservationStatus;
+    
+    switch (modalAction) {
+      case "APPROVE": newStatus = "APPROVED"; break;
+      case "CANCEL": newStatus = "CANCELLED"; break;
+      case "REFUND": newStatus = "REFUNDED"; break;
+      case "REACTIVATE": newStatus = "PENDING_PIX"; break;
+      default: return;
+    }
+
+    const { error } = await updateStatus(activeReservationId, newStatus, notes);
+    
+    setIsUpdating(false);
+    if (!error) {
+      setModalOpen(false);
+      setActiveReservationId(null);
+      setModalAction(null);
+    }
+  };
+
+  const handleOpenDrawer = (id: string) => {
+    setDrawerReservationId(id);
+    setDrawerOpen(true);
   };
 
   return (
-    <div className="space-y-6 flex flex-col h-[calc(100vh-100px)] p-6 lg:p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-on-surface">
-            CRM de Reservas (Kanban)
-          </h1>
-          <p className="text-on-surface-variant text-sm mt-1">
-            Arraste ou clique para mover as reservas pelo funil de vendas. Atualização em tempo real.
-          </p>
+    <>
+      <div className="space-y-6 flex flex-col h-[calc(100vh-100px)] p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0">
+          <div>
+            <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-on-surface">
+              CRM de Reservas
+            </h1>
+            <p className="text-on-surface-variant text-sm mt-1">
+              Gerencie o fluxo de vendas e reservas ativas.
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            {/* View Toggle */}
+            <div className="flex bg-surface-container-low p-1 rounded-xl border border-outline-variant/30 w-full sm:w-auto">
+              <button
+                onClick={() => setViewMode("kanban")}
+                className={`flex-1 sm:px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${viewMode === 'kanban' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
+              >
+                Kanban
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex-1 sm:px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${viewMode === 'list' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
+              >
+                Lista
+              </button>
+            </div>
+
+            <select
+              value={selectedExcursionId}
+              onChange={(e) => {
+                if (e.target.value === "ALL") {
+                  router.push("/admin/reservas");
+                } else {
+                  router.push(`/admin/reservas?excursion_id=${e.target.value}`);
+                }
+              }}
+              className="w-full sm:w-64 rounded-xl border border-outline-variant bg-surface px-4 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+            >
+              <option value="ALL">Todas as Excursões</option>
+              {excursions.map(exc => {
+                const tourTitle = Array.isArray(exc.tour_packages) ? exc.tour_packages[0]?.title : exc.tour_packages?.title;
+                return (
+                  <option key={exc.id} value={exc.id}>
+                    {tourTitle} ({new Date(exc.departure_date).toLocaleDateString("pt-BR")})
+                  </option>
+                );
+              })}
+            </select>
+          </div>
         </div>
-        
-        <div className="w-full sm:w-auto">
-          <select
-            value={selectedExcursionId}
-            onChange={(e) => {
-              if (e.target.value === "ALL") {
-                router.push("/admin/reservas");
-              } else {
-                router.push(`/admin/reservas?excursion_id=${e.target.value}`);
-              }
-            }}
-            className="w-full sm:w-64 rounded-xl border border-outline-variant bg-surface px-4 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-          >
-            <option value="ALL">Todas as Excursões</option>
-            {excursions.map(exc => {
-              const tourTitle = Array.isArray(exc.tour_packages) ? exc.tour_packages[0]?.title : exc.tour_packages?.title;
-              return (
-                <option key={exc.id} value={exc.id}>
-                  {tourTitle} ({new Date(exc.departure_date).toLocaleDateString("pt-BR")})
-                </option>
-              );
-            })}
-          </select>
-        </div>
+
+        {viewMode === "kanban" ? (
+          <ReservasKanban 
+            reservations={reservations} 
+            isLoading={isLoading} 
+            onStatusChange={async () => {}} // Não usado diretamente mais, mas mantido na prop se precisar
+            onActionClick={handleActionClick}
+            onCardClick={handleOpenDrawer}
+          />
+        ) : (
+          <ReservasList 
+            reservations={reservations} 
+            isLoading={isLoading} 
+            onStatusChange={async () => {}}
+            onActionClick={handleActionClick}
+            onRowClick={handleOpenDrawer}
+          />
+        )}
       </div>
 
-      <div className="flex-1 overflow-x-auto pb-4">
-        <div className="flex gap-4 h-full min-w-max">
-          {COLUMNS.map(col => {
-            const columnReservations = reservations.filter(r => r.status === col.id);
-            
-            return (
-              <div key={col.id} className="w-80 flex flex-col bg-surface-container-lowest rounded-2xl border border-outline-variant/30 overflow-hidden shrink-0">
-                <div className={`p-4 border-t-4 ${col.color} bg-surface-container-low border-b border-outline-variant/20 flex justify-between items-center shrink-0`}>
-                  <h3 className="font-semibold text-on-surface">{col.title}</h3>
-                  <span className="bg-surface-container-high text-on-surface-variant text-xs font-bold px-2 py-1 rounded-full">
-                    {columnReservations.length}
-                  </span>
-                </div>
-                
-                <div className="flex-1 p-3 space-y-3 overflow-y-auto">
-                  {isLoading ? (
-                    <div className="text-center text-sm text-outline py-4">Carregando...</div>
-                  ) : columnReservations.length === 0 ? (
-                    <div className="text-center text-sm text-outline py-8 border-2 border-dashed border-outline-variant/30 rounded-xl">
-                      Vazio
-                    </div>
-                  ) : (
-                    columnReservations.map(res => {
-                      const profile = Array.isArray(res.profiles) ? res.profiles[0] : res.profiles;
-                      const excursion = Array.isArray(res.excursions) ? res.excursions[0] : res.excursions;
-                      const tourTitle = Array.isArray(excursion?.tour_packages) ? excursion?.tour_packages[0]?.title : excursion?.tour_packages?.title;
+      <StatusActionModal
+        isOpen={modalOpen}
+        action={modalAction}
+        isLoading={isUpdating}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleModalConfirm}
+      />
 
-                      return (
-                        <div key={res.id} className="bg-surface p-4 rounded-xl border border-outline-variant/40 shadow-sm hover:shadow-md transition-shadow cursor-grab">
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="text-xs font-bold text-outline uppercase tracking-wider">#{res.id.split("-")[0]}</span>
-                            <span className="text-sm font-bold text-primary-dark">{formatCurrency(res.total_amount)}</span>
-                          </div>
-                          <div className="font-semibold text-on-surface mb-1">
-                            {profile?.full_name || "Cliente Desconhecido"}
-                          </div>
-                          <div className="text-xs text-on-surface-variant mb-3 line-clamp-2">
-                            {tourTitle || "Excursão Genérica"} <br/>
-                            {excursion?.departure_date && new Date(excursion.departure_date).toLocaleDateString("pt-BR")}
-                          </div>
-                          
-                          {/* Ações */}
-                          <div className="flex gap-2 pt-3 border-t border-outline-variant/20">
-                            {res.status === "PENDING_PIX" || res.status === "AWAITING_MANUAL_CHECK" ? (
-                              <>
-                                <button onClick={() => handleStatusChange(res.id, "APPROVED")} className="flex-1 bg-success/10 hover:bg-success/20 text-success text-xs font-bold py-1.5 rounded transition-colors">
-                                  Aprovar
-                                </button>
-                                <button onClick={() => handleStatusChange(res.id, "CANCELLED")} className="flex-1 bg-error/10 hover:bg-error/20 text-error text-xs font-bold py-1.5 rounded transition-colors">
-                                  Cancelar
-                                </button>
-                              </>
-                            ) : res.status === "APPROVED" ? (
-                              <button onClick={() => handleStatusChange(res.id, "REFUNDED")} className="flex-1 bg-warning/10 hover:bg-warning/20 text-warning text-xs font-bold py-1.5 rounded transition-colors">
-                                Reembolsar
-                              </button>
-                            ) : null}
-                          </div>
-                        </div>
-                      )
-                    })
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    </div>
+      <ReservationDrawer
+        isOpen={drawerOpen}
+        reservationId={drawerReservationId}
+        onClose={() => setDrawerOpen(false)}
+      />
+    </>
   );
 }

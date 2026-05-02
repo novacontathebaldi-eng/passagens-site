@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { changeReservationStatus, ReservationStatus } from "@/app/actions/reservas";
 
 export type Reservation = {
   id: string;
   total_amount: number;
-  status: "PENDING_PIX" | "AWAITING_MANUAL_CHECK" | "APPROVED" | "REFUNDED" | "CANCELLED" | "EXPIRED";
+  status: ReservationStatus;
   created_at: string;
-  profiles: { full_name: string; phone: string } | null;
+  expires_at: string;
+  profiles: { full_name: string; phone: string; cpf: string } | null;
   excursions: { 
     departure_date: string;
     tour_packages: { title: string } | null;
   } | null;
+  passenger_tickets: { id: string }[];
 };
 
 export function useRealtimeReservations(excursionId: string = "ALL") {
@@ -27,11 +30,13 @@ export function useRealtimeReservations(excursionId: string = "ALL") {
         total_amount,
         status,
         created_at,
-        profiles ( full_name, phone ),
+        expires_at,
+        profiles ( full_name, phone, cpf ),
         excursions ( 
           departure_date,
           tour_packages ( title )
-        )
+        ),
+        passenger_tickets ( id )
       `)
       .order("created_at", { ascending: false });
 
@@ -63,7 +68,16 @@ export function useRealtimeReservations(excursionId: string = "ALL") {
         },
         (payload) => {
           console.log("Realtime event received for reservation:", payload);
-          fetchReservations();
+          if (payload.eventType === 'UPDATE') {
+            setReservations(prev => prev.map(res => 
+              res.id === payload.new.id 
+                ? { ...res, status: payload.new.status } 
+                : res
+            ));
+          } else {
+            // For INSERT or DELETE, we refetch to get joined data or remove items easily
+            fetchReservations();
+          }
         }
       )
       .subscribe();
@@ -71,21 +85,20 @@ export function useRealtimeReservations(excursionId: string = "ALL") {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchReservations, supabase]);
+  }, [fetchReservations, supabase, excursionId]);
 
-  const updateStatus = async (id: string, newStatus: Reservation["status"]) => {
+  const updateStatus = async (id: string, newStatus: ReservationStatus, notes?: string) => {
     // Optimistic UI update
     setReservations(prev => prev.map(res => res.id === id ? { ...res, status: newStatus } : res));
 
-    const { error } = await supabase
-      .from("reservations")
-      .update({ status: newStatus })
-      .eq("id", id);
+    const result = await changeReservationStatus(id, newStatus, notes);
 
-    if (error) {
+    if (result.error) {
+      console.error(result.error);
+      alert(result.error);
       // Revert optimism by refetching
       fetchReservations();
-      return { error };
+      return { error: new Error(result.error) };
     }
     return { error: null };
   };
