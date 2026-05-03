@@ -4,12 +4,24 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { deleteClientAccount, toggleClientBan } from "../actions";
+import { formatDate } from "@/lib/utils";
 
-export default function DangerZoneAdmin({ uid, isBanned }: { uid: string; isBanned: boolean }) {
+export default function DangerZoneAdmin({ 
+  uid, 
+  email, 
+  isBanned, 
+  criticalReservations 
+}: { 
+  uid: string; 
+  email: string; 
+  isBanned: boolean;
+  criticalReservations: any[];
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [showBanModal, setShowBanModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteStrategy, setDeleteStrategy] = useState<"ANONYMIZE" | "HARD_DELETE">("ANONYMIZE");
+  const [confirmationEmail, setConfirmationEmail] = useState("");
 
   const handleToggleBan = () => {
     startTransition(async () => {
@@ -19,23 +31,36 @@ export default function DangerZoneAdmin({ uid, isBanned }: { uid: string; isBann
         router.refresh();
       } catch (error: any) {
         toast.error("Erro ao alterar status: " + error.message);
+      } finally {
+        setShowBanModal(false);
       }
     });
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (confirmationEmail !== email) {
+      toast.error("O email digitado não confere.");
+      return;
+    }
+
     startTransition(async () => {
       try {
-        await deleteClientAccount(uid, deleteStrategy);
-        toast.success("Conta removida com sucesso!");
+        const result = await deleteClientAccount(uid);
+        toast.success(
+          result.strategy === "ANONYMIZE" 
+            ? "Conta anonimizada e desativada com sucesso." 
+            : "Conta removida permanentemente com sucesso!"
+        );
         router.push("/admin/clientes");
       } catch (error: any) {
         toast.error("Erro ao deletar conta: " + error.message);
-      } finally {
         setShowDeleteModal(false);
       }
     });
   };
+
+  const hasImpediments = criticalReservations && criticalReservations.length > 0;
 
   return (
     <div className="bg-error-light/10 border border-error/20 rounded-2xl p-6 mt-6">
@@ -56,7 +81,7 @@ export default function DangerZoneAdmin({ uid, isBanned }: { uid: string; isBann
             </p>
           </div>
           <button
-            onClick={handleToggleBan}
+            onClick={() => setShowBanModal(true)}
             disabled={isPending}
             className={`px-4 py-2 text-sm font-bold rounded-xl transition-colors shrink-0 ${
               isBanned
@@ -77,7 +102,10 @@ export default function DangerZoneAdmin({ uid, isBanned }: { uid: string; isBann
             </p>
           </div>
           <button
-            onClick={() => setShowDeleteModal(true)}
+            onClick={() => {
+              setConfirmationEmail("");
+              setShowDeleteModal(true);
+            }}
             disabled={isPending}
             className="px-4 py-2 text-sm font-bold bg-error text-white rounded-xl hover:bg-error-dark transition-colors shrink-0 disabled:opacity-50"
           >
@@ -86,61 +114,101 @@ export default function DangerZoneAdmin({ uid, isBanned }: { uid: string; isBann
         </div>
       </div>
 
-      {showDeleteModal && (
+      {/* Ban Modal */}
+      {showBanModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-surface rounded-3xl w-full max-w-md p-6 shadow-2xl border border-outline-variant/20">
-            <h3 className="text-xl font-bold text-error mb-2">Excluir Conta</h3>
+            <h3 className="text-xl font-bold text-on-surface mb-2">
+              {isBanned ? "Reativar Conta" : "Suspender Conta"}
+            </h3>
             <p className="text-sm text-on-surface-variant mb-6">
-              Escolha a estratégia de exclusão. Contas com histórico financeiro <b>não podem</b> sofrer Hard Delete.
+              Tem certeza que deseja {isBanned ? "reativar" : "suspender"} o acesso desta conta?
             </p>
-
-            <div className="space-y-3 mb-6">
-              <label className={`flex gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${deleteStrategy === "ANONYMIZE" ? "border-primary bg-primary-light/10" : "border-outline-variant hover:bg-surface-container-low"}`}>
-                <input 
-                  type="radio" 
-                  name="strategy" 
-                  checked={deleteStrategy === "ANONYMIZE"} 
-                  onChange={() => setDeleteStrategy("ANONYMIZE")}
-                  className="mt-1"
-                />
-                <div>
-                  <h4 className="font-semibold text-on-surface">Caminho A: Anonimização</h4>
-                  <p className="text-xs text-on-surface-variant mt-1">Oculte os dados pessoais (nome, CPF, etc), mas mantenha o histórico de reservas financeiras associado ao ID da conta para balanço contábil.</p>
-                </div>
-              </label>
-
-              <label className={`flex gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${deleteStrategy === "HARD_DELETE" ? "border-error bg-error-light/10" : "border-outline-variant hover:bg-surface-container-low"}`}>
-                <input 
-                  type="radio" 
-                  name="strategy" 
-                  checked={deleteStrategy === "HARD_DELETE"} 
-                  onChange={() => setDeleteStrategy("HARD_DELETE")}
-                  className="mt-1"
-                />
-                <div>
-                  <h4 className="font-semibold text-error">Caminho B: Hard Delete</h4>
-                  <p className="text-xs text-on-surface-variant mt-1">Destruição total da conta, passagens e dados em cascata. Falhará se houver histórico de pagamentos aprovados ou pendentes.</p>
-                </div>
-              </label>
-            </div>
-
             <div className="flex justify-end gap-3">
               <button
-                onClick={() => setShowDeleteModal(false)}
+                onClick={() => setShowBanModal(false)}
                 disabled={isPending}
                 className="px-4 py-2 font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
               >
                 Cancelar
               </button>
               <button
-                onClick={handleDelete}
+                onClick={handleToggleBan}
                 disabled={isPending}
-                className="px-6 py-2 bg-error text-white font-bold rounded-xl hover:bg-error-dark transition-colors disabled:opacity-50 flex items-center gap-2"
+                className={`px-6 py-2 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 ${
+                  isBanned ? "bg-success hover:bg-success-dark" : "bg-warning hover:bg-warning-dark"
+                }`}
               >
                 {isPending && <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>}
-                Confirmar Exclusão
+                Confirmar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-surface rounded-3xl w-full max-w-md p-6 shadow-2xl border border-outline-variant/20">
+            <h3 className="text-xl font-bold text-error mb-2">Excluir Conta</h3>
+            
+            {hasImpediments ? (
+              <div className="mb-6">
+                <p className="text-sm text-on-surface-variant mb-3">
+                  Este cliente possui {criticalReservations.length} reserva(s) que impedem a exclusão total:
+                </p>
+                <ul className="text-xs text-on-surface bg-surface-container-low rounded-lg p-3 space-y-2 mb-3 max-h-32 overflow-y-auto">
+                  {criticalReservations.map(r => (
+                    <li key={r.id} className="flex justify-between items-center">
+                      <span>• {(r.excursions?.tour_packages as any)?.title || "Reserva"} — {formatDate(r.created_at)}</span>
+                      <span className="font-bold text-[10px] uppercase bg-surface border border-outline-variant/30 px-1.5 py-0.5 rounded">{r.status}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-sm text-on-surface-variant font-medium bg-primary-light/10 text-primary-dark p-3 rounded-lg border border-primary/20">
+                  Por conter histórico financeiro ativo, os dados pessoais serão anonimizados e a conta será desativada permanentemente. As reservas serão mantidas para fins de auditoria.
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-on-surface-variant mb-6 font-medium bg-error-light/10 text-error-dark p-3 rounded-lg border border-error/20">
+                Este cliente não possui histórico financeiro ativo. Todos os dados, reservas e informações serão excluídos permanentemente. Esta ação é irreversível.
+              </p>
+            )}
+
+            <form onSubmit={handleDelete}>
+              <p className="text-sm text-on-surface-variant mb-2">
+                Para prosseguir, digite o e-mail <b>{email}</b> abaixo:
+              </p>
+              <input 
+                type="email"
+                value={confirmationEmail}
+                onChange={(e) => setConfirmationEmail(e.target.value)}
+                placeholder={email}
+                className="w-full rounded-xl border border-error bg-surface px-4 py-3 text-sm text-on-surface focus:border-error focus:ring-1 focus:ring-error transition-colors mb-6 font-medium"
+                disabled={isPending}
+                required
+              />
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={isPending}
+                  className="px-4 py-2 font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending || confirmationEmail !== email}
+                  className="px-6 py-2 bg-error text-white font-bold rounded-xl hover:bg-error-dark transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isPending && <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>}
+                  Confirmar Exclusão
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

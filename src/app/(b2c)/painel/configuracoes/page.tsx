@@ -11,6 +11,16 @@ export default async function ConfiguracoesPage() {
     redirect("/login");
   }
 
+  // Fetch reservations to determine impediment
+  const { data: reservations } = await supabase
+    .from("reservations")
+    .select("status")
+    .eq("user_id", user.id);
+
+  const hasImpediments = reservations?.some(r => 
+    ["APPROVED", "PENDING_PIX", "AWAITING_MANUAL_CHECK", "COMPLETED"].includes(r.status)
+  ) ?? false;
+
   return (
     <div className="min-h-screen bg-surface py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,7 +54,7 @@ export default async function ConfiguracoesPage() {
           </ul>
         </div>
 
-        <DangerZoneClient />
+        <DangerZoneClient hasImpediments={hasImpediments} email={user.email || ""} />
         
       </div>
     </div>

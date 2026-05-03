@@ -84,6 +84,8 @@ export default function ClientNotes({ clientId, initialNotes }: { clientId: stri
 
       <form onSubmit={handleAdd} className="flex flex-col gap-3">
         <textarea
+          id="note-content"
+          name="note-content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Adicione uma observação sobre este cliente..."

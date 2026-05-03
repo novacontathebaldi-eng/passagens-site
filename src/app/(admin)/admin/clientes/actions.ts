@@ -126,7 +126,7 @@ export async function deleteClientNote(noteId: string) {
   return { success: true };
 }
 
-export async function deleteClientAccount(uid: string, strategy: "ANONYMIZE" | "HARD_DELETE") {
+export async function deleteClientAccount(uid: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Não autenticado");
@@ -134,7 +134,13 @@ export async function deleteClientAccount(uid: string, strategy: "ANONYMIZE" | "
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (!profile || profile.role !== "ADMIN") throw new Error("Acesso negado. Apenas admins podem deletar contas.");
 
-  if (strategy === "ANONYMIZE") {
+  // 1. Double Check de Reservas com histórico importante
+  const { data: reservations } = await supabase.from("reservations").select("id, status").eq("user_id", uid);
+  const criticalReservations = reservations?.filter(r => ["APPROVED", "PENDING_PIX", "AWAITING_MANUAL_CHECK", "COMPLETED"].includes(r.status));
+  
+  const hasImpediments = criticalReservations && criticalReservations.length > 0;
+
+  if (hasImpediments) {
     // Caminho A: Anonimização
     const fakeEmail = `removed_${uid}_${Date.now()}@deleted.partiuturismo.com`;
     
@@ -157,17 +163,9 @@ export async function deleteClientAccount(uid: string, strategy: "ANONYMIZE" | "
     }).eq("id", uid);
 
     await supabase.from("audit_logs").insert({ actor_id: user.id, action: "ANONYMIZE_ACCOUNT", entity_type: "PROFILE", entity_id: uid });
-    return { success: true };
-  } else if (strategy === "HARD_DELETE") {
+    return { success: true, strategy: "ANONYMIZE" };
+  } else {
     // Caminho B: Hard Delete
-    // 1. Double Check de Reservas com histórico importante
-    const { data: reservations } = await supabase.from("reservations").select("id, status").eq("user_id", uid);
-    const criticalReservations = reservations?.filter(r => ["APPROVED", "PENDING_PIX", "AWAITING_MANUAL_CHECK", "COMPLETED"].includes(r.status));
-    
-    if (criticalReservations && criticalReservations.length > 0) {
-      throw new Error("Este usuário possui reservas financeiras importantes e não pode ser apagado via Hard Delete. Use a Anonimização.");
-    }
-
     // 2. Deleção Sequencial Cascata (passenger_tickets deleta via cascata do reservations)
     await supabase.from("reservations").delete().eq("user_id", uid);
     await supabase.from("saved_passengers").delete().eq("owner_id", uid);
@@ -180,8 +178,6 @@ export async function deleteClientAccount(uid: string, strategy: "ANONYMIZE" | "
     if (deleteError) throw new Error(deleteError.message);
 
     await supabase.from("audit_logs").insert({ actor_id: user.id, action: "HARD_DELETE_ACCOUNT", entity_type: "PROFILE", entity_id: uid });
-    return { success: true };
+    return { success: true, strategy: "HARD_DELETE" };
   }
-
-  throw new Error("Estratégia inválida");
 }

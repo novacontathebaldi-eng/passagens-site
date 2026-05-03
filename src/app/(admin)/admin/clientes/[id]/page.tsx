@@ -148,7 +148,12 @@ export default async function ClientDetailsPage(props: { params: Promise<{ id: s
 
           <ClientNotes clientId={clientId} initialNotes={notes} />
           
-          <DangerZoneAdmin uid={clientId} isBanned={isBanned} />
+          <DangerZoneAdmin 
+            uid={clientId} 
+            isBanned={isBanned} 
+            email={email} 
+            criticalReservations={(reservations || []).filter(r => ["APPROVED", "PENDING_PIX", "AWAITING_MANUAL_CHECK", "COMPLETED"].includes(r.status))} 
+          />
         </div>
 
         {/* Right Column: Financial & History */}
