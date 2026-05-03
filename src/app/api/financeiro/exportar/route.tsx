@@ -46,8 +46,10 @@ export async function POST(req: NextRequest) {
     const data = await getFinanceiroData(period, customDateRange);
 
     let dateRangeLabel = data.periodLabel;
-    if (period === "personalizado" && data.dateRange) {
-      dateRangeLabel = `Período: ${format(new Date(data.dateRange.from), "dd/MM/yyyy")} a ${format(new Date(data.dateRange.to), "dd/MM/yyyy")}`;
+    if (period === "personalizado" && customDateRange) {
+      const [yF, mF, dF] = customDateRange.from.split("-");
+      const [yT, mT, dT] = customDateRange.to.split("-");
+      dateRangeLabel = `Período: ${dF}/${mF}/${yF} a ${dT}/${mT}/${yT}`;
     }
 
     const stream = await renderToStream(

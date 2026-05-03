@@ -57,8 +57,8 @@ const s = StyleSheet.create({
   textCellBold: { fontSize: 8, fontWeight: 700, color: "#0f172a" },
 
   // Badge Status
-  badge: { paddingVertical: 2, paddingHorizontal: 4, borderRadius: 4 },
-  badgeText: { fontSize: 6, fontWeight: 700 },
+  badge: { paddingVertical: 2, paddingHorizontal: 4, borderRadius: 4, justifyContent: "center", alignItems: "center" },
+  badgeText: { fontSize: 6, fontWeight: 700, textAlign: "center" },
 
   // Totals Row
   totalRow: { flexDirection: "row", backgroundColor: "#f1f5f9", alignItems: "center" },
@@ -203,7 +203,7 @@ export function FinanceiroPDFDocument({
             <View style={s.colDate}><Text style={s.textHeader}>Data</Text></View>
             <View style={s.colStatus}><Text style={s.textHeader}>Status</Text></View>
             <View style={s.colVia}><Text style={s.textHeader}>Via</Text></View>
-            <View style={s.colPax}><Text style={s.textHeader}>Pax</Text></View>
+            <View style={s.colPax}><Text style={s.textHeader}>Qtd.</Text></View>
             <View style={s.colDiscount}><Text style={s.textHeader}>Desconto</Text></View>
             <View style={s.colValue}><Text style={s.textHeader}>Valor Final</Text></View>
           </View>
@@ -225,7 +225,7 @@ export function FinanceiroPDFDocument({
           {/* Totals Row */}
           {transactions.length > 0 && (
             <View style={[s.tableRow, s.totalRow]} wrap={false}>
-              <View style={{ ...s.colId, width: "66%" }}><Text style={[s.textHeader, { textAlign: "right" }]}>TOTAIS DA TABELA:</Text></View>
+              <View style={{ ...s.colId, width: "74%" }}><Text style={[s.textHeader, { textAlign: "right" }]}>TOTAIS DA TABELA:</Text></View>
               <View style={s.colPax}><Text style={s.textCell}></Text></View>
               <View style={s.colDiscount}><Text style={s.textCellBold}>{formatCurrency(totalDescontos)}</Text></View>
               <View style={s.colValue}><Text style={s.textCellBold}>{formatCurrency(totalValorTabela)}</Text></View>

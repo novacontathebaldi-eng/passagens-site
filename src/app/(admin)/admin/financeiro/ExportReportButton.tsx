@@ -12,9 +12,15 @@ export function ExportReportButton() {
   const [customTo, setCustomTo] = useState("");
 
   const handleExport = async () => {
-    if (period === "personalizado" && (!customFrom || !customTo)) {
-      alert("Por favor, selecione as datas de início e fim.");
-      return;
+    if (period === "personalizado") {
+      if (!customFrom || !customTo) {
+        alert("Por favor, selecione as datas de início e fim.");
+        return;
+      }
+      if (new Date(customFrom) > new Date(customTo)) {
+        alert("A data 'De' não pode ser posterior à data 'Até'.");
+        return;
+      }
     }
 
     try {
