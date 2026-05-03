@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
     ],
+    minimumCacheTTL: 604800,
   },
   async headers() {
     return [

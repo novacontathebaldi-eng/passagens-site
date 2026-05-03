@@ -1,7 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ExcursionItem } from "@/lib/search-utils";
 import { filterExcursions } from "@/components/CategoryPills";
@@ -103,10 +103,12 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
 
                 {/* Image */}
                 <div className="relative h-52 overflow-hidden">
-                  <img
+                  <Image
                     src={exc.tour_package.cover_image}
                     alt={exc.tour_package.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 

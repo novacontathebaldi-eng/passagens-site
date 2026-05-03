@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
@@ -11,7 +12,6 @@ import type { ExcursionItem } from "@/lib/search-utils";
 export default async function HomePage() {
   const supabase = await createClient();
   const settings = await getSiteSettings();
-  const v = new Date(settings.updated_at).getTime();
 
   const { data: excursionsRaw } = await supabase
     .from("excursions")
@@ -121,14 +121,19 @@ export default async function HomePage() {
       {/* ══════════ HERO SECTION ══════════ */}
       <section className="relative overflow-hidden will-change-transform [transform:translateZ(0)]">
         {/* Dynamic hero background image from admin */}
-        <div
-          className="absolute inset-0 bg-cover bg-center [transform:translateZ(0)]"
-          style={{
-            backgroundImage: `url('/api/settings/image?field=hero_image_url&v=${v}')`,
-          }}
-        />
+        {settings.hero_image_url ? (
+          <Image
+            src={settings.hero_image_url}
+            alt="Destinos incríveis pelo Brasil"
+            fill
+            priority
+            className="object-cover absolute inset-0 z-0 [transform:translateZ(0)]"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-primary [transform:translateZ(0)] z-0" />
+        )}
         {/* Gradient overlay (ensures readability over any image) */}
-        <div className="absolute inset-0 gradient-hero opacity-90" />
+        <div className="absolute inset-0 gradient-hero opacity-90 z-0" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-36 sm:pt-16 sm:pb-32 lg:pt-20 lg:pb-40">
           <div className="max-w-3xl">

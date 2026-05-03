@@ -1,21 +1,22 @@
 "use client";
 
 import { Suspense, useTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { login, signInWithGoogle } from "../actions";
 
 import { Logo } from "@/components/Logo";
 
-export default function LoginClient({ v, logoUrl, companyName }: { v: number, logoUrl?: string | null, companyName?: string }) {
+export default function LoginClient({ loginImageUrl, logoUrl, companyName }: { loginImageUrl?: string | null, logoUrl?: string | null, companyName?: string }) {
   return (
     <Suspense>
-      <LoginContent v={v} logoUrl={logoUrl} companyName={companyName} />
+      <LoginContent loginImageUrl={loginImageUrl} logoUrl={logoUrl} companyName={companyName} />
     </Suspense>
   );
 }
 
-function LoginContent({ v, logoUrl, companyName }: { v: number, logoUrl?: string | null, companyName?: string }) {
+function LoginContent({ loginImageUrl, logoUrl, companyName }: { loginImageUrl?: string | null, logoUrl?: string | null, companyName?: string }) {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const success = searchParams.get("success");
@@ -51,12 +52,17 @@ function LoginContent({ v, logoUrl, companyName }: { v: number, logoUrl?: string
       {/* Left: Image Panel */}
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
         {/* Dynamic background image from admin, fallback to gradient */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('/api/settings/image?field=login_image_url&v=${v}')`,
-          }}
-        />
+        {loginImageUrl ? (
+          <Image
+            src={loginImageUrl}
+            alt="Background"
+            fill
+            priority
+            className="object-cover z-0"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-primary z-0" />
+        )}
         {/* Gradient overlay for readability */}
         <div className="absolute inset-0 gradient-hero opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />

@@ -56,8 +56,8 @@ export function Logo({ logoUrl, companyName, size = "md", className = "" }: Logo
           alt={companyName || "Partiu Turismo"}
           width={s.icon}
           height={s.icon}
+          priority
           className="object-contain"
-          unoptimized
         />
       ) : (
         <LogoIcon size={s.icon} />
@@ -82,8 +82,8 @@ export function LogoWhite({ logoUrl, companyName, size = "md", className = "" }:
           alt={companyName || "Partiu Turismo"}
           width={s.icon}
           height={s.icon}
+          priority
           className="object-contain"
-          unoptimized
         />
       ) : (
         <svg

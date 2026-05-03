@@ -49,8 +49,8 @@ function LogoMark({ logoUrl, companyName, size = 28 }: { logoUrl?: string | null
         alt={companyName || "Partiu Turismo"}
         width={size}
         height={size}
+        priority
         className="object-cover rounded-full ring-1 ring-outline/20"
-        unoptimized
       />
     );
   }

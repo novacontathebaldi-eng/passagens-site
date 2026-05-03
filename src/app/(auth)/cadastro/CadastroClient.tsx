@@ -1,21 +1,22 @@
 "use client";
 
 import { Suspense, useTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { signup, signInWithGoogle } from "../actions";
 
 import { Logo } from "@/components/Logo";
 
-export default function CadastroClient({ v, logoUrl, companyName }: { v: number, logoUrl?: string | null, companyName?: string }) {
+export default function CadastroClient({ signupImageUrl, logoUrl, companyName }: { signupImageUrl?: string | null, logoUrl?: string | null, companyName?: string }) {
   return (
     <Suspense>
-      <CadastroContent v={v} logoUrl={logoUrl} companyName={companyName} />
+      <CadastroContent signupImageUrl={signupImageUrl} logoUrl={logoUrl} companyName={companyName} />
     </Suspense>
   );
 }
 
-function CadastroContent({ v, logoUrl, companyName }: { v: number, logoUrl?: string | null, companyName?: string }) {
+function CadastroContent({ signupImageUrl, logoUrl, companyName }: { signupImageUrl?: string | null, logoUrl?: string | null, companyName?: string }) {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const redirectParams = searchParams.get("redirect");
@@ -50,12 +51,17 @@ function CadastroContent({ v, logoUrl, companyName }: { v: number, logoUrl?: str
       {/* Left: Image Panel */}
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
         {/* Dynamic background image from admin */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('/api/settings/image?field=signup_image_url&v=${v}')`,
-          }}
-        />
+        {signupImageUrl ? (
+          <Image
+            src={signupImageUrl}
+            alt="Background"
+            fill
+            priority
+            className="object-cover z-0"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-primary z-0" />
+        )}
         {/* Gradient overlay */}
         <div className="absolute inset-0 gradient-hero opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />

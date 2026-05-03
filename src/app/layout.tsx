@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
     .eq("id", 1)
     .single();
 
-  const v = settings?.updated_at ? new Date(settings.updated_at).getTime() : Date.now();
+
 
   const title = settings?.company_name
     ? `${settings.company_name} — Excursões Turísticas Rodoviárias`
@@ -49,8 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     authors: [{ name: settings?.company_name || "Partiu Turismo" }],
     icons: settings?.favicon_url ? [
-      { rel: "icon", url: `${settings.favicon_url}?v=${v}` },
-      { rel: "apple-touch-icon", url: `${settings.favicon_url}?v=${v}` },
+      { rel: "icon", url: settings.favicon_url },
+      { rel: "apple-touch-icon", url: settings.favicon_url },
     ] : undefined,
     openGraph: {
       type: "website",
@@ -61,7 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Descubra destinos incríveis com excursões turísticas de ônibus premium.",
       images: settings?.og_image_url ? [
         {
-          url: `${settings.og_image_url}?v=${v}`,
+          url: settings.og_image_url,
           width: 1200,
           height: 630,
           alt: settings?.company_name || "Partiu Turismo",

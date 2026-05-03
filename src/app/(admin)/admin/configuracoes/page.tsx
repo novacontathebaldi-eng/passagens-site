@@ -143,7 +143,7 @@ function ImageUploader({
         .from("assets")
         .getPublicUrl(path);
 
-      const url = `${urlData.publicUrl}?v=${Date.now()}`;
+      const url = urlData.publicUrl;
       onUploaded(url);
     } catch (err) {
       alert("Erro ao processar imagem: " + (err instanceof Error ? err.message : "Erro desconhecido"));
@@ -658,7 +658,7 @@ export default function ConfiguracoesPage() {
       const { error } = await supabase.storage.from("assets").upload(path, processed, { upsert: true, cacheControl: "3600" });
       if (error) { alert("Erro: " + error.message); return; }
       const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
-      setSettings({ ...settings, pix_qr_code_url: `${urlData.publicUrl}?v=${Date.now()}` });
+      setSettings({ ...settings, pix_qr_code_url: urlData.publicUrl });
     } catch (err) {
       alert("Erro ao processar: " + (err instanceof Error ? err.message : "Erro"));
     } finally {
