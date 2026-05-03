@@ -154,7 +154,34 @@ export function ReservationDrawer({ reservationId, isOpen, onClose }: Reservatio
             <h2 className="text-xl font-bold text-on-surface">Detalhes da Reserva</h2>
             {reservationId && <p className="text-sm text-outline font-mono mt-1">#{reservationId}</p>}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            {reservationId && (
+              <>
+                <a 
+                  href={`/api/pdf/admin/reserva?reservation_id=${reservationId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-on-surface border border-outline-variant/30 hover:bg-surface-container-low transition-colors flex items-center gap-1.5"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="hidden sm:inline">Relatório Admin</span>
+                </a>
+                <a 
+                  href={`/api/pdf/reserva?reservation_id=${reservationId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-colors flex items-center gap-1.5"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span className="hidden sm:inline">Vouchers</span>
+                </a>
+                <div className="w-px h-6 bg-outline-variant/30 mx-1"></div>
+              </>
+            )}
             {/* Abrir em tela cheia */}
             {reservationId && (
               <Link
@@ -241,17 +268,6 @@ export function ReservationDrawer({ reservationId, isOpen, onClose }: Reservatio
               <section>
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Passageiros ({reservation.passenger_tickets?.length})</h4>
-                  <a 
-                    href={`/api/pdf/reserva?reservation_id=${reservation.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Baixar PDF Vouchers
-                  </a>
                 </div>
                 <div className="space-y-3">
                   {reservation.passenger_tickets?.map((ticket) => (
