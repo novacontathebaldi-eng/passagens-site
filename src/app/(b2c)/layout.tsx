@@ -6,6 +6,7 @@ import { getSiteSettings } from "@/lib/get-settings";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 import { SocialLinks } from "@/components/SocialLinks";
+import { GoogleOneTap } from "@/components/GoogleOneTap";
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -89,6 +90,9 @@ export default async function B2CLayout({
 
       {/* ── Main ── */}
       <main className="flex-1">{children}</main>
+
+      {/* ── Google One Tap (only for unauthenticated visitors) ── */}
+      {!user && <GoogleOneTap />}
 
       {/* ── Footer ── */}
       <footer className="bg-on-surface text-surface-container-low">
