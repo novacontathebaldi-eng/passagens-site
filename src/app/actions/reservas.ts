@@ -74,10 +74,9 @@ export async function changeReservationStatus(
     return { error: "Não autorizado: Permissão negada." };
   }
 
-  const adminClient = getAdminClient();
-
-  // 2. Fetch Current Reservation State
-  const { data: reservation, error: fetchError } = await adminClient
+  // 2. Fetch Current Reservation State using the authenticated client
+  // Since the user is ADMIN/AGENT, RLS allows this.
+  const { data: reservation, error: fetchError } = await supabase
     .from("reservations")
     .select(`
       *,
@@ -97,7 +96,7 @@ export async function changeReservationStatus(
     return { error: `Transição inválida de ${currentStatus} para ${newStatus}.` };
   }
 
-  // 4. Update Reservation Status & Notes
+  // 4. Update Reservation Status & Notes using authenticated client
   const updatePayload: any = { status: newStatus };
   if (notes) {
     // Append to existing notes or set new
@@ -109,7 +108,7 @@ export async function changeReservationStatus(
       : formattedNote;
   }
 
-  const { error: updateError } = await adminClient
+  const { error: updateError } = await supabase
     .from("reservations")
     .update(updatePayload)
     .eq("id", reservationId);
@@ -120,41 +119,42 @@ export async function changeReservationStatus(
 
   // 5. Trigger Emails via Brevo (for CANCELLED and REFUNDED)
   if (newStatus === "CANCELLED" || newStatus === "REFUNDED") {
-    // We need the user's email. auth_user_id is the same as the user_id on auth.users
-    const targetUserId = reservation.user_id;
-    const { data: targetUserAuth, error: authFetchError } = await adminClient.auth.admin.getUserById(targetUserId);
-    
-    if (!authFetchError && targetUserAuth?.user?.email) {
-      const email = targetUserAuth.user.email;
-      const userName = reservation.profiles?.full_name || "Cliente";
-      const actionTitle = newStatus === "CANCELLED" ? "Cancelamento de Reserva" : "Reembolso de Reserva";
-      const shortId = reservationId.split('-')[0].toUpperCase();
-      const reasonHtml = notes 
-        ? `<p><strong>Motivo / Observação:</strong> ${escapeHtml(notes)}</p>` 
-        : "";
+    try {
+      // We need the adminClient only here, to get the user's email via auth.admin API
+      const adminClient = getAdminClient();
+      const targetUserId = reservation.user_id;
+      const { data: targetUserAuth, error: authFetchError } = await adminClient.auth.admin.getUserById(targetUserId);
+      
+      if (!authFetchError && targetUserAuth?.user?.email) {
+        const email = targetUserAuth.user.email;
+        const userName = reservation.profiles?.full_name || "Cliente";
+        const actionTitle = newStatus === "CANCELLED" ? "Cancelamento de Reserva" : "Reembolso de Reserva";
+        const shortId = reservationId.split('-')[0].toUpperCase();
+        const reasonHtml = notes 
+          ? `<p><strong>Motivo / Observação:</strong> ${escapeHtml(notes)}</p>` 
+          : "";
 
-      const htmlContent = `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: ${newStatus === 'CANCELLED' ? '#ef4444' : '#f59e0b'};">${actionTitle} - Partiu Turismo</h2>
-          <p>Olá ${userName},</p>
-          <p>Informamos que o status da sua reserva <strong>#${shortId}</strong> foi alterado para: <strong>${newStatus === 'CANCELLED' ? 'Cancelada' : 'Reembolsada'}</strong>.</p>
-          ${reasonHtml}
-          <p>Se tiver qualquer dúvida, por favor responda a este e-mail ou entre em contato conosco pelo WhatsApp.</p>
-          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-          <p style="font-size: 12px; color: #999;">Atenciosamente,<br>Equipe Partiu Turismo</p>
-        </div>
-      `;
+        const htmlContent = `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: ${newStatus === 'CANCELLED' ? '#ef4444' : '#f59e0b'};">${actionTitle} - Partiu Turismo</h2>
+            <p>Olá ${userName},</p>
+            <p>Informamos que o status da sua reserva <strong>#${shortId}</strong> foi alterado para: <strong>${newStatus === 'CANCELLED' ? 'Cancelada' : 'Reembolsada'}</strong>.</p>
+            ${reasonHtml}
+            <p>Se tiver qualquer dúvida, por favor responda a este e-mail ou entre em contato conosco pelo WhatsApp.</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+            <p style="font-size: 12px; color: #999;">Atenciosamente,<br>Equipe Partiu Turismo</p>
+          </div>
+        `;
 
-      try {
         await sendEmail({
           to: [{ email, name: userName }],
           subject: `Atualização: ${actionTitle} #${shortId}`,
           htmlContent
         });
-      } catch (err) {
-        console.error("Falha ao enviar email do Brevo na Server Action", err);
-        // We do not return error here because the DB update was successful.
       }
+    } catch (err) {
+      console.error("Falha ao configurar admin client ou enviar email na Server Action", err);
+      // We do not return error here because the DB update was successful.
     }
   }
 

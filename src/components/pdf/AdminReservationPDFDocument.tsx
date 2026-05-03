@@ -46,7 +46,7 @@ const s = StyleSheet.create({
   textCellBold: { fontSize: 9, fontWeight: 700, color: "#0f172a" },
 
   notesBox: { backgroundColor: "#f8fafc", padding: 10, borderRadius: 4, borderLeftWidth: 3, borderLeftColor: "#3b82f6", marginTop: 4 },
-  notesText: { fontSize: 9, color: "#334155", fontStyle: "italic" },
+  notesText: { fontSize: 9, color: "#334155" },
 
   auditItem: { flexDirection: "row", marginBottom: 6, paddingBottom: 6, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
   auditDate: { width: "20%", fontSize: 8, color: "#64748b" },
@@ -243,7 +243,7 @@ export default function AdminReservationPDFDocument({
               </View>
             </View>
           ) : (
-            <Text style={{ ...s.value, marginBottom: 12, fontStyle: "italic", color: "#94a3b8" }}>
+            <Text style={{ ...s.value, marginBottom: 12, color: "#94a3b8" }}>
               Nenhuma observação registrada nesta reserva.
             </Text>
           )}
@@ -258,7 +258,7 @@ export default function AdminReservationPDFDocument({
                 </View>
               ))
             ) : (
-              <Text style={{ ...s.value, fontStyle: "italic", color: "#94a3b8" }}>
+              <Text style={{ ...s.value, color: "#94a3b8" }}>
                 Nenhum log de auditoria encontrado para esta reserva.
               </Text>
             )}
