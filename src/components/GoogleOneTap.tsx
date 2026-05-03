@@ -8,10 +8,21 @@ import { createClient } from "@/lib/supabase/client";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
 
+const generateNonce = async (): Promise<{ nonce: string; hashedNonce: string }> => {
+  const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+  const encoder = new TextEncoder();
+  const encodedNonce = encoder.encode(nonce);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encodedNonce);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashedNonce = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return { nonce, hashedNonce };
+};
+
 export function GoogleOneTap() {
   const router = useRouter();
   const supabase = createClient();
   const hasPrompted = useRef(false);
+  const nonceRef = useRef<string | null>(null);
 
   const handleCredentialResponse = useCallback(
     async (response: GoogleCredentialResponse) => {
@@ -19,6 +30,7 @@ export function GoogleOneTap() {
         const { error } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: response.credential,
+          nonce: nonceRef.current || undefined,
         });
 
         if (error) {
@@ -58,9 +70,12 @@ export function GoogleOneTap() {
     [supabase, router]
   );
 
-  const handleScriptLoad = useCallback(() => {
+  const handleScriptLoad = useCallback(async () => {
     if (!window.google || hasPrompted.current) return;
     hasPrompted.current = true;
+
+    const { nonce, hashedNonce } = await generateNonce();
+    nonceRef.current = nonce;
 
     window.google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
@@ -69,6 +84,7 @@ export function GoogleOneTap() {
       cancel_on_tap_outside: true,
       context: "signin",
       itp_support: true,
+      nonce: hashedNonce,
     });
 
     window.google.accounts.id.prompt();
