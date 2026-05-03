@@ -26,8 +26,8 @@ function LogoMarkWhite({ logoUrl, companyName, size = 28 }: { logoUrl?: string |
         alt={companyName || "Partiu Turismo"}
         width={size}
         height={size}
+        priority
         className="object-cover rounded-full ring-1 ring-white/20"
-        unoptimized
       />
     );
   }
