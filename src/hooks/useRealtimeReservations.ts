@@ -67,7 +67,6 @@ export function useRealtimeReservations(excursionId: string = "ALL") {
           filter: excursionId !== "ALL" ? `excursion_id=eq.${excursionId}` : undefined
         },
         (payload) => {
-          console.log("Realtime event received for reservation:", payload);
           if (payload.eventType === 'UPDATE') {
             setReservations(prev => prev.map(res => 
               res.id === payload.new.id 

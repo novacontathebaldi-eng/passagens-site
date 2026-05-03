@@ -16,6 +16,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "reservation_id obrigatório" }, { status: 400 });
   }
 
+  // Validate UUID format
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_REGEX.test(reservationId)) {
+    return NextResponse.json({ error: "Formato de ID inválido" }, { status: 400 });
+  }
+
   // 1. Auth + Role check
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
