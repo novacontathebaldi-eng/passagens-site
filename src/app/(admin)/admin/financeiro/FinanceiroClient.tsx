@@ -95,18 +95,7 @@ export function FinanceiroClient({ initialData, period, companyName, logoUrl }: 
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <ExportReportButton 
-            transactions={data.formattedTransactions}
-            companyName={companyName}
-            logoUrl={logoUrl || ""}
-            periodLabel={data.periodLabel}
-            kpis={{
-              receita: data.receitaAprovada,
-              ticketMedio: data.ticketMedio,
-              pendente: data.valorPendente,
-              reembolsado: data.valorReembolsado
-            }}
-          />
+          <ExportReportButton />
         </div>
       </div>
 

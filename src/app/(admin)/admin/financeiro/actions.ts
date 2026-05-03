@@ -3,39 +3,56 @@
 import { createClient } from "@/lib/supabase/server";
 import { startOfDay, subDays, startOfMonth, startOfYear, format } from "date-fns";
 
-export async function getFinanceiroData(period: string) {
+export async function getFinanceiroData(
+  period: string,
+  customDateRange?: { from: string; to: string }
+) {
   const supabase = await createClient();
 
   // Calcular Datas Baseado no Período
   const now = new Date();
   let startDate = new Date();
+  let endDate = now;
   let periodLabel = "Este Mês";
 
-  switch (period) {
-    case "hoje":
-      startDate = startOfDay(now);
-      periodLabel = "Hoje";
-      break;
-    case "7_dias":
-      startDate = subDays(now, 7);
-      periodLabel = "Últimos 7 Dias";
-      break;
-    case "este_mes":
-      startDate = startOfMonth(now);
-      periodLabel = "Este Mês";
-      break;
-    case "30_dias":
-      startDate = subDays(now, 30);
-      periodLabel = "Últimos 30 Dias";
-      break;
-    case "este_ano":
-      startDate = startOfYear(now);
-      periodLabel = "Este Ano";
-      break;
-    default:
-      startDate = startOfMonth(now);
-      periodLabel = "Este Mês";
+  if (period === "personalizado" && customDateRange) {
+    startDate = new Date(customDateRange.from);
+    endDate = new Date(customDateRange.to);
+    // Expand end date to the end of the day
+    endDate.setHours(23, 59, 59, 999);
+    periodLabel = "Personalizado";
+  } else {
+    switch (period) {
+      case "hoje":
+        startDate = startOfDay(now);
+        periodLabel = "Hoje";
+        break;
+      case "7_dias":
+        startDate = subDays(now, 7);
+        periodLabel = "Últimos 7 Dias";
+        break;
+      case "este_mes":
+        startDate = startOfMonth(now);
+        periodLabel = "Este Mês";
+        break;
+      case "30_dias":
+        startDate = subDays(now, 30);
+        periodLabel = "Últimos 30 Dias";
+        break;
+      case "este_ano":
+        startDate = startOfYear(now);
+        periodLabel = "Este Ano";
+        break;
+      default:
+        startDate = startOfMonth(now);
+        periodLabel = "Este Mês";
+    }
   }
+
+  const dateRange = {
+    from: startDate.toISOString(),
+    to: endDate.toISOString()
+  };
 
   // Buscar Reservas do Supabase
   const { data: reservations, error } = await supabase
@@ -43,15 +60,18 @@ export async function getFinanceiroData(period: string) {
     .select(`
       id,
       total_amount,
+      discount_applied,
+      gateway_provider,
       status,
       created_at,
       profiles ( full_name ),
       excursions (
         tour_packages ( title )
-      )
+      ),
+      passenger_tickets ( count )
     `)
     .gte("created_at", startDate.toISOString())
-    .lte("created_at", now.toISOString())
+    .lte("created_at", endDate.toISOString())
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -95,9 +115,18 @@ export async function getFinanceiroData(period: string) {
     const tourPackage = (Array.isArray(tourPackageRaw) ? tourPackageRaw[0] : tourPackageRaw) as { title: string } | null;
     const excursionTitle = tourPackage?.title || "Excursão Genérica";
 
+    // Extrair Pax
+    const paxRaw = res.passenger_tickets as unknown;
+    const paxCount = Array.isArray(paxRaw) && paxRaw.length > 0 
+      ? Number(paxRaw[0].count) 
+      : (paxRaw && typeof (paxRaw as any).count !== 'undefined' ? Number((paxRaw as any).count) : 0);
+
     return {
       id: res.id,
       amount,
+      discount: Number(res.discount_applied || 0),
+      gateway: res.gateway_provider || "N/A",
+      pax: paxCount,
       status: res.status,
       date: res.created_at,
       clientName,
@@ -114,10 +143,12 @@ export async function getFinanceiroData(period: string) {
 
   return {
     periodLabel,
+    dateRange,
     receitaAprovada,
     valorPendente,
     valorReembolsado,
     ticketMedio,
+    totalTransactions: formattedTransactions.length,
     chartData,
     formattedTransactions,
   };
