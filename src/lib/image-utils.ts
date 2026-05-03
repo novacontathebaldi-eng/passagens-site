@@ -80,6 +80,69 @@ export async function convertToWebP(file: File): Promise<File> {
 }
 
 /**
+ * Converts a raster image File to PNG format using Canvas.
+ * Used for assets that must remain PNG-compatible (e.g., logo for PDF rendering).
+ * Preserves alpha/transparency. SVG and ICO files are returned unchanged.
+ *
+ * @returns A new File object (PNG) or the original if passthrough.
+ */
+export async function convertToPNG(file: File): Promise<File> {
+  // SVG and ICO: pass through unchanged
+  if (PASSTHROUGH_TYPES.has(file.type)) {
+    return file;
+  }
+
+  // Already PNG: pass through unchanged
+  if (file.type === "image/png") {
+    return file;
+  }
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+
+      // Draw with transparency support (no fillRect = transparent bg)
+      ctx.drawImage(img, 0, 0);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          const baseName = file.name.replace(/\.[^.]+$/, "");
+          const pngFile = new File([blob], `${baseName}.png`, {
+            type: "image/png",
+          });
+          resolve(pngFile);
+        },
+        "image/png"
+      );
+    };
+
+    img.onerror = () => {
+      resolve(file);
+    };
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
  * Gets the file extension for a given MIME type.
  */
 export function getExtForType(file: File): string {

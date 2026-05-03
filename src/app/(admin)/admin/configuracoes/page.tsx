@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { convertToWebP, getExtForType, getOldFilePaths } from "@/lib/image-utils";
+import { convertToWebP, convertToPNG, getExtForType, getOldFilePaths } from "@/lib/image-utils";
 import Image from "next/image";
 import {
   DndContext,
@@ -117,8 +117,10 @@ function ImageUploader({
     setIsUploading(true);
 
     try {
-      // 1. Convert to WebP (preserves transparency; SVG/ICO pass through)
-      const processed = await convertToWebP(file);
+      // 1. Convert image: logo → PNG (PDF compatibility), others → WebP
+      const processed = field.key === "logo_url"
+        ? await convertToPNG(file)
+        : await convertToWebP(file);
       const ext = getExtForType(processed);
       const path = `site/${field.key}.${ext}`;
 
