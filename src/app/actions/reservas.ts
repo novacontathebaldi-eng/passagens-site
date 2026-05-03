@@ -7,6 +7,17 @@ import { revalidatePath } from "next/cache";
 
 export type ReservationStatus = "PENDING_PIX" | "AWAITING_MANUAL_CHECK" | "APPROVED" | "REFUNDED" | "CANCELLED" | "EXPIRED";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // Helper for admin operations requiring service role
 function getAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -46,6 +57,11 @@ export async function changeReservationStatus(
   
   if (authError || !user) {
     return { error: "Não autorizado: Usuário não autenticado." };
+  }
+
+  // Validate UUID format to prevent malformed queries
+  if (!UUID_REGEX.test(reservationId)) {
+    return { error: "ID de reserva inválido." };
   }
 
   const { data: profile } = await supabase
@@ -114,7 +130,7 @@ export async function changeReservationStatus(
       const actionTitle = newStatus === "CANCELLED" ? "Cancelamento de Reserva" : "Reembolso de Reserva";
       const shortId = reservationId.split('-')[0].toUpperCase();
       const reasonHtml = notes 
-        ? `<p><strong>Motivo / Observação:</strong> ${notes}</p>` 
+        ? `<p><strong>Motivo / Observação:</strong> ${escapeHtml(notes)}</p>` 
         : "";
 
       const htmlContent = `
