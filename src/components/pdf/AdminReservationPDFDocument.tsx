@@ -10,13 +10,14 @@ Font.register({
 
 const s = StyleSheet.create({
   page: { padding: 30, fontFamily: "Inter", fontSize: 10, color: "#0f172a" },
-  header: { marginBottom: 20, paddingBottom: 10, borderBottom: "2pt solid #e2e8f0", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
-  headerLeft: { flexDirection: "column", gap: 4 },
-  headerRight: { alignItems: "flex-end", gap: 4 },
-  logo: { height: 30, width: "auto", marginBottom: 8 },
-  companyName: { fontSize: 12, fontWeight: 700, color: "#64748b" },
-  title: { fontSize: 18, fontWeight: 700, color: "#1e293b" },
-  subtitle: { fontSize: 9, color: "#64748b" },
+  header: { marginBottom: 20, paddingBottom: 12, borderBottom: "2pt solid #e2e8f0", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
+  headerRight: { alignItems: "flex-end" },
+  logo: { width: 36, height: 36, objectFit: "contain", borderRadius: 6 },
+  companyName: { fontSize: 14, fontWeight: 700, color: "#1e293b" },
+  reportSub: { fontSize: 8, color: "#64748b", marginTop: 2 },
+  title: { fontSize: 16, fontWeight: 700, color: "#0f172a" },
+  subtitle: { fontSize: 8, color: "#94a3b8" },
   
   section: { marginBottom: 20 },
   sectionTitle: { fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 8, borderBottomWidth: 1, borderBottomColor: "#cbd5e1", paddingBottom: 4 },
@@ -130,12 +131,18 @@ export default function AdminReservationPDFDocument({
         <View style={s.header}>
           <View style={s.headerLeft}>
             {logoUrl && <Image src={logoUrl} style={s.logo} />}
-            <Text style={s.companyName}>{companyName}</Text>
+            <View>
+              <Text style={s.companyName}>{companyName}</Text>
+              <Text style={s.reportSub}>Relatório Administrativo</Text>
+            </View>
           </View>
           <View style={s.headerRight}>
             <Text style={s.title}>Relatório de Reserva</Text>
-            <Text style={s.subtitle}>#{reservation.shortId}</Text>
-            <Text style={s.subtitle}>Gerado em: {generatedAt}</Text>
+            <View style={{ flexDirection: "row", gap: 6, marginTop: 2 }}>
+              <Text style={s.subtitle}>ID #{reservation.shortId}</Text>
+              <Text style={s.subtitle}>|</Text>
+              <Text style={s.subtitle}>{generatedAt}</Text>
+            </View>
           </View>
         </View>
 
