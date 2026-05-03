@@ -142,6 +142,7 @@ export async function changeReservationStatus(
     }
   }
 
-  revalidatePath("/admin/reservas");
+  revalidatePath("/admin/reservas", "layout");
+  revalidatePath(`/admin/reservas/${reservationId}`);
   return { success: true };
 }
