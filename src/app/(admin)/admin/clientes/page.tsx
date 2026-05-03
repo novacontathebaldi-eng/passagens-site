@@ -160,8 +160,8 @@ export default async function ClientesPage(props: {
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 px-6 text-sm text-on-surface-variant">{p.cpf ? formatCPF(p.cpf) : "—"}</td>
-                      <td className="py-3 px-6 text-sm text-on-surface-variant">{p.phone ? formatPhone(p.phone) : "—"}</td>
+                      <td className="py-3 px-6 text-sm text-on-surface-variant whitespace-nowrap">{p.cpf ? formatCPF(p.cpf) : "—"}</td>
+                      <td className="py-3 px-6 text-sm text-on-surface-variant whitespace-nowrap">{p.phone ? formatPhone(p.phone) : "—"}</td>
                       <td className="py-3 px-6">
                         <RoleSelect userId={p.id} initialRole={p.role} />
                       </td>
@@ -184,9 +184,9 @@ export default async function ClientesPage(props: {
                       <td className="py-3 px-6">
                         <Link 
                           href={`/admin/clientes/${p.id}`}
-                          className="px-4 py-2 bg-surface border border-outline-variant rounded-lg text-sm font-semibold hover:bg-surface-container-low transition-colors inline-block text-center"
+                          className="px-3 py-1.5 bg-surface border border-outline-variant rounded-lg text-sm font-semibold hover:bg-surface-container-low transition-colors inline-block text-center whitespace-nowrap"
                         >
-                          Ver Detalhes
+                          Gerenciar
                         </Link>
                       </td>
                     </tr>

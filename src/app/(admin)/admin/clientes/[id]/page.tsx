@@ -163,9 +163,9 @@ export default async function ClientDetailsPage(props: { params: Promise<{ id: s
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-6 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-on-surface-variant">Lifetime Value (LTV)</p>
+                <p className="text-sm font-medium text-on-surface-variant">Total Gasto</p>
                 <p className="text-3xl font-bold text-primary mt-1">{formatBRL(ltv)}</p>
-                <p className="text-xs text-outline mt-1">Soma de pedidos aprovados</p>
+                <p className="text-xs text-outline mt-1">Soma de pedidos aprovados e concluídos</p>
               </div>
               <div className="w-12 h-12 rounded-full bg-primary-light/20 flex items-center justify-center text-primary">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
