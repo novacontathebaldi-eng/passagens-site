@@ -27,7 +27,7 @@ function maskCPF(cpf: string): string {
   return `***.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
 }
 
-export default function VoucherCard({ ticket, tripTitle, departureDate, departureDateFull, companyName, logoUrl }: VoucherCardProps) {
+export default function VoucherCard({ ticket, tripTitle, departureDateFull, companyName, logoUrl }: VoucherCardProps) {
   return (
     <div className="voucher-card bg-surface-container-lowest rounded-3xl border border-outline-variant/30 overflow-hidden shadow-md print:shadow-none print:border print:rounded-none print:break-inside-avoid print:mb-4">
       {/* Header */}

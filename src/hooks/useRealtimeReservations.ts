@@ -44,7 +44,7 @@ export function useRealtimeReservations(excursionId: string = "ALL") {
       query = query.eq("excursion_id", excursionId);
     }
 
-    const { data, error } = await query;
+    const { data } = await query;
     
     if (data) {
       setReservations(data as unknown as Reservation[]);

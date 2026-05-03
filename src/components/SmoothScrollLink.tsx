@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { AnchorHTMLAttributes } from "react";
 
 interface SmoothScrollLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> {
@@ -10,7 +10,6 @@ interface SmoothScrollLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElem
 
 export function SmoothScrollLink({ href, className, children, ...props }: SmoothScrollLinkProps) {
   const pathname = usePathname();
-  const router = useRouter();
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     // Check if the link has a hash

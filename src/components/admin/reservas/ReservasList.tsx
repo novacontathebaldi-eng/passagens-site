@@ -5,7 +5,6 @@ import { useState, useMemo } from "react";
 interface ReservasListProps {
   reservations: Reservation[];
   isLoading: boolean;
-  onStatusChange: (id: string, newStatus: ReservationStatus) => Promise<void>;
   onActionClick: (id: string, action: "APPROVE" | "CANCEL" | "REFUND" | "REACTIVATE") => void;
   onRowClick?: (id: string) => void;
 }

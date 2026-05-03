@@ -4,7 +4,7 @@ import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 import { getCoverImage } from "@/lib/tour-images";
 import { HeroSearchBar } from "@/components/HeroSearchBar";
 import { ExcursionGrid } from "@/components/ExcursionGrid";
-import { CategoryPills, HeroCategoryPills } from "@/components/CategoryPills";
+import { HeroCategoryPills } from "@/components/CategoryPills";
 import { getSiteSettings } from "@/lib/get-settings";
 import type { ExcursionItem } from "@/lib/search-utils";
 

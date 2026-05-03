@@ -254,7 +254,7 @@ export function ReservationDrawer({ reservationId, isOpen, onClose }: Reservatio
                   </a>
                 </div>
                 <div className="space-y-3">
-                  {reservation.passenger_tickets?.map((ticket, i) => (
+                  {reservation.passenger_tickets?.map((ticket) => (
                     <div key={ticket.id} className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/20 flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-sm font-bold text-on-surface-variant">

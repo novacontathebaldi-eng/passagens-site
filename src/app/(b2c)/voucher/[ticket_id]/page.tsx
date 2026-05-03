@@ -2,8 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getSiteSettings } from "@/lib/get-settings";
 import { notFound } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { formatBRL, formatDate } from "@/lib/utils";
-import { Bus, MapPin, CalendarDays, User, Printer } from "lucide-react";
+import { formatDate } from "@/lib/utils";
+import { Bus, MapPin, CalendarDays, User } from "lucide-react";
 import { PrintVoucherButton } from "./PrintVoucherButton";
 
 export default async function VoucherPage({

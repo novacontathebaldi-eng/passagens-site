@@ -24,7 +24,7 @@ export default function GestaoAcessosPage() {
 
   async function fetchProfiles() {
     setIsLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("profiles")
       .select("id, role, full_name, cpf, email_confirmed_at, created_at")
       .order("created_at", { ascending: false });

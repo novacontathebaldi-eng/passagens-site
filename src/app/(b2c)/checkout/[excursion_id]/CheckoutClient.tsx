@@ -46,7 +46,7 @@ const checkoutSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
-export default function CheckoutClient({ excursion, user, profile, savedPassengers, occupiedSeats, backHref }: CheckoutClientProps) {
+export default function CheckoutClient({ excursion, profile, savedPassengers, occupiedSeats, backHref }: CheckoutClientProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [quantity, setQuantity] = useState(1);
@@ -96,7 +96,7 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
             replace(parsed);
           }
         }
-      } catch (e) {
+      } catch (_e) {
         // ignore
       }
     }
@@ -330,8 +330,6 @@ export default function CheckoutClient({ excursion, user, profile, savedPassenge
               <div className="space-y-8">
                 {fields.map((field, idx) => {
                   const currentSource = watchedPassengers[idx]?.source || "manual";
-                  const isProfile = currentSource === "profile";
-                  const isSaved = currentSource === "saved";
                   
                   return (
                     <div key={field.id} className="p-5 sm:p-6 border border-outline-variant/50 rounded-2xl bg-surface-container-lowest relative shadow-sm transition-all">

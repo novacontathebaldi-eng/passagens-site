@@ -75,7 +75,7 @@ export function ReservationCard({ reservation, onActionClick, onClick }: Reserva
       style={style}
       {...attributes}
       {...listeners}
-      onClick={(e) => {
+      onClick={(_e) => {
         // Prevent opening drawer if dragging
         if (!isDragging && onClick) {
           onClick(reservation.id);

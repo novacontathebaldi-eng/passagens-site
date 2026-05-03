@@ -346,7 +346,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.whatsapp_support_numbers === 'string') {
             numbers = JSON.parse(data.whatsapp_support_numbers);
           }
-        } catch (e) { }
+        } catch (_e) { }
 
         let pixKeys: PixKeyEntry[] = [];
         try {
@@ -355,7 +355,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.pix_keys === 'string') {
             pixKeys = JSON.parse(data.pix_keys);
           }
-        } catch (e) { }
+        } catch (_e) { }
 
         let heroStats: HeroStatEntry[] = [];
         try {
@@ -364,7 +364,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.hero_stats === 'string') {
             heroStats = JSON.parse(data.hero_stats);
           }
-        } catch (e) { }
+        } catch (_e) { }
 
         let driverContacts: DriverContactEntry[] = [];
         try {
@@ -373,7 +373,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.driver_contact_numbers === 'string') {
             driverContacts = JSON.parse(data.driver_contact_numbers);
           }
-        } catch (e) { }
+        } catch (_e) { }
 
         let checklistItems: ChecklistItem[] = [];
         try {
@@ -382,7 +382,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.driver_checklist_items === 'string') {
             checklistItems = JSON.parse(data.driver_checklist_items);
           }
-        } catch (e) { }
+        } catch (_e) { }
 
         let socialLinks: SocialLinkEntry[] = [];
         try {
@@ -391,7 +391,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.social_links === 'string') {
             socialLinks = JSON.parse(data.social_links);
           }
-        } catch (e) { }
+        } catch (_e) { }
 
         setSettings({
           ...data,

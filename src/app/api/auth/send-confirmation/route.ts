@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       const diffHours = diffMinutes / 60;
 
       // Reset if it's been more than an hour
-      let currentCount = diffHours >= 1 ? 0 : rateLimit.request_count;
+      const currentCount = diffHours >= 1 ? 0 : rateLimit.request_count;
 
       if (diffHours < 1 && currentCount >= 5) {
          return NextResponse.json({ error: "Aguarde uma hora. Máximo de envios excedido." }, { status: 429 });

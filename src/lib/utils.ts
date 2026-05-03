@@ -21,7 +21,7 @@ export function validateCPF(cpf: string): boolean {
     sum += parseInt(digits.charAt(i)) * (10 - i);
   }
   let remainder = 11 - (sum % 11);
-  let d1 = remainder === 10 || remainder === 11 ? 0 : remainder;
+  const d1 = remainder === 10 || remainder === 11 ? 0 : remainder;
   
   if (d1 !== parseInt(digits.charAt(9))) return false;
   
@@ -30,7 +30,7 @@ export function validateCPF(cpf: string): boolean {
     sum += parseInt(digits.charAt(i)) * (11 - i);
   }
   remainder = 11 - (sum % 11);
-  let d2 = remainder === 10 || remainder === 11 ? 0 : remainder;
+  const d2 = remainder === 10 || remainder === 11 ? 0 : remainder;
   
   if (d2 !== parseInt(digits.charAt(10))) return false;
   

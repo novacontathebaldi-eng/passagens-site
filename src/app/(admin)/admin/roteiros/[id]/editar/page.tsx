@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import TourImageManager from "@/components/admin/TourImageManager";
 
 export default function EditarRoteiroPage() {
-  const router = useRouter();
   const params = useParams();
   const id = params.id as string;
   const supabase = createClient();
@@ -27,7 +26,7 @@ export default function EditarRoteiroPage() {
 
   useEffect(() => {
     async function load() {
-      const { data, error: fetchError } = await supabase
+      const { data } = await supabase
         .from("tour_packages")
         .select("*")
         .eq("id", id)

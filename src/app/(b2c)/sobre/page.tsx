@@ -1,5 +1,4 @@
 import { Bus, Map, ShieldCheck, HeartHandshake } from "lucide-react";
-import Link from "next/link";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 
 export default function SobrePage() {

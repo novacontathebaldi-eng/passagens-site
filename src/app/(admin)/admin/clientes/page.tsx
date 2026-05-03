@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { formatCPF, formatPhone, formatDate, USER_ROLE_LABELS } from "@/lib/utils";
+import { formatCPF, formatPhone, formatDate } from "@/lib/utils";
 
 type Profile = {
   id: string;
@@ -21,7 +21,6 @@ export default function ClientesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [editingRole, setEditingRole] = useState<string | null>(null);
   const supabase = createClient();
 

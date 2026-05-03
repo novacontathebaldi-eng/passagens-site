@@ -27,7 +27,7 @@ const UUID_REGEX =
 export async function findTicketByIdentifier(
   supabase: SupabaseClient,
   identifier: string,
-  excursionId: string
+  _excursionId: string
 ): Promise<TicketData | null> {
   const isUUID = UUID_REGEX.test(identifier);
   const column = isUUID ? "qr_code_token" : "short_code";

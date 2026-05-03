@@ -32,7 +32,7 @@ export default async function ConfigsPage() {
     } else if (typeof settings?.driver_contact_numbers === "string") {
       driverContacts = JSON.parse(settings?.driver_contact_numbers);
     }
-  } catch (e) {}
+  } catch (_e) {}
 
   const initials = profile?.full_name
     ? profile.full_name.substring(0, 2).toUpperCase()

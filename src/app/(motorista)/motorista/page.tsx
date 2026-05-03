@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { formatBRL, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { CalendarDays, Users, QrCode, BusFront, ChevronRight, Clock } from "lucide-react";
 

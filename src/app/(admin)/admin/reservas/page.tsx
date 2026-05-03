@@ -153,7 +153,6 @@ export default function ReservasPage() {
           <ReservasKanban 
             reservations={reservations} 
             isLoading={isLoading} 
-            onStatusChange={async () => {}} // Não usado diretamente mais, mas mantido na prop se precisar
             onActionClick={handleActionClick}
             onCardClick={handleOpenDrawer}
           />
@@ -161,7 +160,6 @@ export default function ReservasPage() {
           <ReservasList 
             reservations={reservations} 
             isLoading={isLoading} 
-            onStatusChange={async () => {}}
             onActionClick={handleActionClick}
             onRowClick={handleOpenDrawer}
           />

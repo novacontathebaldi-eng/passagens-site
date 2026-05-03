@@ -12,7 +12,6 @@ import {
 } from "@dnd-kit/core";
 import { 
   SortableContext, 
-  arrayMove, 
   sortableKeyboardCoordinates,
   rectSortingStrategy
 } from "@dnd-kit/sortable";
@@ -33,7 +32,6 @@ const COLUMNS = [
 interface ReservasKanbanProps {
   reservations: Reservation[];
   isLoading: boolean;
-  onStatusChange: (id: string, newStatus: ReservationStatus) => Promise<void>;
   onActionClick: (id: string, action: "APPROVE" | "CANCEL" | "REFUND" | "REACTIVATE") => void;
   onCardClick?: (id: string) => void;
 }
@@ -82,7 +80,7 @@ function KanbanColumn({ col, reservations, onActionClick, onCardClick }: { col: 
   );
 }
 
-export function ReservasKanban({ reservations, isLoading, onStatusChange, onActionClick, onCardClick }: ReservasKanbanProps) {
+export function ReservasKanban({ reservations, isLoading, onActionClick, onCardClick }: ReservasKanbanProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(

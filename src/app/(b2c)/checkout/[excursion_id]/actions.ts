@@ -67,7 +67,7 @@ export async function createReservation(data: CheckoutData) {
 
     // [SECURITY PATCH] Validação Matemática do Pagamento (Server-Side Trust)
     const baseTotalAmount = Number(excursion.price_per_seat) * data.quantity;
-    let finalAmount = baseTotalAmount;
+    const finalAmount = baseTotalAmount;
 
     // Se houver regras de cupom/promotor no futuro, aplique o desconto aqui:
     // if (promoterId) { finalAmount = baseTotalAmount - discount; }

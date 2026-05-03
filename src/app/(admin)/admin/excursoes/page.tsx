@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
@@ -18,7 +18,6 @@ export default function ExcursoesPage() {
   const [excursions, setExcursions] = useState<Excursion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
   const supabase = createClient();
 
   useEffect(() => {

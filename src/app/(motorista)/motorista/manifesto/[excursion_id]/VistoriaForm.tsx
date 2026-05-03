@@ -44,7 +44,7 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
           } else if (typeof settings.driver_checklist_items === "string") {
             try {
               parsedItems = JSON.parse(settings.driver_checklist_items);
-            } catch (e) {}
+            } catch (_e) {}
           }
         }
         setItems(parsedItems);
@@ -139,7 +139,7 @@ export default function VistoriaForm({ excursionId, onStatusChange }: VistoriaFo
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      let uploadedPaths: string[] = [];
+      const uploadedPaths: string[] = [];
 
       // Upload photos if selected
       if (selectedFiles.length > 0) {
