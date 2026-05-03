@@ -35,7 +35,11 @@ export function GoogleOneTap() {
 
         if (error) {
           console.error("[GoogleOneTap] signInWithIdToken error:", error.message);
-          toast.error("Não foi possível fazer login com Google. Tente novamente.");
+          if (error.message.toLowerCase().includes("banned")) {
+            toast.error("Conta suspensa. Entre em contato com o suporte.");
+          } else {
+            toast.error("Não foi possível fazer login com Google. Tente novamente.");
+          }
           return;
         }
 
@@ -87,7 +91,12 @@ export function GoogleOneTap() {
       nonce: hashedNonce,
     });
 
-    window.google.accounts.id.prompt();
+    window.google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment()) {
+        const reason = notification.getNotDisplayedReason() || notification.getSkippedReason() || notification.getDismissedReason();
+        console.info(`[GoogleOneTap] Prompt fechado ou ignorado pelo usuário: ${reason}`);
+      }
+    });
   }, [handleCredentialResponse]);
 
   // Don't render anything if client ID is missing
