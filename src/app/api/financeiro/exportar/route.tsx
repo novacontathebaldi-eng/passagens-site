@@ -50,6 +50,7 @@ const ReportDocument = ({ transactions, companyName, logoUrl, periodLabel, kpis 
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : <Text style={styles.title}>{companyName}</Text>}
           {logoUrl && <Text style={styles.title}>Relatório Financeiro</Text>}
           {!logoUrl && <Text style={styles.subtitle}>Relatório Financeiro</Text>}

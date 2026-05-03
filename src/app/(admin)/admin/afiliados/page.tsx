@@ -29,8 +29,6 @@ export default function AfiliadosAdminPage() {
   const [commission, setCommission] = useState("10");
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => { fetchPromoters(); }, []);
-
   async function fetchPromoters() {
     const { data } = await supabase
       .from("promoters")
@@ -40,6 +38,11 @@ export default function AfiliadosAdminPage() {
     if (data) setPromoters(data as unknown as Promoter[]);
     setIsLoading(false);
   }
+
+  useEffect(() => { 
+    fetchPromoters(); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSearchUser() {
     setSearchError(null);

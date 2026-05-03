@@ -20,10 +20,6 @@ export default function ExcursoesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchExcursions();
-  }, []);
-
   async function fetchExcursions() {
     const { data } = await supabase
       .from("excursions")
@@ -43,6 +39,11 @@ export default function ExcursoesPage() {
     }
     setIsLoading(false);
   }
+
+  useEffect(() => {
+    fetchExcursions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir esta excursão? Esta ação não pode ser desfeita.")) return;

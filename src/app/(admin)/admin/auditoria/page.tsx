@@ -24,10 +24,6 @@ export default function AuditoriaPage() {
   const PAGE_SIZE = 20;
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchLogs();
-  }, [page, actionFilter, entityFilter]);
-
   async function fetchLogs() {
     setIsLoading(true);
 
@@ -48,6 +44,11 @@ export default function AuditoriaPage() {
     if (data) setLogs(data);
     setIsLoading(false);
   }
+
+  useEffect(() => {
+    fetchLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, actionFilter, entityFilter]);
 
   const formatAction = (action: string) => {
     const map: Record<string, { cls: string; label: string }> = {

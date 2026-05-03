@@ -18,10 +18,6 @@ export default function RoteirosPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchPackages();
-  }, []);
-
   async function fetchPackages() {
     const { data } = await supabase
       .from("tour_packages")
@@ -31,6 +27,11 @@ export default function RoteirosPage() {
     if (data) setPackages(data);
     setIsLoading(false);
   }
+
+  useEffect(() => {
+    fetchPackages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este roteiro? Excursões vinculadas a ele também serão afetadas.")) return;

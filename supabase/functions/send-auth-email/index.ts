@@ -2,7 +2,6 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.45.6";
 
-const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
 const brevoApiKey = Deno.env.get("BREVO_API_KEY") as string;
 const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
@@ -46,7 +45,7 @@ Deno.serve(async (req: Request) => {
       };
       user = verified.user;
       email_data = verified.email_data;
-    } catch (err) {
+    } catch {
       return new Response(JSON.stringify({ error: "Invalid signature" }), {
         status: 401,
         headers: { "Content-Type": "application/json" }

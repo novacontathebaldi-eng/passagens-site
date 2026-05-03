@@ -52,7 +52,7 @@ export async function performCheckin(
   }
 
   // 2. Fetch the ticket from the database
-  const ticket = await findTicketByIdentifier(supabase, identifier, excursion_id);
+  const ticket = await findTicketByIdentifier(supabase, identifier);
 
   // 3. Validate using the pure logic function
   const result = validateTicket(ticket, excursion_id);

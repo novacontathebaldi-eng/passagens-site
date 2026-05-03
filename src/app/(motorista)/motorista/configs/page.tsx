@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./LogoutButton";
 import { DriverContactCard } from "./DriverContactCard";
@@ -101,3 +102,4 @@ export default async function ConfigsPage() {
     </div>
   );
 }
+

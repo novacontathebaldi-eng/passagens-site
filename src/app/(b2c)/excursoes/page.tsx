@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
@@ -345,3 +346,4 @@ export default async function CatalogoPage({
     </div>
   );
 }
+

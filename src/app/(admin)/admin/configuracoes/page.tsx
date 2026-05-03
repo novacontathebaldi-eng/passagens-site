@@ -346,7 +346,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.whatsapp_support_numbers === 'string') {
             numbers = JSON.parse(data.whatsapp_support_numbers);
           }
-        } catch (_e) { }
+        } catch { }
 
         let pixKeys: PixKeyEntry[] = [];
         try {
@@ -355,7 +355,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.pix_keys === 'string') {
             pixKeys = JSON.parse(data.pix_keys);
           }
-        } catch (_e) { }
+        } catch { }
 
         let heroStats: HeroStatEntry[] = [];
         try {
@@ -364,7 +364,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.hero_stats === 'string') {
             heroStats = JSON.parse(data.hero_stats);
           }
-        } catch (_e) { }
+        } catch { }
 
         let driverContacts: DriverContactEntry[] = [];
         try {
@@ -373,7 +373,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.driver_contact_numbers === 'string') {
             driverContacts = JSON.parse(data.driver_contact_numbers);
           }
-        } catch (_e) { }
+        } catch { }
 
         let checklistItems: ChecklistItem[] = [];
         try {
@@ -382,7 +382,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.driver_checklist_items === 'string') {
             checklistItems = JSON.parse(data.driver_checklist_items);
           }
-        } catch (_e) { }
+        } catch { }
 
         let socialLinks: SocialLinkEntry[] = [];
         try {
@@ -391,7 +391,7 @@ export default function ConfiguracoesPage() {
           } else if (typeof data.social_links === 'string') {
             socialLinks = JSON.parse(data.social_links);
           }
-        } catch (_e) { }
+        } catch { }
 
         setSettings({
           ...data,
@@ -1212,7 +1212,7 @@ export default function ConfiguracoesPage() {
             Perguntas da Vistoria do Ônibus
           </h2>
           <p className="text-xs text-on-surface-variant">
-            Configure as perguntas que os motoristas deverão responder ao realizar a vistoria da excursão. As respostas são de "Sim" ou "Não".
+            Configure as perguntas que os motoristas deverão responder ao realizar a vistoria da excursão. As respostas são de &quot;Sim&quot; ou &quot;Não&quot;.
           </p>
 
           <div className="space-y-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4">

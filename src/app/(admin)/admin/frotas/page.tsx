@@ -19,10 +19,6 @@ export default function FrotasPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchLayouts();
-  }, []);
-
   async function fetchLayouts() {
     const { data } = await supabase
       .from("vehicle_layouts")
@@ -32,6 +28,11 @@ export default function FrotasPage() {
     if (data) setLayouts(data as VehicleLayout[]);
     setIsLoading(false);
   }
+
+  useEffect(() => {
+    fetchLayouts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este layout de ônibus? Excursões vinculadas serão afetadas.")) return;

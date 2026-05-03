@@ -18,10 +18,6 @@ export default function GestaoAcessosPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchProfiles();
-  }, [supabase]);
-
   async function fetchProfiles() {
     setIsLoading(true);
     const { data } = await supabase
@@ -34,6 +30,11 @@ export default function GestaoAcessosPage() {
     }
     setIsLoading(false);
   }
+
+  useEffect(() => {
+    fetchProfiles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase]);
 
   async function handleRoleChange(profileId: string, newRole: string) {
     const confirmChange = confirm(`Tem certeza que deseja mudar a role deste usuário para ${newRole}?`);

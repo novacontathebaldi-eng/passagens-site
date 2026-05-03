@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -202,3 +203,4 @@ export function AdminMobileMenu({ navItems, profile, initials, logoUrl, companyN
     </>
   );
 }
+

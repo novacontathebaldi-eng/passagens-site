@@ -103,7 +103,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   if (typeof parsedPixKeys === "string") {
     try {
       parsedPixKeys = JSON.parse(parsedPixKeys);
-    } catch (_e) {
+    } catch {
       parsedPixKeys = null;
     }
   }
@@ -112,7 +112,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   if (typeof parsedWhatsApp === "string") {
     try {
       parsedWhatsApp = JSON.parse(parsedWhatsApp);
-    } catch (_e) {
+    } catch {
       parsedWhatsApp = null;
     }
   }
@@ -121,7 +121,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   if (typeof parsedSocialLinks === "string") {
     try {
       parsedSocialLinks = JSON.parse(parsedSocialLinks);
-    } catch (_e) {
+    } catch {
       parsedSocialLinks = null;
     }
   }
@@ -130,7 +130,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   if (typeof parsedHeroStats === "string") {
     try {
       parsedHeroStats = JSON.parse(parsedHeroStats);
-    } catch (_e) {
+    } catch {
       parsedHeroStats = null;
     }
   }

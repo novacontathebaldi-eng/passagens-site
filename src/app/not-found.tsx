@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 
@@ -46,3 +47,4 @@ export default function NotFound() {
     </main>
   );
 }
+

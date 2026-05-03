@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -24,8 +25,22 @@ export default function ClientesPage() {
   const [editingRole, setEditingRole] = useState<string | null>(null);
   const supabase = createClient();
 
+  async function fetchProfiles() {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, full_name, cpf, phone, role, email_confirmed_at, created_at, avatar_url")
+      .order("created_at", { ascending: false });
+
+    if (data) {
+      setProfiles(data);
+      setFiltered(data);
+    }
+    setIsLoading(false);
+  }
+
   useEffect(() => {
     fetchProfiles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -43,19 +58,6 @@ export default function ClientesPage() {
     }
     setFiltered(result);
   }, [profiles, search, roleFilter]);
-
-  async function fetchProfiles() {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, full_name, cpf, phone, role, email_confirmed_at, created_at, avatar_url")
-      .order("created_at", { ascending: false });
-
-    if (data) {
-      setProfiles(data);
-      setFiltered(data);
-    }
-    setIsLoading(false);
-  }
 
   async function handleRoleChange(profileId: string, newRole: string) {
     setEditingRole(profileId);
@@ -217,3 +219,4 @@ export default function ClientesPage() {
     </div>
   );
 }
+

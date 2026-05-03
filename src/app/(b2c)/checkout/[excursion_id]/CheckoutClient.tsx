@@ -96,7 +96,7 @@ export default function CheckoutClient({ excursion, profile, savedPassengers, oc
             replace(parsed);
           }
         }
-      } catch (_e) {
+      } catch {
         // ignore
       }
     }

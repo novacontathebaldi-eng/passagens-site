@@ -63,6 +63,7 @@ export default function VoucherPDFDocument({
         {/* Header */}
         <View style={s.header}>
           <View style={s.headerLeft}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
             {logoUrl && <Image src={logoUrl} style={s.logo} />}
             <View>
               <Text style={s.headerTitle}>{companyName}</Text>
@@ -101,6 +102,7 @@ export default function VoucherPDFDocument({
 
               <View style={s.qrRow}>
                 {qrImages[ticket.id] && (
+                  /* eslint-disable-next-line jsx-a11y/alt-text */
                   <Image src={qrImages[ticket.id]} style={s.qrImage} />
                 )}
                 <View>

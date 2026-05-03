@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -250,3 +251,4 @@ export function ExcursionGrid({ excursions, categories }: ExcursionGridProps) {
     </section>
   );
 }
+
