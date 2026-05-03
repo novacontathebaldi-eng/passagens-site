@@ -69,7 +69,6 @@ export function GoogleOneTap() {
       cancel_on_tap_outside: true,
       context: "signin",
       itp_support: true,
-      use_fedcm_for_prompt: true,
     });
 
     window.google.accounts.id.prompt();
