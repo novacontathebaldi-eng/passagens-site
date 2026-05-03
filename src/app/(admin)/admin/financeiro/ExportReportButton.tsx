@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 export function ExportReportButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,7 +80,7 @@ export function ExportReportButton() {
         Exportar Relatório
       </button>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md shadow-xl">
             <h3 className="text-xl font-bold text-on-surface mb-4">Exportar Relatório</h3>
@@ -146,8 +147,9 @@ export function ExportReportButton() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+        )}
     </>
   );
 }
