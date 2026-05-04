@@ -30,6 +30,8 @@ export default function ErrorPage({
             <img
               src="/images/eita404.png"
               alt="Eita, o ônibus enguiçou!"
+              loading="lazy"
+              fetchPriority="low"
               className="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-multiply"
               style={{ filter: "hue-rotate(320deg)" }} // Muda a cor pra um tom mais avermelhado pra dar ideia de erro
             />

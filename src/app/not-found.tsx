@@ -11,6 +11,8 @@ export default function NotFound() {
           <img
             src="/images/eita404.png"
             alt="Ônibus perdido"
+            loading="lazy"
+            fetchPriority="low"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
