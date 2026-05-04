@@ -102,16 +102,14 @@ export async function signup(formData: FormData) {
     redirect(`/cadastro?${searchParams.toString()}`);
   }
 
-  // Send confirmation email
+  // Send confirmation email via Edge Function (triggered by profile insertion)
   if (data?.user?.id && data?.user?.email) {
     try {
-      await sendConfirmationEmail(data.user.id, data.user.email);
-      
       if (acceptsMarketing) {
         await addContactToBrevo(data.user.email, { NOME: fullName });
       }
     } catch (e) {
-      console.error("Failed to send welcome/confirmation email or add to Brevo:", e);
+      console.error("Failed to add to Brevo:", e);
     }
   }
 
