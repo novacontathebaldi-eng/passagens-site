@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -68,6 +70,12 @@ export default function EditarExcursaoPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    if (form.return_date && new Date(form.return_date) <= new Date(form.departure_date)) {
+      toast.error("A data de retorno deve ser posterior à data de saída.");
+      setIsLoading(false);
+      return;
+    }
 
     const { error: updateError } = await supabase
       .from("excursions")

@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -45,6 +47,12 @@ export default function NovaExcursaoPage() {
     const return_date = formData.get("return_date") as string;
     const allow_seat_selection = formData.get("allow_seat_selection") === "on";
     const status = formData.get("status") as string;
+
+    if (return_date && new Date(return_date) <= new Date(departure_date)) {
+      toast.error("A data de retorno deve ser posterior à data de saída.");
+      setIsLoading(false);
+      return;
+    }
 
     const { error: insertError } = await supabase.from("excursions").insert([
       {
