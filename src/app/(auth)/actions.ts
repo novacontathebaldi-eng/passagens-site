@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendConfirmationEmail } from "@/lib/auth-emails";
 import { addContactToBrevo } from "@/lib/brevo";
 import { getSiteSettings } from "@/lib/get-settings";
@@ -199,6 +200,25 @@ export async function completeProfile(formData: FormData) {
     .eq("id", user.id);
 
   if (error) {
+    if (error.message.toLowerCase().includes("duplicate key value violates unique constraint") && error.message.toLowerCase().includes("cpf")) {
+      // Find the real owner of this CPF
+      const { data: ownerProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("cpf", cpf)
+        .single();
+        
+      if (ownerProfile) {
+        const { data: { user: ownerUser } } = await supabaseAdmin.auth.admin.getUserById(ownerProfile.id);
+        if (ownerUser && ownerUser.email) {
+          return { 
+            error: "CPF_DUPLICATE", 
+            maskedEmail: maskEmail(ownerUser.email),
+            conflictingCpf: cpf
+          };
+        }
+      }
+    }
     return { error: translateAuthError(error.message) };
   }
 
@@ -241,4 +261,65 @@ export async function updatePassword(formData: FormData) {
 
   // Se deu certo, desloga para forçar login com a nova senha ou redireciona
   redirect("/redefinir-senha?success=true");
+}
+
+function maskEmail(email: string) {
+  const [local, domainExt] = email.split('@');
+  if (!domainExt) return email;
+  
+  const domainParts = domainExt.split('.');
+  const domain = domainParts[0];
+  const ext = domainParts.slice(1).join('.');
+
+  const maskedLocal = local.length > 2 ? local.substring(0, 2) + '••••••' : local + '••••';
+  const maskedDomain = domain.length > 2 ? domain.substring(0, 2) + '••' : domain + '•';
+
+  return `${maskedLocal}@${maskedDomain}.${ext}`;
+}
+
+export async function recoverAccountByCpf(cpf: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Não autenticado" };
+  }
+
+  // 1. Achar o dono do CPF
+  const { data: ownerProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("id")
+    .eq("cpf", cpf)
+    .single();
+
+  if (!ownerProfile) {
+    return { error: "CPF não encontrado." };
+  }
+
+  // 2. Buscar e-mail real do dono
+  const { data: { user: ownerUser } } = await supabaseAdmin.auth.admin.getUserById(ownerProfile.id);
+  
+  if (!ownerUser || !ownerUser.email) {
+    return { error: "Usuário original sem e-mail." };
+  }
+
+  // 3. Tentar resetar a senha
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") || headersList.get("host");
+  const protocol = headersList.get("x-forwarded-proto") || "https";
+  const origin = headersList.get("origin") || (host ? `${protocol}://${host}` : null) || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+  const { error: resetError } = await supabase.auth.resetPasswordForEmail(ownerUser.email, {
+    redirectTo: `${origin}/auth/callback?next=/redefinir-senha`,
+  });
+
+  // 4. Incondicionalmente deslogar da conta órfã
+  await supabase.auth.signOut();
+
+  // 5. Retornar status pro front-end redirecionar
+  if (resetError) {
+    return { error: "FALHA_ENVIO" };
+  }
+
+  return { success: true };
 }
