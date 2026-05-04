@@ -36,6 +36,16 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Defensive: catch auth ?code= arriving at root (Supabase redirect URL allowlist fallback)
+  // When Supabase can't match redirect_to against the allowlist, it redirects to site URL root with ?code=
+  if (pathname === "/" && request.nextUrl.searchParams.has("code")) {
+    const code = request.nextUrl.searchParams.get("code")!;
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    url.searchParams.set("code", code);
+    return NextResponse.redirect(url);
+  }
+
   // Protect admin routes
   if (pathname.startsWith("/admin")) {
     if (!user) {
