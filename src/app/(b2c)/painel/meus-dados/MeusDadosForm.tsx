@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateProfile } from "../actions";
 import { CheckCircle2, AlertCircle } from "lucide-react";
-import { formatCPF, formatPhone } from "@/lib/utils";
+import { formatCPF, formatPhone, validateCPF } from "@/lib/utils";
 
 interface ProfileData {
   full_name: string;
@@ -39,6 +39,11 @@ export default function MeusDadosForm({ initialData }: { initialData: any }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
+
+    if (formData.cpf && !validateCPF(formData.cpf)) {
+      setMessage({ type: "error", text: "O CPF informado é inválido." });
+      return;
+    }
 
     const data = new FormData();
     data.append("full_name", formData.full_name);

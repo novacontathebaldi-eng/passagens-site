@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { addSavedPassenger, updateSavedPassenger, deleteSavedPassenger } from "../actions";
 import { CheckCircle2, AlertCircle, Plus, Edit2, Trash2, UserCircle2 } from "lucide-react";
-import { formatCPF } from "@/lib/utils";
+import { formatCPF, validateCPF } from "@/lib/utils";
 
 interface Passenger {
   id: string;
@@ -68,6 +68,11 @@ export default function PassageirosList({ initialPassengers }: { initialPassenge
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
+
+    if (formData.cpf && !validateCPF(formData.cpf)) {
+      setMessage({ type: "error", text: "O CPF informado é inválido." });
+      return;
+    }
 
     const data = new FormData();
     data.append("full_name", formData.full_name);
@@ -176,8 +181,14 @@ export default function PassageirosList({ initialPassengers }: { initialPassenge
 
       {/* Modal Glassmorphism */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-container/60 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-surface rounded-3xl w-full max-w-lg p-6 md:p-8 shadow-2xl border border-outline-variant/30 my-auto">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-container/60 backdrop-blur-sm overflow-y-auto"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div 
+            className="bg-surface rounded-3xl w-full max-w-lg p-6 md:p-8 shadow-2xl border border-outline-variant/30 my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-xl font-bold text-on-surface mb-6">
               {editingPassenger ? "Editar Passageiro" : "Novo Passageiro"}
             </h3>

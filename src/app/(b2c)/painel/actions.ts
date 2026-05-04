@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { validateCPF } from "@/lib/utils";
 
 export async function deleteOwnAccount() {
   const supabase = await createClient();
@@ -82,6 +83,10 @@ export async function updateProfile(formData: FormData) {
     return { error: "Nome completo é obrigatório." };
   }
 
+  if (cpf && !validateCPF(cpf)) {
+    return { error: "CPF inválido." };
+  }
+
   // Remove mask for CPF
   const unmaskedCpf = cpf ? cpf.replace(/\D/g, "") : null;
   // Remove mask for phone (optional but good practice)
@@ -124,6 +129,10 @@ export async function addSavedPassenger(formData: FormData) {
     return { error: "Nome completo e CPF são obrigatórios." };
   }
 
+  if (!validateCPF(cpf)) {
+    return { error: "CPF inválido." };
+  }
+
   const unmaskedCpf = cpf.replace(/\D/g, "");
 
   const { error } = await supabase.from("saved_passengers").insert({
@@ -158,6 +167,10 @@ export async function updateSavedPassenger(id: string, formData: FormData) {
 
   if (!full_name || full_name.trim().length < 3 || !cpf) {
     return { error: "Nome completo e CPF são obrigatórios." };
+  }
+
+  if (!validateCPF(cpf)) {
+    return { error: "CPF inválido." };
   }
 
   const unmaskedCpf = cpf.replace(/\D/g, "");

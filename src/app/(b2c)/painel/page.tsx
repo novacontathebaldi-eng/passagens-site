@@ -245,7 +245,7 @@ export default async function PainelClientePage({
                   <span className="text-outline group-hover:text-primary">→</span>
                 </Link>
                 <Link href="/painel/meus-viajantes" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
-                  <span>Meus Viajantes</span>
+                  <span>Meus Acompanhantes</span>
                   <span className="text-outline group-hover:text-primary">→</span>
                 </Link>
                 <Link href="/painel/configuracoes" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
