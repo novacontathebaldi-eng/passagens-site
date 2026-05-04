@@ -58,14 +58,16 @@ export async function GET(request: NextRequest) {
 
   const generatedAt = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
+  const pdfElement = (
+    <ManifestoPDFDocument
+      excursionTitle={safeTitle}
+      passengers={passengers}
+      generatedAt={generatedAt}
+    />
+  );
+
   try {
-    const buffer = await renderToBuffer(
-      <ManifestoPDFDocument
-        excursionTitle={safeTitle}
-        passengers={passengers}
-        generatedAt={generatedAt}
-      />
-    );
+    const buffer = await renderToBuffer(pdfElement);
 
     const safeFilename = safeTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const filename = `manifesto-${safeFilename}.pdf`;

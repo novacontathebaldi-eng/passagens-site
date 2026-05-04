@@ -46,9 +46,23 @@ export default function AuditoriaPage() {
   }
 
   useEffect(() => {
-    fetchLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, actionFilter, entityFilter]);
+    let cancelled = false;
+    async function load() {
+      setIsLoading(true);
+      let query = supabase
+        .from("audit_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+      if (actionFilter !== "ALL") query = query.eq("action", actionFilter);
+      if (entityFilter.trim()) query = query.ilike("entity_type", `%${entityFilter}%`);
+      const { data } = await query;
+      if (!cancelled && data) setLogs(data);
+      if (!cancelled) setIsLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [supabase, page, actionFilter, entityFilter]);
 
   const formatAction = (action: string) => {
     const map: Record<string, { cls: string; label: string }> = {

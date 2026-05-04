@@ -86,14 +86,16 @@ export default function NotificationCenter() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [animateBadge, setAnimateBadge] = useState(false);
 
+  const prevUnread = useRef(unreadCount);
+
   // Animate badge on new unread
-  useEffect(() => {
-    if (unreadCount > 0) {
+  if (prevUnread.current !== unreadCount) {
+    if (unreadCount > prevUnread.current) {
       setAnimateBadge(true);
-      const timer = setTimeout(() => setAnimateBadge(false), 600);
-      return () => clearTimeout(timer);
+      setTimeout(() => setAnimateBadge(false), 600);
     }
-  }, [unreadCount]);
+    prevUnread.current = unreadCount;
+  }
 
   // Close dropdown on outside click
   useEffect(() => {

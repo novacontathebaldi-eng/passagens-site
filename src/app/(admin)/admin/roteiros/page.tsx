@@ -29,9 +29,18 @@ export default function RoteirosPage() {
   }
 
   useEffect(() => {
-    fetchPackages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    let cancelled = false;
+    async function load() {
+      const { data } = await supabase
+        .from("tour_packages")
+        .select("id, title, slug, category, short_description")
+        .order("created_at", { ascending: false });
+      if (!cancelled && data) setPackages(data);
+      if (!cancelled) setIsLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [supabase]);
 
   async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este roteiro? Excursões vinculadas a ele também serão afetadas.")) return;

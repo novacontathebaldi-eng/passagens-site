@@ -73,18 +73,20 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  const pdfElement = (
+    <VoucherPDFDocument
+      tickets={tickets}
+      tripTitle={tripTitle}
+      departureDate={departureDate}
+      departureDateFull={departureDateFull}
+      companyName={companyName}
+      logoUrl={logoUrl}
+      qrImages={qrImages}
+    />
+  );
+
   try {
-    const buffer = await renderToBuffer(
-      <VoucherPDFDocument
-        tickets={tickets}
-        tripTitle={tripTitle}
-        departureDate={departureDate}
-        departureDateFull={departureDateFull}
-        companyName={companyName}
-        logoUrl={logoUrl}
-        qrImages={qrImages}
-      />
-    );
+    const buffer = await renderToBuffer(pdfElement);
 
     const firstName = tickets[0]?.full_name.split(" ")[0] ?? "passageiro";
     const filename = `voucher-${tickets[0]?.short_code}-${firstName}.pdf`;

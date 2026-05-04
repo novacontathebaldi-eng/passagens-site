@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { getFinanceiroData } from "./actions";
@@ -36,11 +36,11 @@ export function FinanceiroClient({ initialData, period, companyName, logoUrl }: 
   const [data, setData] = useState(initialData);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    // When the period prop changes, the initialData might be stale until the next fetch, 
-    // but the server already gave us the right initialData. So we update it here just in case.
+  const prevInitialData = useRef(initialData);
+  if (prevInitialData.current !== initialData) {
+    prevInitialData.current = initialData;
     setData(initialData);
-  }, [initialData]);
+  }
 
   useEffect(() => {
     const supabase = createClient();

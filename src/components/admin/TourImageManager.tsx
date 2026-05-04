@@ -53,8 +53,21 @@ export default function TourImageManager({ packageId, maxImages = 10 }: Props) {
   }, [packageId, supabase]);
 
   useEffect(() => {
-    loadImages();
-  }, [loadImages]);
+    let cancelled = false;
+    async function init() {
+      const { data, error: fetchError } = await supabase
+        .from("tour_package_images")
+        .select("id, package_id, storage_path, url, alt_text, position, is_cover, file_size, mime_type")
+        .eq("package_id", packageId)
+        .order("position", { ascending: true });
+      if (cancelled) return;
+      if (fetchError) setError("Erro ao carregar imagens: " + fetchError.message);
+      else setImages(data || []);
+      setIsLoading(false);
+    }
+    init();
+    return () => { cancelled = true; };
+  }, [packageId, supabase]);
 
   // Validate file
   function validateFile(file: File): string | null {

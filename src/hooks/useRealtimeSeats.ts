@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 export function useRealtimeSeats(excursionId: string, initialOccupiedSeats: string[]) {
@@ -6,10 +6,12 @@ export function useRealtimeSeats(excursionId: string, initialOccupiedSeats: stri
   const supabase = createClient();
 
   // Keep state in sync if parent server component passes new initial props
-  useEffect(() => {
+  const prevSeatsKey = useRef(JSON.stringify(initialOccupiedSeats));
+  const seatsKey = JSON.stringify(initialOccupiedSeats);
+  if (prevSeatsKey.current !== seatsKey) {
+    prevSeatsKey.current = seatsKey;
     setOccupiedSeats(initialOccupiedSeats);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(initialOccupiedSeats)]);
+  }
 
   const fetchSeats = useCallback(async () => {
     const { data: seats } = await supabase

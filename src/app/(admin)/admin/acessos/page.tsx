@@ -32,8 +32,18 @@ export default function GestaoAcessosPage() {
   }
 
   useEffect(() => {
-    fetchProfiles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let cancelled = false;
+    async function load() {
+      setIsLoading(true);
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, role, full_name, cpf, email_confirmed_at, created_at")
+        .order("created_at", { ascending: false });
+      if (!cancelled && data) setProfiles(data as Profile[]);
+      if (!cancelled) setIsLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
   }, [supabase]);
 
   async function handleRoleChange(profileId: string, newRole: string) {

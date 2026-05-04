@@ -39,10 +39,19 @@ export default function AfiliadosAdminPage() {
     setIsLoading(false);
   }
 
-  useEffect(() => { 
-    fetchPromoters(); 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const { data } = await supabase
+        .from("promoters")
+        .select("id, referral_code, commission_percentage, total_earnings, created_at, profiles (full_name)")
+        .order("created_at", { ascending: false });
+      if (!cancelled && data) setPromoters(data as unknown as Promoter[]);
+      if (!cancelled) setIsLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [supabase]);
 
   async function handleSearchUser() {
     setSearchError(null);

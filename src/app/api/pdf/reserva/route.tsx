@@ -95,19 +95,21 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  const pdfElement = (
+    <VoucherPDFDocument
+      tickets={tickets}
+      tripTitle={tripTitle}
+      departureDate={departureDate}
+      departureDateFull={departureDateFull}
+      companyName={companyName}
+      logoUrl={logoUrl}
+      qrImages={qrImages}
+    />
+  );
+
   // 6. Render PDF server-side
   try {
-    const buffer = await renderToBuffer(
-      <VoucherPDFDocument
-        tickets={tickets}
-        tripTitle={tripTitle}
-        departureDate={departureDate}
-        departureDateFull={departureDateFull}
-        companyName={companyName}
-        logoUrl={logoUrl}
-        qrImages={qrImages}
-      />
-    );
+    const buffer = await renderToBuffer(pdfElement);
 
     const shortId = reservationId.split("-")[0].toUpperCase();
     const filename = `reserva-${shortId}-vouchers.pdf`;

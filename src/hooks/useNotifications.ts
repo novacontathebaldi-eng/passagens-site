@@ -41,7 +41,9 @@ export function useNotifications(limit = 20) {
   // Keep limit in a ref so the realtime callback always sees the latest value
   // without needing it in the dependency array.
   const limitRef = useRef(limit);
-  limitRef.current = limit;
+  useEffect(() => {
+    limitRef.current = limit;
+  }, [limit]);
 
   // Initial fetch
   useEffect(() => {

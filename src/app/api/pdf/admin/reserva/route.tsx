@@ -81,28 +81,30 @@ export async function GET(request: NextRequest) {
 
   const shortId = reservation.id.split("-")[0];
 
+  const pdfElement = (
+    <AdminReservationPDFDocument
+      companyName={companyName}
+      logoUrl={logoUrl}
+      reservation={{
+        id: reservation.id,
+        shortId,
+        total_amount: reservation.total_amount,
+        discount_applied: reservation.discount_applied,
+        status: reservation.status,
+        gateway_provider: reservation.gateway_provider,
+        notes: reservation.notes,
+        created_at: reservation.created_at,
+      }}
+      profile={formattedProfile}
+      excursion={formattedExcursion}
+      tickets={reservation.passenger_tickets || []}
+      auditLogs={auditLogs || []}
+      generatedAt={generatedAt}
+    />
+  );
+
   try {
-    const buffer = await renderToBuffer(
-      <AdminReservationPDFDocument
-        companyName={companyName}
-        logoUrl={logoUrl}
-        reservation={{
-          id: reservation.id,
-          shortId,
-          total_amount: reservation.total_amount,
-          discount_applied: reservation.discount_applied,
-          status: reservation.status,
-          gateway_provider: reservation.gateway_provider,
-          notes: reservation.notes,
-          created_at: reservation.created_at,
-        }}
-        profile={formattedProfile}
-        excursion={formattedExcursion}
-        tickets={reservation.passenger_tickets || []}
-        auditLogs={auditLogs || []}
-        generatedAt={generatedAt}
-      />
-    );
+    const buffer = await renderToBuffer(pdfElement);
 
     const filename = `relatorio-reserva-${shortId}.pdf`;
 

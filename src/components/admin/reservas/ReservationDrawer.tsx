@@ -48,9 +48,9 @@ export function ReservationDrawer({ reservationId, isOpen, onClose }: Reservatio
   const supabase = createClient();
 
   useEffect(() => {
+    let cancelled = false;
+    
     if (!isOpen || !reservationId) {
-      setReservation(null);
-      setAuditLogs([]);
       return;
     }
 
@@ -84,7 +84,7 @@ export function ReservationDrawer({ reservationId, isOpen, onClose }: Reservatio
         .eq("id", reservationId)
         .single();
 
-      if (resData) {
+      if (!cancelled && resData) {
         setReservation(resData as unknown as FullReservation);
       }
 
@@ -102,17 +102,20 @@ export function ReservationDrawer({ reservationId, isOpen, onClose }: Reservatio
         .eq("entity_id", reservationId)
         .order("created_at", { ascending: false });
 
-      if (logsData) {
-        // Here we could join auth.users if we had access, but RLS on auth.users usually prevents it for clients.
-        // If we want the actor's email, we might need an edge function or a secure view. 
-        // For now we just show the action.
+      if (!cancelled && logsData) {
         setAuditLogs(logsData as AuditLog[]);
       }
 
-      setIsLoading(false);
+      if (!cancelled) setIsLoading(false);
     }
 
     loadData();
+
+    return () => {
+      cancelled = true;
+      setReservation(null);
+      setAuditLogs([]);
+    };
   }, [isOpen, reservationId, supabase]);
 
   if (!isOpen) return null;

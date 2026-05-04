@@ -41,9 +41,26 @@ export default function ExcursoesPage() {
   }
 
   useEffect(() => {
-    fetchExcursions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    let cancelled = false;
+    async function load() {
+      const { data } = await supabase
+        .from("excursions")
+        .select(`
+          id,
+          status,
+          price_per_seat,
+          departure_date,
+          allow_seat_selection,
+          tour_packages ( title ),
+          vehicle_layouts ( name, capacity )
+        `)
+        .order("departure_date", { ascending: true });
+      if (!cancelled && data) setExcursions(data as unknown as Excursion[]);
+      if (!cancelled) setIsLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [supabase]);
 
   async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir esta excursão? Esta ação não pode ser desfeita.")) return;

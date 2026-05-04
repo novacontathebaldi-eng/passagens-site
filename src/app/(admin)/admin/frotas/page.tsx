@@ -30,9 +30,18 @@ export default function FrotasPage() {
   }
 
   useEffect(() => {
-    fetchLayouts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    let cancelled = false;
+    async function load() {
+      const { data } = await supabase
+        .from("vehicle_layouts")
+        .select("id, name, capacity, amenities, created_at")
+        .order("created_at", { ascending: false });
+      if (!cancelled && data) setLayouts(data as VehicleLayout[]);
+      if (!cancelled) setIsLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [supabase]);
 
   async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este layout de ônibus? Excursões vinculadas serão afetadas.")) return;

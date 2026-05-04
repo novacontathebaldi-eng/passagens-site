@@ -53,7 +53,34 @@ export function useRealtimeReservations(excursionId: string = "ALL") {
   }, [excursionId, supabase]);
 
   useEffect(() => {
-    fetchReservations();
+    // Inline initial load to avoid calling setState via external function
+    (async () => {
+      setIsLoading(true);
+      let query = supabase
+        .from("reservations")
+        .select(`
+          id,
+          total_amount,
+          status,
+          created_at,
+          expires_at,
+          profiles ( full_name, phone, cpf ),
+          excursions ( 
+            departure_date,
+            tour_packages ( title )
+          ),
+          passenger_tickets ( id )
+        `)
+        .order("created_at", { ascending: false });
+
+      if (excursionId !== "ALL") {
+        query = query.eq("excursion_id", excursionId);
+      }
+
+      const { data } = await query;
+      if (data) setReservations(data as unknown as Reservation[]);
+      setIsLoading(false);
+    })();
 
     const channelName = excursionId === "ALL" ? 'public:reservations' : `reservations-${excursionId}`;
     const channel = supabase
