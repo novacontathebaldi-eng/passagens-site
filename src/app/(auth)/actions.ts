@@ -189,7 +189,7 @@ export async function completeProfile(formData: FormData) {
     .eq("id", user.id);
 
   if (error) {
-    redirect(`/completar-cadastro?error=${encodeURIComponent(translateAuthError(error.message))}`);
+    return { error: translateAuthError(error.message) };
   }
 
   // Redirect based on role

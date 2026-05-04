@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense, useTransition, useState } from "react";
+import { Suspense, useTransition, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { completeProfile } from "../actions";
 import { formatCPF, validateCPF } from "@/lib/utils";
+import { toast } from "sonner";
 
 export default function CompletarCadastroPage() {
   return (
@@ -17,25 +18,35 @@ export default function CompletarCadastroPage() {
 function CompletarContent() {
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
-  const [error, setError] = useState<string | null>(errorParam);
   const [isPending, startTransition] = useTransition();
   const [cpf, setCpf] = useState("");
 
+  useEffect(() => {
+    if (errorParam) {
+      toast.error(errorParam);
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("error");
+      window.history.replaceState({}, "", newUrl.toString());
+    }
+  }, [errorParam]);
+
   const handleAction = (formData: FormData) => {
-    setError(null);
     const cpfValue = formData.get("cpf") as string;
     
     if (!validateCPF(cpfValue)) {
-      setError("O CPF informado é inválido. Verifique os dígitos.");
+      toast.error("O CPF informado é inválido. Verifique os dígitos.");
       return;
     }
 
-    startTransition(() => {
+    startTransition(async () => {
       const nextParam = searchParams.get("next");
       if (nextParam) {
         formData.append("next", nextParam);
       }
-      completeProfile(formData);
+      const result = await completeProfile(formData);
+      if (result?.error) {
+        toast.error(result.error);
+      }
     });
   };
 
@@ -55,12 +66,6 @@ function CompletarContent() {
             Precisamos de mais alguns dados para garantir sua segurança e reservas.
           </p>
         </div>
-
-        {error && (
-          <div className="rounded-xl bg-error-light border border-error/20 px-4 py-3 text-sm text-error">
-            {error}
-          </div>
-        )}
 
         <form action={handleAction} className="space-y-5">
           <div>
