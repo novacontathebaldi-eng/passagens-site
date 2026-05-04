@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getSiteSettings } from "@/lib/get-settings";
 
 interface CheckoutData {
   excursionId: string;
@@ -78,7 +79,12 @@ export async function createReservation(data: CheckoutData) {
       return { error: "Divergência de valores detectada. O preço da excursão pode ter sido atualizado." };
     }
 
-    // 3. Criar Reserva (PENDING_PIX) com TTL
+    // [BUGFIX TTL] Buscar TTL global e calcular a data de expiração real
+    const settings = await getSiteSettings();
+    const ttlHours = settings.hold_ttl_hours || 24;
+    const expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000).toISOString();
+
+    // 3. Criar Reserva (PENDING_PIX) com TTL dinâmico
     const { data: reservation, error: resError } = await supabase
       .from("reservations")
       .insert({
@@ -86,6 +92,7 @@ export async function createReservation(data: CheckoutData) {
         excursion_id: data.excursionId,
         promoter_id: promoterId,
         total_amount: finalAmount, // Banco assume o controle matemático final
+        expires_at: expiresAt,
         // status is locked by DB privileges or defaults to PENDING_PIX
       })
       .select("id")

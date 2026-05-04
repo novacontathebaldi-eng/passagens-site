@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { sendEmail } from "@/lib/brevo";
 import { revalidatePath } from "next/cache";
+import { buildCancellationEmail, buildRefundEmail } from "@/lib/email-templates";
+import { getSiteSettings } from "@/lib/get-settings";
 
 export type ReservationStatus = "PENDING_PIX" | "AWAITING_MANUAL_CHECK" | "APPROVED" | "REFUNDED" | "CANCELLED" | "EXPIRED";
 
@@ -131,20 +133,14 @@ export async function changeReservationStatus(
         const actionTitle = newStatus === "CANCELLED" ? "Cancelamento de Reserva" : "Reembolso de Reserva";
         const shortId = reservationId.split('-')[0].toUpperCase();
         const reasonHtml = notes 
-          ? `<p><strong>Motivo / Observação:</strong> ${escapeHtml(notes)}</p>` 
-          : "";
+          ? `<strong>Motivo / Observação:</strong><br>${escapeHtml(notes)}` 
+          : undefined;
 
-        const htmlContent = `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: ${newStatus === 'CANCELLED' ? '#ef4444' : '#f59e0b'};">${actionTitle} - Partiu Turismo</h2>
-            <p>Olá ${userName},</p>
-            <p>Informamos que o status da sua reserva <strong>#${shortId}</strong> foi alterado para: <strong>${newStatus === 'CANCELLED' ? 'Cancelada' : 'Reembolsada'}</strong>.</p>
-            ${reasonHtml}
-            <p>Se tiver qualquer dúvida, por favor responda a este e-mail ou entre em contato conosco pelo WhatsApp.</p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-            <p style="font-size: 12px; color: #999;">Atenciosamente,<br>Equipe Partiu Turismo</p>
-          </div>
-        `;
+        const settings = await getSiteSettings();
+
+        const htmlContent = newStatus === "CANCELLED"
+          ? buildCancellationEmail({ userName, shortId, reasonHtml, settings })
+          : buildRefundEmail({ userName, shortId, reasonHtml, settings });
 
         await sendEmail({
           to: [{ email, name: userName }],
