@@ -50,7 +50,7 @@ function LogoMark({ logoUrl, companyName, size = 28 }: { logoUrl?: string | null
           width={size}
           height={size}
           priority
-          className="object-contain"
+          className="object-cover rounded-full"
         />
     );
   }
