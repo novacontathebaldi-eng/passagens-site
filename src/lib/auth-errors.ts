@@ -18,8 +18,8 @@ export function translateAuthError(
     return "Usuário não encontrado.";
   }
   if (lowerError.includes("user is banned")) {
-    const phone = support?.phone || "nosso WhatsApp";
-    const email = support?.email || "nosso e-mail";
+    const phone = support?.phone ? support.phone.replace(/ /g, "\u00A0") : "nosso\u00A0WhatsApp";
+    const email = support?.email ? support.email.replace(/ /g, "\u00A0") : "nosso\u00A0e-mail";
     return `Sua conta foi suspensa. Por favor, entre em contato com o suporte através do ${phone} ou ${email}.`;
   }
   
