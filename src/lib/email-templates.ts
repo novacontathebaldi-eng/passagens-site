@@ -124,7 +124,7 @@ function buildBaseLayout(settings: SiteSettings, title: string, content: string)
                   <div style="border-top: 2px solid ${COLORS.bgAccent}; padding-top: 24px; text-align: center;">
                     ${waFooterHtml ? `<p style="margin: 0 0 10px 0; font-size: 14px;">${waFooterHtml}</p>` : ""}
                     <p style="margin: 0 0 4px 0; font-size: 13px; color: ${COLORS.textMuted};">
-                      Com carinho, <strong style="color: ${COLORS.primary};">Equipe ${settings.company_name}</strong> 🚌✨
+                      Atenciosamente, <strong style="color: ${COLORS.primary};">Equipe ${settings.company_name}</strong>
                     </p>
                   </div>
                 </td>
@@ -153,7 +153,7 @@ export function buildCancellationEmail({ userName, shortId, reasonHtml, settings
     </h2>
     <p style="font-size: 13px; color: ${COLORS.textMuted}; margin-top: 0; margin-bottom: 24px;">Pedido <strong>#${shortId}</strong></p>
 
-    <p style="margin-bottom: 16px;">Olá <strong style="color: ${COLORS.textDark};">${userName}</strong>,</p>
+    <p style="margin-bottom: 16px;">Prezado(a) <strong style="color: ${COLORS.textDark};">${userName}</strong>,</p>
     
     <p style="margin-bottom: 20px;">
       Informamos que a sua reserva foi 
@@ -166,7 +166,7 @@ export function buildCancellationEmail({ userName, shortId, reasonHtml, settings
     </div>` : ""}
     
     <p style="margin-bottom: 0; color: ${COLORS.textBody};">
-      Se você acredita que isso foi um engano ou deseja remarcar, estamos à disposição para ajudar. Basta nos chamar! 💙
+      Se houver qualquer dúvida ou se desejar verificar opções para reagendamento, nossa equipe encontra-se à inteira disposição.
     </p>
   `;
 
@@ -179,16 +179,15 @@ export function buildCancellationEmail({ userName, shortId, reasonHtml, settings
 export function buildRefundEmail({ userName, shortId, reasonHtml, settings }: CancellationRefundProps): string {
   const content = `
     <h2 style="color: ${COLORS.textDark}; font-size: 21px; font-weight: 700; margin-top: 0; margin-bottom: 8px;">
-      Reembolso Processado ✅
+      Reembolso Processado
     </h2>
     <p style="font-size: 13px; color: ${COLORS.textMuted}; margin-top: 0; margin-bottom: 24px;">Pedido <strong>#${shortId}</strong></p>
 
-    <p style="margin-bottom: 16px;">Olá <strong style="color: ${COLORS.textDark};">${userName}</strong>,</p>
+    <p style="margin-bottom: 16px;">Prezado(a) <strong style="color: ${COLORS.textDark};">${userName}</strong>,</p>
     
     <p style="margin-bottom: 20px;">
-      Temos uma boa notícia! O reembolso da sua reserva foi 
-      <span style="color: ${COLORS.success}; font-weight: 600; background-color: #ECFDF5; padding: 2px 8px; border-radius: 6px;">processado e autorizado</span> 
-      com sucesso.
+      Confirmamos que o reembolso correspondente à sua reserva foi devidamente 
+      <span style="color: ${COLORS.success}; font-weight: 600; background-color: #ECFDF5; padding: 2px 8px; border-radius: 6px;">processado e autorizado</span>.
     </p>
     
     ${reasonHtml ? `
@@ -197,7 +196,7 @@ export function buildRefundEmail({ userName, shortId, reasonHtml, settings }: Ca
     </div>` : ""}
     
     <p style="margin-bottom: 0; color: ${COLORS.textBody};">
-      O prazo para o valor constar na sua conta depende exclusivamente da sua instituição financeira. Geralmente leva de 1 a 5 dias úteis.
+      O prazo para que o valor seja creditado depende exclusivamente da sua instituição financeira (geralmente entre 1 a 5 dias úteis).
     </p>
   `;
 
@@ -222,24 +221,24 @@ export function buildExpiredEmail({ userName, shortId, excursionName, siteUrl, s
 
   const content = `
     <h2 style="color: ${COLORS.textDark}; font-size: 21px; font-weight: 700; margin-top: 0; margin-bottom: 8px;">
-      Sua reserva expirou ⏳
+      Aviso de Expiração
     </h2>
     <p style="font-size: 13px; color: ${COLORS.textMuted}; margin-top: 0; margin-bottom: 24px;">Pedido <strong>#${shortId}</strong></p>
 
-    <p style="margin-bottom: 16px;">Oi <strong style="color: ${COLORS.textDark};">${userName}</strong>,</p>
+    <p style="margin-bottom: 16px;">Prezado(a) <strong style="color: ${COLORS.textDark};">${userName}</strong>,</p>
     
     <p style="margin-bottom: 16px;">
-      O prazo de pagamento da sua reserva para <strong style="color: ${COLORS.primary};">${excursionName}</strong> acabou e as poltronas foram liberadas.
+      Informamos que o prazo para confirmação do pagamento referente à viagem para <strong style="color: ${COLORS.primary};">${excursionName}</strong> expirou. Sendo assim, as poltronas foram automaticamente liberadas pelo sistema.
     </p>
     
     <div style="background-color: ${COLORS.bgAccent}; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; font-size: 14px; color: ${COLORS.textBody}; text-align: center;">
-      💡 <strong>Imprevistos acontecem!</strong> Se você ainda quer viajar com a gente, tente reservar novamente — pode ser que ainda tenha vagas.
+      <strong>Ainda há interesse na viagem?</strong> Caso deseje, você pode realizar uma nova simulação de reserva para verificar se ainda existem assentos disponíveis.
     </div>
     
     <!-- Botão CTA principal -->
     <div style="text-align: center; margin: 32px 0 20px 0;">
       <a href="${siteUrl}" style="background: linear-gradient(135deg, ${COLORS.cta} 0%, ${COLORS.ctaDark} 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);">
-        🚌 Fazer Nova Reserva
+        Verificar Disponibilidade
       </a>
     </div>
 
