@@ -60,7 +60,7 @@ export default async function AjudaPage() {
   // Helper para formatar o link do WhatsApp
   const getWhatsappLink = (number: string) => {
     const cleanNumber = number.replace(/\D/g, "");
-    const msg = `Olá, meu nome é ${profile?.full_name || 'um cliente'}${profile?.cpf ? ` (CPF: ${profile.cpf})` : ''}. Preciso de ajuda com minhas reservas.`;
+    const msg = `Olá, meu nome é ${profile?.full_name || 'um cliente'}. Preciso de ajuda com minhas reservas.`;
     return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
   };
 
