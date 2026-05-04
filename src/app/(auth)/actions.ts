@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { sendConfirmationEmail } from "@/lib/auth-emails";
 import { addContactToBrevo } from "@/lib/brevo";
+import { getSiteSettings } from "@/lib/get-settings";
 import { translateAuthError } from "@/lib/auth-errors";
 
 export async function login(formData: FormData) {
@@ -23,8 +24,17 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
+    let support;
+    if (error.message.toLowerCase().includes("user is banned")) {
+      const settings = await getSiteSettings();
+      support = {
+        phone: settings.whatsapp_support_numbers?.[0],
+        email: settings.contact_email || undefined,
+      };
+    }
+
     const searchParams = new URLSearchParams();
-    searchParams.set("error", translateAuthError(error.message));
+    searchParams.set("error", translateAuthError(error.message, support));
     if (safeRedirect) searchParams.set("redirect", safeRedirect);
     redirect(`/login?${searchParams.toString()}`);
   }

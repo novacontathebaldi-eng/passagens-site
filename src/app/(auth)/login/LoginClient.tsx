@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useTransition } from "react";
+import { Suspense, useTransition, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { login, signInWithGoogle } from "../actions";
 
 import { Logo } from "@/components/Logo";
+import { toast } from "sonner";
 
 export default function LoginClient({ loginImageUrl, logoUrl, companyName }: { loginImageUrl?: string | null, logoUrl?: string | null, companyName?: string }) {
   return (
@@ -24,6 +25,23 @@ function LoginContent({ loginImageUrl, logoUrl, companyName }: { loginImageUrl?:
 
   const [isEmailPending, startEmailTransition] = useTransition();
   const [isGooglePending, startGoogleTransition] = useTransition();
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+    if (success) {
+      toast.success(success);
+    }
+    
+    // Limpa a URL se houver erro ou sucesso para não repetir no recarregamento
+    if (error || success) {
+      const newUrl = new URL(window.location.href);
+      if (error) newUrl.searchParams.delete("error");
+      if (success) newUrl.searchParams.delete("success");
+      window.history.replaceState({}, "", newUrl.toString());
+    }
+  }, [error, success]);
 
   const handleEmailAction = (formData: FormData) => {
     startEmailTransition(() => {
@@ -123,18 +141,6 @@ function LoginContent({ loginImageUrl, logoUrl, companyName }: { loginImageUrl?:
               Bom te ver de volta! Acesse para gerenciar suas viagens.
             </p>
           </div>
-
-          {success && (
-            <div className="rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-medium">
-              {success}
-            </div>
-          )}
-
-          {error && (
-            <div className="rounded-xl bg-error-light border border-error/20 px-4 py-3 text-sm text-error">
-              {error}
-            </div>
-          )}
 
           {/* Google Login */}
           <form action={handleGoogleAction}>

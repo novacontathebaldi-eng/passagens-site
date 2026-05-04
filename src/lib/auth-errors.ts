@@ -2,7 +2,10 @@
  * Mapeia erros em inglês retornados pelo Supabase Auth para mensagens amigáveis em Português do Brasil (PT-BR).
  * Cobre casos comuns de erro em login, cadastro, recuperação de senha e validação de tokens.
  */
-export function translateAuthError(error: string | null | undefined): string {
+export function translateAuthError(
+  error: string | null | undefined,
+  support?: { phone?: string; email?: string }
+): string {
   if (!error) return "Ocorreu um erro desconhecido. Tente novamente.";
   
   const lowerError = error.toLowerCase();
@@ -13,6 +16,11 @@ export function translateAuthError(error: string | null | undefined): string {
   }
   if (lowerError.includes("user not found")) {
     return "Usuário não encontrado.";
+  }
+  if (lowerError.includes("user is banned")) {
+    const phone = support?.phone || "nosso WhatsApp";
+    const email = support?.email || "nosso e-mail";
+    return `Sua conta foi suspensa. Por favor, entre em contato com o suporte através do ${phone} ou ${email}.`;
   }
   
   // Cadastro
