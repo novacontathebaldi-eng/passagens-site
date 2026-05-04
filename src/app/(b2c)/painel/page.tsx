@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
-import { CalendarDays, Bus, Clock, CheckCircle2, XCircle, Users } from "lucide-react";
+import { CalendarDays, Bus, Clock, CheckCircle2, XCircle, Users, HelpCircle, MapPin, Compass } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
 import { getCoverImage } from "@/lib/tour-images";
 
@@ -80,6 +80,17 @@ export default async function PainelClientePage({
     }
   };
 
+  // Gamification: Meu Passaporte
+  const approvedReservations = reservations?.filter((r: any) => r.status === 'APPROVED') || [];
+  const totalCompanions = approvedReservations.reduce((acc: number, curr: any) => acc + (curr.passenger_tickets?.length || 0), 0);
+  
+  const now = new Date();
+  const nextTrips = approvedReservations
+    .filter((r: any) => r.excursions?.departure_date && new Date(r.excursions.departure_date) >= now)
+    .sort((a: any, b: any) => new Date(a.excursions.departure_date).getTime() - new Date(b.excursions.departure_date).getTime());
+  
+  const nextTrip = nextTrips[0];
+
   return (
     <div className="min-h-screen bg-surface py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -125,6 +136,51 @@ export default async function PainelClientePage({
           
           {/* COLUNA ESQUERDA: Reservas */}
           <div className="lg:col-span-2 space-y-8">
+            
+            {/* WIDGET MEU PASSAPORTE */}
+            <div className="bg-gradient-to-br from-primary/10 to-surface-container-lowest border border-primary/20 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                <Compass className="w-32 h-32 text-primary" />
+              </div>
+              <div className="relative z-10">
+                <h2 className="text-xl font-bold text-on-surface flex items-center gap-2 mb-6">
+                  <Compass className="w-6 h-6 text-primary" /> Meu Passaporte
+                </h2>
+                
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4 shadow-sm">
+                    <p className="text-xs sm:text-sm font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Viagens</p>
+                    <p className="text-3xl font-extrabold text-primary">{approvedReservations.length}</p>
+                  </div>
+                  <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4 shadow-sm">
+                    <p className="text-xs sm:text-sm font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Passageiros</p>
+                    <p className="text-3xl font-extrabold text-primary">{totalCompanions}</p>
+                  </div>
+                </div>
+
+                {nextTrip ? (
+                  <div className="bg-surface/60 backdrop-blur-sm border border-outline-variant/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Próxima Aventura</p>
+                      <p className="text-sm font-bold text-on-surface">
+                        {Array.isArray(nextTrip.excursions?.tour_packages) ? nextTrip.excursions.tour_packages[0]?.title : nextTrip.excursions?.tour_packages?.title}
+                      </p>
+                    </div>
+                    <div className="sm:text-right">
+                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Data</p>
+                      <p className="text-sm font-bold text-on-surface flex items-center gap-1 sm:justify-end">
+                        <CalendarDays className="w-4 h-4 text-primary" /> {formatDate(nextTrip.excursions?.departure_date)}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-surface/60 backdrop-blur-sm border border-outline-variant/30 rounded-2xl p-4">
+                    <p className="text-sm text-on-surface-variant">Você ainda não tem próximas aventuras agendadas. Que tal explorar nossos roteiros?</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
               <Bus className="w-6 h-6 text-primary" /> Minhas Viagens
             </h2>
@@ -250,6 +306,13 @@ export default async function PainelClientePage({
                 </Link>
                 <Link href="/painel/configuracoes" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
                   <span>Privacidade e Configurações</span>
+                  <span className="text-outline group-hover:text-primary">→</span>
+                </Link>
+                <Link href="/painel/ajuda" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
+                  <span className="flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4 text-primary" />
+                    Central de Ajuda
+                  </span>
                   <span className="text-outline group-hover:text-primary">→</span>
                 </Link>
                 

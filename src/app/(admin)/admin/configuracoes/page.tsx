@@ -27,6 +27,7 @@ type HeroStatEntry = { number: string; label: string; iconPath: string };
 type DriverContactEntry = { id: string; label: string; number: string; whatsapp: boolean };
 type ChecklistItem = { id: string; label: string };
 type SocialLinkEntry = { id: string; platform: string; name: string; url: string; isActive: boolean; };
+type FaqItem = { id: string; question: string; answer: string; };
 
 const PIX_KEY_TYPES = [
   { value: "TELEFONE", label: "Telefone" },
@@ -86,6 +87,7 @@ type GlobalSettings = {
   signup_image_url: string | null;
   favicon_url: string | null;
   og_image_url: string | null;
+  faq_items: FaqItem[];
 };
 
 const IMAGE_FIELDS = [
@@ -395,12 +397,22 @@ export default function ConfiguracoesPage() {
           }
         } catch { }
 
+        let faqItems: FaqItem[] = [];
+        try {
+          if (Array.isArray(data.faq_items)) {
+            faqItems = data.faq_items as FaqItem[];
+          } else if (typeof data.faq_items === 'string') {
+            faqItems = JSON.parse(data.faq_items);
+          }
+        } catch { }
+
         setSettings({
           ...data,
           whatsapp_support_numbers: numbers.length > 0 ? numbers : [""],
           driver_contact_numbers: driverContacts,
           driver_checklist_items: checklistItems,
           social_links: socialLinks,
+          faq_items: faqItems,
           pix_keys: pixKeys,
           hero_stats: heroStats,
           pix_key: data.pix_key ?? "",
@@ -453,6 +465,7 @@ export default function ConfiguracoesPage() {
           signup_image_url: null,
           favicon_url: null,
           og_image_url: null,
+          faq_items: [],
         });
       }
       setIsLoading(false);
@@ -478,6 +491,7 @@ export default function ConfiguracoesPage() {
       })),
       driver_checklist_items: JSON.stringify(settings.driver_checklist_items),
       social_links: JSON.stringify(settings.social_links),
+      faq_items: JSON.stringify(settings.faq_items),
       updated_at: new Date().toISOString()
     };
 
@@ -634,6 +648,33 @@ export default function ConfiguracoesPage() {
         social_links: arrayMove(settings.social_links, oldIndex, newIndex),
       });
     }
+  };
+
+  // FAQ handlers
+  const addFaqItem = () => {
+    if (!settings) return;
+    setSettings({ ...settings, faq_items: [...settings.faq_items, { id: crypto.randomUUID(), question: "", answer: "" }] });
+  };
+
+  const updateFaqItem = (index: number, field: keyof FaqItem, value: string) => {
+    if (!settings) return;
+    const newItems = [...settings.faq_items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setSettings({ ...settings, faq_items: newItems });
+  };
+
+  const removeFaqItem = (index: number) => {
+    if (!settings) return;
+    setSettings({ ...settings, faq_items: settings.faq_items.filter((_, i) => i !== index) });
+  };
+
+  const moveFaqItem = (index: number, direction: -1 | 1) => {
+    if (!settings) return;
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= settings.faq_items.length) return;
+    const newItems = [...settings.faq_items];
+    [newItems[index], newItems[newIndex]] = [newItems[newIndex], newItems[index]];
+    setSettings({ ...settings, faq_items: newItems });
   };
 
   // QR Code image upload
@@ -1240,6 +1281,65 @@ export default function ConfiguracoesPage() {
 
             <button type="button" onClick={addChecklistItem} className="w-full flex items-center justify-center gap-2 py-3 px-4 border-2 border-dashed border-outline-variant/40 rounded-xl text-sm font-semibold text-primary hover:border-primary/50 hover:bg-primary/5 transition-all mt-2">
               + Adicionar pergunta
+            </button>
+          </div>
+        </section>
+
+        {/* CENTRAL DE AJUDA / FAQ */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-bold border-b border-outline-variant/20 pb-2 flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Central de Ajuda / FAQ
+          </h2>
+          <p className="text-xs text-on-surface-variant">
+            Perguntas e respostas que aparecerão na Central de Ajuda do cliente.
+          </p>
+
+          <div className="space-y-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4">
+            {settings.faq_items.length === 0 && (
+              <p className="text-xs text-on-surface-variant italic">Nenhuma pergunta cadastrada.</p>
+            )}
+
+            {settings.faq_items.map((item, i) => (
+              <div key={item.id} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center p-4 bg-surface rounded-xl border border-outline-variant/30">
+                <div className="flex-1 flex flex-col gap-2 w-full">
+                  <input
+                    type="text"
+                    value={item.question}
+                    onChange={(e) => updateFaqItem(i, "question", e.target.value)}
+                    placeholder="Pergunta (Ex: Como funciona o cancelamento?)"
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                    required
+                  />
+                  <textarea
+                    value={item.answer}
+                    onChange={(e) => updateFaqItem(i, "answer", e.target.value)}
+                    placeholder="Resposta detalhada"
+                    rows={2}
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"
+                    required
+                  />
+                </div>
+                
+                {/* Actions: reorder + delete */}
+                <div className="flex sm:flex-col gap-1 shrink-0 mt-2 sm:mt-0">
+                  <button type="button" onClick={() => moveFaqItem(i, -1)} disabled={i === 0} className="p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para cima">
+                    <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                  </button>
+                  <button type="button" onClick={() => moveFaqItem(i, 1)} disabled={i === settings.faq_items.length - 1} className="p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors disabled:opacity-30" title="Mover para baixo">
+                    <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+                  <button type="button" onClick={() => removeFaqItem(i)} className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" title="Remover pergunta">
+                    <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <button type="button" onClick={addFaqItem} className="w-full flex items-center justify-center gap-2 py-3 px-4 border-2 border-dashed border-outline-variant/40 rounded-xl text-sm font-semibold text-primary hover:border-primary/50 hover:bg-primary/5 transition-all mt-2">
+              + Adicionar Pergunta ao FAQ
             </button>
           </div>
         </section>
