@@ -322,18 +322,19 @@ export async function recoverAccountByCpf(cpf: string) {
     return { error: "Usuário original sem e-mail." };
   }
 
-  // 3. Enviar recuperação via Admin client (evita conflito de sessão com a conta órfã)
+  // 3. Incondicionalmente deslogar da conta órfã ANTES de enviar o reset
+  // Isso garante que o SSR client esteja "limpo" e que cookies de PKCE não sejam limpos logo após criados
+  await supabase.auth.signOut();
+
+  // 4. Enviar recuperação via SSR client (usa PKCE flow do projeto)
   const headersList = await headers();
   const host = headersList.get("x-forwarded-host") || headersList.get("host");
   const protocol = headersList.get("x-forwarded-proto") || "https";
   const origin = headersList.get("origin") || (host ? `${protocol}://${host}` : null) || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-  const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(ownerUser.email, {
+  const { error: resetError } = await supabase.auth.resetPasswordForEmail(ownerUser.email, {
     redirectTo: `${origin}/auth/callback?next=/redefinir-senha`,
   });
-
-  // 4. Incondicionalmente deslogar da conta órfã
-  await supabase.auth.signOut();
 
   // 5. Retornar status pro front-end redirecionar
   if (resetError) {
