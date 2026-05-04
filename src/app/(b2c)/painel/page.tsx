@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
-import { CalendarDays, Bus, Clock, CheckCircle2, XCircle, Users, HelpCircle, MapPin, Compass } from "lucide-react";
+import { CalendarDays, Bus, Clock, CheckCircle2, XCircle, Users, HelpCircle, MapPin, Compass, User, Settings } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
 import { getCoverImage } from "@/lib/tour-images";
 
@@ -137,49 +137,7 @@ export default async function PainelClientePage({
           {/* COLUNA ESQUERDA: Reservas */}
           <div className="lg:col-span-2 space-y-8">
             
-            {/* WIDGET MEU PASSAPORTE */}
-            <div className="bg-gradient-to-br from-primary/10 to-surface-container-lowest border border-primary/20 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                <Compass className="w-32 h-32 text-primary" />
-              </div>
-              <div className="relative z-10">
-                <h2 className="text-xl font-bold text-on-surface flex items-center gap-2 mb-6">
-                  <Compass className="w-6 h-6 text-primary" /> Meu Passaporte
-                </h2>
-                
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4 shadow-sm">
-                    <p className="text-xs sm:text-sm font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Viagens</p>
-                    <p className="text-3xl font-extrabold text-primary">{approvedReservations.length}</p>
-                  </div>
-                  <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4 shadow-sm">
-                    <p className="text-xs sm:text-sm font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Passageiros</p>
-                    <p className="text-3xl font-extrabold text-primary">{totalCompanions}</p>
-                  </div>
-                </div>
 
-                {nextTrip ? (
-                  <div className="bg-surface/60 backdrop-blur-sm border border-outline-variant/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Próxima Aventura</p>
-                      <p className="text-sm font-bold text-on-surface">
-                        {Array.isArray(nextTrip.excursions?.tour_packages) ? nextTrip.excursions.tour_packages[0]?.title : nextTrip.excursions?.tour_packages?.title}
-                      </p>
-                    </div>
-                    <div className="sm:text-right">
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Data</p>
-                      <p className="text-sm font-bold text-on-surface flex items-center gap-1 sm:justify-end">
-                        <CalendarDays className="w-4 h-4 text-primary" /> {formatDate(nextTrip.excursions?.departure_date)}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-surface/60 backdrop-blur-sm border border-outline-variant/30 rounded-2xl p-4">
-                    <p className="text-sm text-on-surface-variant">Você ainda não tem próximas aventuras agendadas. Que tal explorar nossos roteiros?</p>
-                  </div>
-                )}
-              </div>
-            </div>
 
             <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
               <Bus className="w-6 h-6 text-primary" /> Minhas Viagens
@@ -258,6 +216,31 @@ export default async function PainelClientePage({
                 </SmoothScrollLink>
               </div>
             )}
+            {/* WIDGET MEU PASSAPORTE (Discreto) */}
+            <div className="mt-8 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Compass className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface">Meu Passaporte</h3>
+                  <p className="text-xs text-on-surface-variant">
+                    {approvedReservations.length} viagem(ns) • {totalCompanions} acompanhante(s)
+                  </p>
+                </div>
+              </div>
+              
+              {nextTrip && (
+                <div className="bg-surface-container rounded-xl p-3 w-full sm:w-auto text-sm border border-outline-variant/30">
+                  <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-0.5 flex items-center gap-1">
+                    <CalendarDays className="w-3 h-3" /> Próxima
+                  </p>
+                  <p className="font-bold text-on-surface truncate max-w-[200px]" title={Array.isArray(nextTrip.excursions?.tour_packages) ? nextTrip.excursions.tour_packages[0]?.title : nextTrip.excursions?.tour_packages?.title}>
+                    {Array.isArray(nextTrip.excursions?.tour_packages) ? nextTrip.excursions.tour_packages[0]?.title : nextTrip.excursions?.tour_packages?.title}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* COLUNA DIREITA: Waitlist e Configs */}
@@ -297,15 +280,24 @@ export default async function PainelClientePage({
               <h3 className="text-lg font-bold text-on-surface mb-4">Minha Conta</h3>
               <div className="space-y-2">
                 <Link href="/painel/meus-dados" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
-                  <span>Meus Dados</span>
+                  <span className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-primary" />
+                    Meus Dados
+                  </span>
                   <span className="text-outline group-hover:text-primary">→</span>
                 </Link>
                 <Link href="/painel/meus-viajantes" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
-                  <span>Meus Acompanhantes</span>
+                  <span className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    Meus Acompanhantes
+                  </span>
                   <span className="text-outline group-hover:text-primary">→</span>
                 </Link>
                 <Link href="/painel/configuracoes" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
-                  <span>Privacidade e Configurações</span>
+                  <span className="flex items-center gap-2">
+                    <Settings className="w-4 h-4 text-primary" />
+                    Privacidade e Configurações
+                  </span>
                   <span className="text-outline group-hover:text-primary">→</span>
                 </Link>
                 <Link href="/painel/ajuda" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">

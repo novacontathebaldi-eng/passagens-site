@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, MessageCircle, HelpCircle, ShieldAlert, ExternalLink } from "lucide-react";
+import { ChevronLeft, MessageCircle, HelpCircle, ShieldAlert, ExternalLink, Mail, Info, CreditCard, Users, CheckCircle } from "lucide-react";
+import { SocialLinks } from "@/components/SocialLinks";
 
 export const metadata = {
   title: "Central de Ajuda | Partiu Turismo",
@@ -82,32 +83,76 @@ export default async function AjudaPage() {
 
         <div className="space-y-8">
           
-          {/* CARTÃO DE SUPORTE RÁPIDO (WHATSAPP) */}
+          {/* CARTÃO DE SUPORTE RÁPIDO */}
           <section className="bg-gradient-to-br from-primary/10 to-surface-container-lowest border border-primary/20 rounded-3xl p-6 sm:p-8 shadow-sm">
             <h2 className="text-xl font-bold text-on-surface mb-2">Suporte Rápido</h2>
             <p className="text-sm text-on-surface-variant mb-6">Nossa equipe está pronta para tirar suas dúvidas ou ajudar com problemas na sua viagem.</p>
             
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {whatsappNumbers.map((num, i) => (
                 <a
                   key={i}
                   href={getWhatsappLink(num)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 bg-surface-container-lowest hover:bg-surface border border-outline-variant/30 rounded-2xl p-4 flex items-center gap-4 transition-all shadow-sm hover:shadow-md hover:border-primary/50 group"
+                  className="flex-1 bg-surface-container-lowest hover:bg-surface border border-outline-variant/30 rounded-2xl p-4 flex items-center gap-4 transition-all shadow-sm hover:shadow-md hover:border-[#25D366]/50 group"
                 >
                   <div className="w-12 h-12 bg-[#25D366]/10 text-[#25D366] rounded-xl flex items-center justify-center shrink-0 group-hover:bg-[#25D366] group-hover:text-white transition-colors">
                     <MessageCircle className="w-6 h-6" />
                   </div>
-                  <div>
+                  <div className="overflow-hidden">
                     <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">WhatsApp</p>
-                    <p className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Falar com Suporte</p>
+                    <p className="text-sm font-bold text-on-surface group-hover:text-[#25D366] transition-colors truncate">{num}</p>
                   </div>
                 </a>
               ))}
-              {whatsappNumbers.length === 0 && (
-                <p className="text-sm text-on-surface-variant italic">Número de suporte indisponível no momento.</p>
+              
+              {settings.contact_email && (
+                <a
+                  href={`mailto:${settings.contact_email}`}
+                  className="flex-1 bg-surface-container-lowest hover:bg-surface border border-outline-variant/30 rounded-2xl p-4 flex items-center gap-4 transition-all shadow-sm hover:shadow-md hover:border-primary/50 group"
+                >
+                  <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Mail className="w-6 h-6" />
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">E-mail</p>
+                    <p className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors truncate">{settings.contact_email}</p>
+                  </div>
+                </a>
               )}
+            </div>
+            {whatsappNumbers.length === 0 && !settings.contact_email && (
+              <p className="text-sm text-on-surface-variant italic mt-4">Nenhum canal de suporte configurado no momento.</p>
+            )}
+          </section>
+
+          {/* COMO RESERVAR */}
+          <section className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <h2 className="text-xl font-bold text-on-surface mb-8 flex items-center gap-2">
+              <Info className="w-5 h-5 text-primary" /> Como reservar sua excursão?
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
+              {/* Linha conectora (visível apenas em telas maiores) */}
+              <div className="hidden sm:block absolute top-6 left-[16%] right-[16%] h-0.5 bg-outline-variant/30 z-0"></div>
+              
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl mb-4 shadow-md ring-4 ring-surface-container-lowest">1</div>
+                <h3 className="font-bold text-on-surface mb-2">Escolha o Destino</h3>
+                <p className="text-sm text-on-surface-variant">Explore nossas opções e escolha a data ideal para sua viagem na página inicial.</p>
+              </div>
+
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl mb-4 shadow-md ring-4 ring-surface-container-lowest">2</div>
+                <h3 className="font-bold text-on-surface mb-2">Adicione Passageiros</h3>
+                <p className="text-sm text-on-surface-variant">Selecione quantos lugares deseja e preencha os dados dos acompanhantes.</p>
+              </div>
+
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl mb-4 shadow-md ring-4 ring-surface-container-lowest">3</div>
+                <h3 className="font-bold text-on-surface mb-2">Efetue o Pagamento</h3>
+                <p className="text-sm text-on-surface-variant">Realize o pagamento via PIX, envie o comprovante pelo WhatsApp e aguarde a aprovação.</p>
+              </div>
             </div>
           </section>
 
@@ -157,21 +202,8 @@ export default async function AjudaPage() {
           {/* REDES SOCIAIS */}
           {activeSocialLinks.length > 0 && (
             <section className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 sm:p-8 shadow-sm">
-              <h2 className="text-lg font-bold text-on-surface mb-4">Nossas Redes</h2>
-              <div className="flex flex-wrap gap-3">
-                {activeSocialLinks.map(link => (
-                  <a
-                    key={link.id}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-surface border border-outline-variant/30 rounded-xl text-sm font-semibold text-on-surface-variant hover:text-primary hover:border-primary/30 transition-colors"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    {link.name || link.platform}
-                  </a>
-                ))}
-              </div>
+              <h2 className="text-xl font-bold text-on-surface mb-6">Nossas Redes</h2>
+              <SocialLinks links={socialLinks} className="flex flex-wrap gap-6" iconClassName="w-8 h-8 text-on-surface-variant hover:text-primary transition-all hover:scale-110" />
             </section>
           )}
 
