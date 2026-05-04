@@ -880,7 +880,7 @@ export default function ConfiguracoesPage() {
               <input
                 type="number"
                 value={settings.hold_ttl_hours}
-                onChange={(e) => setSettings({ ...settings, hold_ttl_hours: parseInt(e.target.value) })}
+                onChange={(e) => setSettings({ ...settings, hold_ttl_hours: parseInt(e.target.value) || 0 })}
                 className="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 min="1"
                 required
