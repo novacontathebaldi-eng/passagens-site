@@ -240,14 +240,14 @@ export default async function PainelClientePage({
             <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-on-surface mb-4">Minha Conta</h3>
               <div className="space-y-2">
-                <button className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
+                <Link href="/painel/meus-dados" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
                   <span>Meus Dados</span>
                   <span className="text-outline group-hover:text-primary">→</span>
-                </button>
-                <button className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
-                  <span>Passageiros Salvos</span>
+                </Link>
+                <Link href="/painel/meus-viajantes" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
+                  <span>Meus Viajantes</span>
                   <span className="text-outline group-hover:text-primary">→</span>
-                </button>
+                </Link>
                 <Link href="/painel/configuracoes" className="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors text-sm font-medium text-on-surface flex items-center justify-between group">
                   <span>Privacidade e Configurações</span>
                   <span className="text-outline group-hover:text-primary">→</span>
