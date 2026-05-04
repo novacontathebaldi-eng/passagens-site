@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { updateProfile } from "../actions";
-import { CheckCircle2, AlertCircle } from "lucide-react";
 import { formatCPF, formatPhone, validateCPF } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface ProfileData {
   full_name: string;
@@ -14,7 +14,6 @@ interface ProfileData {
 
 export default function MeusDadosForm({ initialData }: { initialData: any }) {
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null);
 
   const [formData, setFormData] = useState<ProfileData>({
     full_name: initialData?.full_name || "",
@@ -38,10 +37,9 @@ export default function MeusDadosForm({ initialData }: { initialData: any }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(null);
 
     if (formData.cpf && !validateCPF(formData.cpf)) {
-      setMessage({ type: "error", text: "O CPF informado é inválido." });
+      toast.error("O CPF informado é inválido.");
       return;
     }
 
@@ -54,26 +52,15 @@ export default function MeusDadosForm({ initialData }: { initialData: any }) {
     startTransition(async () => {
       const res = await updateProfile(data);
       if (res.error) {
-        setMessage({ type: "error", text: res.error });
+        toast.error(res.error);
       } else {
-        setMessage({ type: "success", text: "Dados atualizados com sucesso!" });
+        toast.success("Dados atualizados com sucesso!");
       }
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      
-      {message && (
-        <div className={`p-4 rounded-xl text-sm font-medium flex items-center gap-2 ${
-          message.type === "success" 
-            ? "bg-success/10 border border-success/20 text-success" 
-            : "bg-error/10 border border-error/20 text-error"
-        }`}>
-          {message.type === "success" ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-          {message.text}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2 md:col-span-2">

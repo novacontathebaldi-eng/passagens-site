@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { addSavedPassenger, updateSavedPassenger, deleteSavedPassenger } from "../actions";
-import { CheckCircle2, AlertCircle, Plus, Edit2, Trash2, UserCircle2 } from "lucide-react";
+import { Plus, Edit2, Trash2, UserCircle2 } from "lucide-react";
 import { formatCPF, validateCPF } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface Passenger {
   id: string;
@@ -16,7 +17,6 @@ interface Passenger {
 
 export default function PassageirosList({ initialPassengers }: { initialPassengers: Passenger[] }) {
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPassenger, setEditingPassenger] = useState<Passenger | null>(null);
 
@@ -37,7 +37,6 @@ export default function PassageirosList({ initialPassengers }: { initialPassenge
       orgao_emissor: "",
       birth_date: "",
     });
-    setMessage(null);
     setIsModalOpen(true);
   };
 
@@ -50,7 +49,6 @@ export default function PassageirosList({ initialPassengers }: { initialPassenge
       orgao_emissor: passenger.orgao_emissor || "",
       birth_date: passenger.birth_date || "",
     });
-    setMessage(null);
     setIsModalOpen(true);
   };
 
@@ -67,10 +65,9 @@ export default function PassageirosList({ initialPassengers }: { initialPassenge
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(null);
 
     if (formData.cpf && !validateCPF(formData.cpf)) {
-      setMessage({ type: "error", text: "O CPF informado é inválido." });
+      toast.error("O CPF informado é inválido.");
       return;
     }
 
@@ -90,10 +87,10 @@ export default function PassageirosList({ initialPassengers }: { initialPassenge
       }
 
       if (res.error) {
-        setMessage({ type: "error", text: res.error });
+        toast.error(res.error);
       } else {
         setIsModalOpen(false);
-        setMessage({ type: "success", text: editingPassenger ? "Passageiro atualizado!" : "Passageiro adicionado!" });
+        toast.success(editingPassenger ? "Passageiro atualizado!" : "Passageiro adicionado!");
       }
     });
   };
@@ -104,9 +101,9 @@ export default function PassageirosList({ initialPassengers }: { initialPassenge
     startTransition(async () => {
       const res = await deleteSavedPassenger(id);
       if (res.error) {
-        setMessage({ type: "error", text: res.error });
+        toast.error(res.error);
       } else {
-        setMessage({ type: "success", text: "Passageiro excluído." });
+        toast.success("Passageiro excluído.");
       }
     });
   };
@@ -123,17 +120,6 @@ export default function PassageirosList({ initialPassengers }: { initialPassenge
           Novo Passageiro
         </button>
       </div>
-
-      {message && (
-        <div className={`mb-6 p-4 rounded-xl text-sm font-medium flex items-center gap-2 ${
-          message.type === "success" 
-            ? "bg-success/10 border border-success/20 text-success" 
-            : "bg-error/10 border border-error/20 text-error"
-        }`}>
-          {message.type === "success" ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-          {message.text}
-        </div>
-      )}
 
       {initialPassengers.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-outline-variant/30 rounded-2xl">
