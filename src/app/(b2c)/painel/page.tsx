@@ -98,7 +98,8 @@ export default async function PainelClientePage({
           </div>
         )}
 
-        {!profile?.email_confirmed_at && (
+        {/* Only show confirmation banner for non-Google users without confirmed email */}
+        {!profile?.email_confirmed_at && user.app_metadata?.provider !== 'google' && (
           <ConfirmEmailBanner email={user.email!} />
         )}
 
