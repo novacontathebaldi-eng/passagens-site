@@ -57,7 +57,7 @@ export function Logo({ logoUrl, companyName, size = "md", className = "" }: Logo
           width={s.icon}
           height={s.icon}
           priority
-          className="object-contain"
+          className="object-cover rounded-xl shadow-sm"
         />
       ) : (
         <LogoIcon size={s.icon} />
@@ -83,7 +83,7 @@ export function LogoWhite({ logoUrl, companyName, size = "md", className = "" }:
           width={s.icon}
           height={s.icon}
           priority
-          className="object-contain"
+          className="object-cover rounded-xl shadow-sm"
         />
       ) : (
         <svg
