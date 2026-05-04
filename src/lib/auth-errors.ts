@@ -28,7 +28,7 @@ export function translateAuthError(
     return "Este e-mail já está cadastrado em nosso sistema.";
   }
   if (lowerError.includes("duplicate key value violates unique constraint") && lowerError.includes("cpf")) {
-    return "Este CPF já está cadastrado. Verifique os dados e tente novamente.";
+    return "Oops! Este CPF já está vinculado a uma conta.";
   }
   if (lowerError.includes("password should be at least 6 characters") || lowerError.includes("password must be at least 6 characters")) {
     return "A senha deve ter no mínimo 6 caracteres.";

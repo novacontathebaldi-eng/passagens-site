@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { completeProfile } from "../actions";
 import { formatCPF, validateCPF } from "@/lib/utils";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function CompletarCadastroPage() {
   return (
@@ -21,9 +22,25 @@ function CompletarContent() {
   const [isPending, startTransition] = useTransition();
   const [cpf, setCpf] = useState("");
 
+  const showError = (msg: string) => {
+    if (msg.includes("vinculado a uma conta")) {
+      toast.error(
+        <div className="flex flex-col gap-1.5">
+          <span>{msg}</span>
+          <Link href="/login" className="text-sm font-semibold underline hover:text-primary transition-colors w-fit">
+            Fazer login agora
+          </Link>
+        </div>,
+        { duration: 8000 }
+      );
+    } else {
+      toast.error(msg);
+    }
+  };
+
   useEffect(() => {
     if (errorParam) {
-      toast.error(errorParam);
+      showError(errorParam);
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete("error");
       window.history.replaceState({}, "", newUrl.toString());
@@ -34,7 +51,7 @@ function CompletarContent() {
     const cpfValue = formData.get("cpf") as string;
     
     if (!validateCPF(cpfValue)) {
-      toast.error("O CPF informado é inválido. Verifique os dígitos.");
+      showError("O CPF informado é inválido. Verifique os dígitos.");
       return;
     }
 
@@ -45,7 +62,7 @@ function CompletarContent() {
       }
       const result = await completeProfile(formData);
       if (result?.error) {
-        toast.error(result.error);
+        showError(result.error);
       }
     });
   };
