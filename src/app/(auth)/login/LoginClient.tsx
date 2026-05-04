@@ -28,7 +28,38 @@ function LoginContent({ loginImageUrl, logoUrl, companyName }: { loginImageUrl?:
 
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      const match = error.match(/através do (.+) ou (.+)\.$/);
+      if (error.includes("Sua conta foi suspensa") && match) {
+        const phone = match[1];
+        const email = match[2];
+        
+        toast.error(
+          <span>
+            Sua conta foi suspensa. Por favor, entre em contato com o suporte através do{" "}
+            <span 
+              onClick={() => { 
+                navigator.clipboard.writeText(phone.replace(/\u00A0/g, ' ')); 
+                toast.success("Telefone copiado!"); 
+              }} 
+              className="cursor-pointer"
+            >
+              {phone}
+            </span>
+            {" "}ou{" "}
+            <span 
+              onClick={() => { 
+                navigator.clipboard.writeText(email.replace(/\u00A0/g, ' ')); 
+                toast.success("E-mail copiado!"); 
+              }} 
+              className="cursor-pointer"
+            >
+              {email}
+            </span>.
+          </span>
+        );
+      } else {
+        toast.error(error);
+      }
     }
     if (success) {
       toast.success(success);
