@@ -105,6 +105,15 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Protect completar-cadastro (requires active session)
+  if (pathname.startsWith("/completar-cadastro")) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Redirect logged-in users away from auth pages
   if (pathname.startsWith("/login") || pathname.startsWith("/cadastro")) {
     if (user) {

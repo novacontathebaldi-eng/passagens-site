@@ -190,12 +190,31 @@ export async function completeProfile(formData: FormData) {
   const phone = formData.get("phone") as string;
   const birthDate = formData.get("birth_date") as string;
 
+  // Validação de data de nascimento
+  if (!birthDate) {
+    return { error: "A data de nascimento é obrigatória." };
+  }
+  const birth = new Date(birthDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (isNaN(birth.getTime())) {
+    return { error: "Data de nascimento inválida." };
+  }
+  if (birth > today) {
+    return { error: "A data de nascimento não pode ser no futuro." };
+  }
+  const minDate = new Date();
+  minDate.setFullYear(minDate.getFullYear() - 5);
+  if (birth > minDate) {
+    return { error: "Idade mínima é de 5 anos para cadastro." };
+  }
+
   const { error } = await supabase
     .from("profiles")
     .update({
       cpf,
       phone,
-      birth_date: birthDate || null,
+      birth_date: birthDate,
     })
     .eq("id", user.id);
 
@@ -303,13 +322,13 @@ export async function recoverAccountByCpf(cpf: string) {
     return { error: "Usuário original sem e-mail." };
   }
 
-  // 3. Tentar resetar a senha
+  // 3. Enviar recuperação via Admin client (evita conflito de sessão com a conta órfã)
   const headersList = await headers();
   const host = headersList.get("x-forwarded-host") || headersList.get("host");
   const protocol = headersList.get("x-forwarded-proto") || "https";
   const origin = headersList.get("origin") || (host ? `${protocol}://${host}` : null) || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-  const { error: resetError } = await supabase.auth.resetPasswordForEmail(ownerUser.email, {
+  const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(ownerUser.email, {
     redirectTo: `${origin}/auth/callback?next=/redefinir-senha`,
   });
 
@@ -318,7 +337,8 @@ export async function recoverAccountByCpf(cpf: string) {
 
   // 5. Retornar status pro front-end redirecionar
   if (resetError) {
-    return { error: "FALHA_ENVIO" };
+    console.error("[recoverAccountByCpf] Reset error:", resetError.message);
+    return { error: translateAuthError(resetError.message) };
   }
 
   return { success: true };
