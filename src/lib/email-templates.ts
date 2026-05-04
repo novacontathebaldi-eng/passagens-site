@@ -25,6 +25,22 @@ type ExpiredProps = BaseEmailProps & {
   siteUrl: string;
 };
 
+export type TicketData = {
+  id: string;
+  full_name: string;
+  cpf: string;
+  seat_code: string;
+  short_code: string;
+};
+
+type VoucherEmailProps = BaseEmailProps & {
+  tripTitle: string;
+  depDate: string;
+  siteUrl: string;
+  tickets: TicketData[];
+  qrCidMap: Record<string, string>;
+};
+
 // ─── Design Tokens (espelham o globals.css do site) ────────────────────────
 const COLORS = {
   primary: "#1E40AF",        // Azul Royal
@@ -239,4 +255,78 @@ export function buildExpiredEmail({ userName, shortId, excursionName, siteUrl, s
   `;
 
   return buildBaseLayout(settings, `Reserva Expirada #${shortId}`, content);
+}
+
+function maskCPF(cpf: string): string {
+  const d = cpf.replace(/\D/g, "");
+  if (d.length < 11) return cpf;
+  return `***.${d.slice(3, 6)}.${d.slice(6, 9)}-**`;
+}
+
+/**
+ * Template premium para Confirmação e Envio de Vouchers.
+ * Usa um layout condensado tipo Bento para não poluir o e-mail.
+ */
+export function buildVoucherEmail({ userName, shortId, tripTitle, depDate, siteUrl, tickets, qrCidMap, settings }: VoucherEmailProps): string {
+  
+  // Linhas de passageiros (clean e compactas)
+  const ticketRows = tickets.map((t) => `
+    <div style="background-color: ${COLORS.bgCard}; border: 1px solid ${COLORS.border}; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed ${COLORS.border}; padding-bottom: 12px; margin-bottom: 12px;">
+        <strong style="color: ${COLORS.primary}; font-size: 15px;">👤 ${escapeHtml(t.full_name)}</strong>
+        <span style="background-color: ${COLORS.bgAccent}; color: ${COLORS.primary}; font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: bold;">Poltrona ${t.seat_code}</span>
+      </div>
+      
+      <table style="width: 100%;" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="width: 100px; vertical-align: top;">
+            <img src="cid:${qrCidMap[t.id]}" alt="QR Code" width="80" height="80" style="border-radius: 8px; border: 1px solid ${COLORS.border};" />
+          </td>
+          <td style="vertical-align: top; padding-left: 16px;">
+            <p style="margin: 0 0 4px 0; font-size: 11px; color: ${COLORS.textMuted}; text-transform: uppercase; letter-spacing: 0.5px;">Código de Embarque</p>
+            <div style="font-size: 24px; font-weight: 800; color: ${COLORS.textDark}; letter-spacing: 2px; font-family: monospace;">${t.short_code}</div>
+            <p style="margin: 8px 0 0 0; font-size: 11px; color: ${COLORS.textLight};">CPF: ${maskCPF(t.cpf)}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `).join("");
+
+  const content = `
+    <h2 style="color: ${COLORS.textDark}; font-size: 22px; font-weight: 800; margin-top: 0; margin-bottom: 8px;">
+      Sua reserva está confirmada! 🎉
+    </h2>
+    <p style="font-size: 13px; color: ${COLORS.textMuted}; margin-top: 0; margin-bottom: 24px;">Pedido <strong>#${shortId}</strong></p>
+
+    <p style="margin-bottom: 24px; font-size: 15px;">Olá <strong style="color: ${COLORS.textDark};">${userName}</strong>,</p>
+    
+    <div style="background: linear-gradient(to right, ${COLORS.bgAccent}, #ffffff); border-left: 4px solid ${COLORS.secondary}; padding: 16px 20px; border-radius: 0 12px 12px 0; margin-bottom: 32px;">
+      <p style="margin: 0; font-size: 12px; color: ${COLORS.textMuted}; text-transform: uppercase; letter-spacing: 0.5px;">Viagem</p>
+      <p style="margin: 4px 0 0 0; font-size: 18px; font-weight: 700; color: ${COLORS.primaryDark};">${tripTitle}</p>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: ${COLORS.textDark}; font-weight: 500;">📅 ${depDate}</p>
+    </div>
+    
+    <h3 style="font-size: 16px; color: ${COLORS.textDark}; margin-bottom: 16px; border-bottom: 2px solid ${COLORS.bgAccent}; padding-bottom: 8px;">
+      🎫 Seus Vouchers de Embarque
+    </h3>
+    
+    ${ticketRows}
+    
+    <div style="background-color: #F8FAFC; border-radius: 12px; padding: 20px; margin-top: 24px; margin-bottom: 32px;">
+      <p style="margin: 0 0 12px 0; font-weight: 700; color: ${COLORS.textDark}; font-size: 14px;">ℹ️ Como usar seus vouchers:</p>
+      <ul style="margin: 0; padding-left: 20px; color: ${COLORS.textBody}; font-size: 13px; line-height: 1.6;">
+        <li style="margin-bottom: 8px;">Apresente este e-mail na tela do seu celular ao motorista no momento do embarque.</li>
+        <li style="margin-bottom: 8px;">Caso não consiga ler o QR Code, informe o <strong style="color: ${COLORS.primary};">Código de Embarque</strong> de 6 letras.</li>
+        <li>Não esqueça de levar um <strong>documento original com foto</strong> (RG ou CNH).</li>
+      </ul>
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0 16px 0;">
+      <a href="${siteUrl}" style="background: linear-gradient(135deg, ${COLORS.cta} 0%, ${COLORS.ctaDark} 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);">
+        🌐 Ver Reserva no Site
+      </a>
+    </div>
+  `;
+
+  return buildBaseLayout(settings, `Vouchers de Embarque - ${tripTitle}`, content);
 }

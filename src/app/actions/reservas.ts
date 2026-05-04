@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { sendEmail } from "@/lib/brevo";
 import { revalidatePath } from "next/cache";
-import { buildCancellationEmail, buildRefundEmail } from "@/lib/email-templates";
+import { buildCancellationEmail, buildRefundEmail, buildVoucherEmail, TicketData } from "@/lib/email-templates";
+import QRCode from "qrcode";
 import { getSiteSettings } from "@/lib/get-settings";
 
 export type ReservationStatus = "PENDING_PIX" | "AWAITING_MANUAL_CHECK" | "APPROVED" | "REFUNDED" | "CANCELLED" | "EXPIRED";
@@ -82,7 +83,8 @@ export async function changeReservationStatus(
     .from("reservations")
     .select(`
       *,
-      profiles ( full_name, auth_user_id:id )
+      profiles ( full_name, auth_user_id:id ),
+      excursions ( departure_date, tour_packages ( title ) )
     `)
     .eq("id", reservationId)
     .single();
@@ -119,8 +121,8 @@ export async function changeReservationStatus(
     return { error: "Erro ao atualizar a reserva: " + updateError.message };
   }
 
-  // 5. Trigger Emails via Brevo (for CANCELLED and REFUNDED)
-  if (newStatus === "CANCELLED" || newStatus === "REFUNDED") {
+  // 5. Trigger Emails via Brevo (for CANCELLED, REFUNDED and APPROVED)
+  if (newStatus === "CANCELLED" || newStatus === "REFUNDED" || newStatus === "APPROVED") {
     try {
       // We need the adminClient only here, to get the user's email via auth.admin API
       const adminClient = getAdminClient();
@@ -130,23 +132,74 @@ export async function changeReservationStatus(
       if (!authFetchError && targetUserAuth?.user?.email) {
         const email = targetUserAuth.user.email;
         const userName = reservation.profiles?.full_name || "Cliente";
-        const actionTitle = newStatus === "CANCELLED" ? "Cancelamento de Reserva" : "Reembolso de Reserva";
         const shortId = reservationId.split('-')[0].toUpperCase();
-        const reasonHtml = notes 
-          ? `<strong>Motivo / Observação:</strong><br>${escapeHtml(notes)}` 
-          : undefined;
-
+        
         const settings = await getSiteSettings();
+        
+        let htmlContent = "";
+        let subject = "";
+        let attachments: { content: string; name: string }[] = [];
 
-        const htmlContent = newStatus === "CANCELLED"
-          ? buildCancellationEmail({ userName, shortId, reasonHtml, settings })
-          : buildRefundEmail({ userName, shortId, reasonHtml, settings });
+        if (newStatus === "CANCELLED") {
+          const actionTitle = "Cancelamento de Reserva";
+          const reasonHtml = notes 
+            ? `<strong>Motivo / Observação:</strong><br>${escapeHtml(notes)}` 
+            : undefined;
+          htmlContent = buildCancellationEmail({ userName, shortId, reasonHtml, settings });
+          subject = `Atualização: ${actionTitle} #${shortId}`;
+        } else if (newStatus === "REFUNDED") {
+          const actionTitle = "Reembolso de Reserva";
+          const reasonHtml = notes 
+            ? `<strong>Motivo / Observação:</strong><br>${escapeHtml(notes)}` 
+            : undefined;
+          htmlContent = buildRefundEmail({ userName, shortId, reasonHtml, settings });
+          subject = `Atualização: ${actionTitle} #${shortId}`;
+        } else if (newStatus === "APPROVED") {
+          // Buscamos os tickets para anexar e gerar os vouchers
+          const { data: tickets } = await supabase
+            .from("passenger_tickets")
+            .select("id, full_name, cpf, seat_code, qr_code_token, short_code")
+            .eq("reservation_id", reservationId);
+            
+          if (tickets && tickets.length > 0) {
+            const qrCidMap: Record<string, string> = {};
+            for (const t of tickets) {
+              const buffer = await QRCode.toBuffer(t.qr_code_token, {
+                type: "png",
+                width: 200,
+                margin: 1,
+                errorCorrectionLevel: "M",
+              });
+              const cidName = `qr-${t.short_code}.png`;
+              attachments.push({
+                content: buffer.toString("base64"),
+                name: cidName,
+              });
+              qrCidMap[t.id] = cidName;
+            }
+            
+            const tripTitle = reservation.excursions?.tour_packages?.title || "Viagem";
+            const depDate = reservation.excursions?.departure_date 
+              ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(reservation.excursions.departure_date))
+              : "Data a definir";
+            const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+            const siteUrl = `${origin}/sucesso/${reservationId}`;
+            
+            htmlContent = buildVoucherEmail({
+              userName, shortId, tripTitle, depDate, siteUrl, tickets: tickets as TicketData[], qrCidMap, settings
+            });
+            subject = `Seus Vouchers de Embarque — ${tripTitle}`;
+          }
+        }
 
-        await sendEmail({
-          to: [{ email, name: userName }],
-          subject: `Atualização: ${actionTitle} #${shortId}`,
-          htmlContent
-        });
+        if (htmlContent) {
+          await sendEmail({
+            to: [{ email, name: userName }],
+            subject,
+            htmlContent,
+            attachment: attachments.length > 0 ? attachments : undefined
+          });
+        }
       }
     } catch (err) {
       console.error("Falha ao configurar admin client ou enviar email na Server Action", err);
