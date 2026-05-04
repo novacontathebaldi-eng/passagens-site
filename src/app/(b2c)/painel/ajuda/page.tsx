@@ -174,7 +174,7 @@ export default async function AjudaPage() {
                         </svg>
                       </span>
                     </summary>
-                    <div className="p-4 pt-0 text-sm text-on-surface-variant leading-relaxed bg-surface-container-lowest border-t border-outline-variant/20">
+                    <div className="p-4 pt-4 text-sm text-on-surface-variant leading-relaxed bg-surface-container-lowest border-t border-outline-variant/20">
                       {faq.answer.split('\n').map((line, j) => (
                         <p key={j} className={j > 0 ? "mt-2" : ""}>{line}</p>
                       ))}
