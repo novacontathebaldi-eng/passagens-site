@@ -44,14 +44,14 @@ interface SiteHeaderProps {
 function LogoMark({ logoUrl, companyName, size = 28 }: { logoUrl?: string | null; companyName?: string; size?: number }) {
   if (logoUrl) {
     return (
-      <Image
-        src={logoUrl}
-        alt={companyName || "Partiu Turismo"}
-        width={size}
-        height={size}
-        priority
-        className="object-cover rounded-full ring-1 ring-outline/20"
-      />
+        <Image
+          src={logoUrl}
+          alt={companyName || "Partiu Turismo"}
+          width={size}
+          height={size}
+          priority
+          className="object-contain"
+        />
     );
   }
   return (
@@ -147,7 +147,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group z-50 relative">
-            <LogoMark logoUrl={settings.logo_url} companyName={settings.company_name} size={28} />
+            <LogoMark logoUrl={settings.logo_url} companyName={settings.company_name} size={40} />
             <span className="text-xl font-extrabold font-[family-name:var(--font-display)] text-primary group-hover:text-primary-dark transition-colors">
               {settings.company_name}
             </span>
@@ -352,7 +352,7 @@ export function SiteHeader({ user, settings, userRole }: SiteHeaderProps) {
               {/* Drawer Header (Logo inside drawer) */}
               <div className="h-16 px-4 flex items-center border-b border-outline-variant/30 shrink-0">
                 <Link href="/" className="flex items-center gap-2" onClick={closeMenu}>
-                  <LogoMark logoUrl={settings.logo_url} companyName={settings.company_name} size={28} />
+                  <LogoMark logoUrl={settings.logo_url} companyName={settings.company_name} size={36} />
                   <span className="text-xl font-extrabold font-[family-name:var(--font-display)] text-primary">
                     {settings.company_name}
                   </span>
