@@ -294,27 +294,23 @@ export function buildVoucherEmail({ userName, shortId, tripTitle, depDate, siteU
   `).join("");
 
   const content = `
-    <!-- Badge de confirmacao -->
-    <div style="text-align: center; margin: 0 0 28px 0;">
-      <div style="display: inline-block; background: ${C.successBg}; color: ${C.success}; font-size: 13px; font-weight: 700; padding: 6px 16px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;">Reserva Confirmada</div>
-    </div>
+    <h2 style="color: ${C.dark}; font-size: 22px; font-weight: 800; margin: 0 0 6px 0;">Pagamento Confirmado</h2>
+    <p style="font-size: 13px; color: ${C.muted}; margin: 0 0 28px 0;">Pedido <strong>#${shortId}</strong></p>
 
-    <p style="margin: 0 0 28px 0; font-size: 15px; text-align: center; color: ${C.body};">
-      Prezado(a) <strong style="color: ${C.dark};">${userName}</strong>, sua reserva esta confirmada.
-    </p>
+    <p style="margin: 0 0 20px 0;">Tudo certo, <strong style="color: ${C.dark};">${userName}</strong>.</p>
     
-    <!-- Card da viagem -->
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 32px 0; border-radius: 16px; overflow: hidden;">
-      <tr>
-        <td style="background: linear-gradient(135deg, ${C.primaryDark} 0%, ${C.primary} 60%, ${C.secDark} 100%); padding: 28px 24px; text-align: center;">
-          <p style="margin: 0 0 4px 0; font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Pedido #${shortId}</p>
-          <p style="margin: 0 0 10px 0; font-size: 22px; font-weight: 800; color: #ffffff; line-height: 1.3;">${tripTitle}</p>
-          <div style="display: inline-block; background: rgba(255,255,255,0.15); padding: 6px 16px; border-radius: 8px;">
-            <span style="font-size: 14px; color: #ffffff; font-weight: 600;">${depDate}</span>
-          </div>
-        </td>
-      </tr>
-    </table>
+    <p style="margin: 0 0 24px 0;">
+      Seu pagamento foi 
+      <span style="color: ${C.success}; font-weight: 700; background: ${C.successBg}; padding: 3px 10px; border-radius: 6px; font-size: 14px;">confirmado com sucesso</span>
+      e a sua viagem esta garantida.
+    </p>
+
+    <!-- Dados da viagem -->
+    <div style="background: ${C.borderLight}; padding: 18px 20px; border-radius: 12px; margin: 0 0 28px 0; border-left: 4px solid ${C.primary};">
+      <p style="margin: 0 0 2px 0; font-size: 11px; color: ${C.muted}; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Viagem</p>
+      <p style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: ${C.dark};">${tripTitle}</p>
+      <p style="margin: 0; font-size: 14px; color: ${C.body}; font-weight: 500;">Embarque: <strong style="color: ${C.dark};">${depDate}</strong></p>
+    </div>
     
     <!-- Titulo vouchers -->
     <p style="font-size: 14px; font-weight: 700; color: ${C.dark}; margin: 0 0 16px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid ${C.primary}; padding-bottom: 10px;">
@@ -324,18 +320,14 @@ export function buildVoucherEmail({ userName, shortId, tripTitle, depDate, siteU
     ${ticketRows}
     
     <!-- Instrucoes -->
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 28px 0; border-radius: 12px; overflow: hidden; border: 1px solid ${C.border};">
-      <tr>
-        <td style="background: ${C.borderLight}; padding: 20px 24px;">
-          <p style="margin: 0 0 12px 0; font-weight: 700; color: ${C.dark}; font-size: 14px;">Informacoes importantes:</p>
-          <table cellpadding="0" cellspacing="0" border="0" style="font-size: 13px; color: ${C.body}; line-height: 1.7;">
-            <tr><td style="padding: 4px 0; vertical-align: top; width: 20px; color: ${C.primary}; font-weight: 700;">1.</td><td style="padding: 4px 0;">Apresente este e-mail ou o voucher no celular ao motorista no embarque.</td></tr>
-            <tr><td style="padding: 4px 0; vertical-align: top; color: ${C.primary}; font-weight: 700;">2.</td><td style="padding: 4px 0;">Se o QR Code nao funcionar, informe o <strong style="color: ${C.primary};">Codigo de Embarque</strong>.</td></tr>
-            <tr><td style="padding: 4px 0; vertical-align: top; color: ${C.primary}; font-weight: 700;">3.</td><td style="padding: 4px 0;">Tenha em maos um <strong>documento original com foto</strong> (RG ou CNH).</td></tr>
-          </table>
-        </td>
-      </tr>
-    </table>
+    <div style="background: ${C.borderLight}; padding: 18px 20px; border-radius: 12px; margin: 28px 0; border-left: 4px solid ${C.secondary};">
+      <p style="margin: 0 0 10px 0; font-weight: 700; color: ${C.dark}; font-size: 14px;">Antes de embarcar:</p>
+      <table cellpadding="0" cellspacing="0" border="0" style="font-size: 13px; color: ${C.body}; line-height: 1.7;">
+        <tr><td style="padding: 4px 0; vertical-align: top; width: 20px; color: ${C.primary}; font-weight: 700;">1.</td><td style="padding: 4px 0;">Apresente este e-mail ou o voucher no celular ao motorista.</td></tr>
+        <tr><td style="padding: 4px 0; vertical-align: top; color: ${C.primary}; font-weight: 700;">2.</td><td style="padding: 4px 0;">Se o QR Code nao funcionar, informe o <strong style="color: ${C.primary};">Codigo de Embarque</strong>.</td></tr>
+        <tr><td style="padding: 4px 0; vertical-align: top; color: ${C.primary}; font-weight: 700;">3.</td><td style="padding: 4px 0;">Leve um <strong>documento original com foto</strong> (RG ou CNH).</td></tr>
+      </table>
+    </div>
     
     <!-- CTA -->
     <div style="text-align: center; margin: 32px 0 8px 0;">
