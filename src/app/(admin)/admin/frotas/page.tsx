@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import AmenityBadges from "@/components/AmenityBadges";
+import { toast } from "sonner";
 
 type VehicleLayout = {
   id: string;
@@ -50,7 +51,7 @@ export default function FrotasPage() {
     const { error } = await supabase.from("vehicle_layouts").delete().eq("id", id);
 
     if (error) {
-      alert("Erro ao excluir: " + error.message);
+      toast.error("Erro ao excluir: " + error.message);
     } else {
       setLayouts(prev => prev.filter(l => l.id !== id));
     }

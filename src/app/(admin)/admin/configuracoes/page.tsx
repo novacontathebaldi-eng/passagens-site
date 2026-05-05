@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { convertToWebP, convertToPNG, getExtForType, getOldFilePaths } from "@/lib/image-utils";
 import Image from "next/image";
+import { toast } from "sonner";
 import {
   DndContext,
   closestCenter,
@@ -136,7 +137,7 @@ function ImageUploader({
         .upload(path, processed, { upsert: true, cacheControl: "3600" });
 
       if (error) {
-        alert("Erro ao fazer upload: " + error.message);
+        toast.error("Erro ao fazer upload: " + error.message);
         return;
       }
 
@@ -148,7 +149,7 @@ function ImageUploader({
       const url = urlData.publicUrl;
       onUploaded(url);
     } catch (err) {
-      alert("Erro ao processar imagem: " + (err instanceof Error ? err.message : "Erro desconhecido"));
+      toast.error("Erro ao processar imagem: " + (err instanceof Error ? err.message : "Erro desconhecido"));
     } finally {
       setIsUploading(false);
       // Reset input so the same file can be re-uploaded
@@ -697,11 +698,11 @@ export default function ConfiguracoesPage() {
       const oldPaths = getOldFilePaths("pix_qr_code");
       await supabase.storage.from("assets").remove(oldPaths);
       const { error } = await supabase.storage.from("assets").upload(path, processed, { upsert: true, cacheControl: "3600" });
-      if (error) { alert("Erro: " + error.message); return; }
+      if (error) { toast.error("Erro: " + error.message); return; }
       const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
       setSettings({ ...settings, pix_qr_code_url: urlData.publicUrl });
     } catch (err) {
-      alert("Erro ao processar: " + (err instanceof Error ? err.message : "Erro"));
+      toast.error("Erro ao processar: " + (err instanceof Error ? err.message : "Erro"));
     } finally {
       setIsUploadingQr(false);
       if (qrInputRef.current) qrInputRef.current.value = "";

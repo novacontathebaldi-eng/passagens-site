@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { toast } from "sonner";
 
 type Excursion = {
   id: string;
@@ -69,7 +70,7 @@ export default function ExcursoesPage() {
     const { error } = await supabase.from("excursions").delete().eq("id", id);
 
     if (error) {
-      alert("Erro ao excluir: " + error.message);
+      toast.error("Erro ao excluir: " + error.message);
     } else {
       setExcursions(prev => prev.filter(e => e.id !== id));
     }
@@ -86,7 +87,7 @@ export default function ExcursoesPage() {
       .eq("id", id);
 
     if (error) {
-      alert("Erro ao atualizar status: " + error.message);
+      toast.error("Erro ao atualizar status: " + error.message);
       fetchExcursions();
     }
   }

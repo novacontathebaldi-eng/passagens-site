@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { toast } from "sonner";
 
 export function ExportReportButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,11 +15,11 @@ export function ExportReportButton() {
   const handleExport = async () => {
     if (period === "personalizado") {
       if (!customFrom || !customTo) {
-        alert("Por favor, selecione as datas de início e fim.");
+        toast.warning("Por favor, selecione as datas de início e fim.");
         return;
       }
       if (new Date(customFrom) > new Date(customTo)) {
-        alert("A data 'De' não pode ser posterior à data 'Até'.");
+        toast.warning("A data 'De' não pode ser posterior à data 'Até'.");
         return;
       }
     }
@@ -53,7 +54,7 @@ export function ExportReportButton() {
       setIsOpen(false);
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
-      alert("Ocorreu um erro ao gerar o relatório. Tente novamente.");
+      toast.error("Ocorreu um erro ao gerar o relatório. Tente novamente.");
     } finally {
       setIsExporting(false);
     }

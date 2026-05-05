@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 type Profile = {
   id: string;
@@ -59,7 +60,7 @@ export default function GestaoAcessosPage() {
       .eq("id", profileId);
 
     if (error) {
-      alert("Erro ao atualizar papel: " + error.message);
+      toast.error("Erro ao atualizar papel: " + error.message);
       fetchProfiles(); // Revert on error
     } else {
       // In a robust system, we would also add to audit_logs

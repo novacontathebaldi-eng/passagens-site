@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { changeReservationStatus, ReservationStatus } from "@/app/actions/reservas";
+import { toast } from "sonner";
 
 export type Reservation = {
   id: string;
@@ -121,7 +122,7 @@ export function useRealtimeReservations(excursionId: string = "ALL") {
 
     if (result.error) {
       console.error(result.error);
-      alert(result.error);
+      toast.error(result.error);
       // Revert optimism by refetching
       fetchReservations();
       return { error: new Error(result.error) };

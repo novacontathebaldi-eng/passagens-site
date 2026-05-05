@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatBRL, formatDate } from "@/lib/utils";
+import { toast } from "sonner";
 
 type Promoter = {
   id: string;
@@ -106,7 +107,7 @@ export default function AfiliadosAdminPage() {
     setDeletingId(id);
     const { error } = await supabase.from("promoters").delete().eq("id", id);
     if (error) {
-      alert("Erro ao excluir: " + error.message);
+      toast.error("Erro ao excluir: " + error.message);
     } else {
       setPromoters(prev => prev.filter(p => p.id !== id));
     }
