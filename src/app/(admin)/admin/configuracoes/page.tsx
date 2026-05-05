@@ -332,7 +332,6 @@ export default function ConfiguracoesPage() {
   const [settings, setSettings] = useState<GlobalSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState<{ type: "ok" | "error"; text: string } | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -478,7 +477,6 @@ export default function ConfiguracoesPage() {
     e.preventDefault();
     if (!settings) return;
     setIsSaving(true);
-    setSaveMsg(null);
 
     const payload = {
       ...settings,
@@ -504,10 +502,9 @@ export default function ConfiguracoesPage() {
     setIsSaving(false);
 
     if (error) {
-      setSaveMsg({ type: "error", text: "Erro ao salvar: " + error.message });
+      toast.error("Erro ao salvar: " + error.message);
     } else {
-      setSaveMsg({ type: "ok", text: "Configurações salvas com sucesso!" });
-      setTimeout(() => setSaveMsg(null), 4000);
+      toast.success("Configurações salvas com sucesso!");
     }
   };
 
@@ -740,15 +737,7 @@ export default function ConfiguracoesPage() {
         </div>
       </div>
 
-      {/* Success/Error Message */}
-      {saveMsg && (
-        <div className={`rounded-xl px-4 py-3 text-sm font-medium ${saveMsg.type === "ok"
-            ? "bg-green-50 text-green-700 border border-green-200"
-            : "bg-red-50 text-red-700 border border-red-200"
-          }`}>
-          {saveMsg.text}
-        </div>
-      )}
+
 
       <form onSubmit={handleSubmit} className="space-y-8 bg-surface-container-lowest p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-outline-variant/30">
 

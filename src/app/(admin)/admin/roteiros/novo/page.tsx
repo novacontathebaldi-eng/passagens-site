@@ -4,11 +4,11 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import TourImageManager from "@/components/admin/TourImageManager";
+import { toast } from "sonner";
 
 export default function NovoRoteiroPage() {
   const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [savedPackageId, setSavedPackageId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
@@ -30,7 +30,6 @@ export default function NovoRoteiroPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
 
     const { data, error: insertError } = await supabase
       .from("tour_packages")
@@ -47,9 +46,10 @@ export default function NovoRoteiroPage() {
     setIsLoading(false);
 
     if (insertError) {
-      setError(insertError.message);
+      toast.error(insertError.message);
     } else if (data) {
       setSavedPackageId(data.id);
+      toast.success("Roteiro salvo com sucesso! Agora adicione as imagens.");
     }
   }
 
@@ -69,20 +69,9 @@ export default function NovoRoteiroPage() {
       </div>
 
       <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-6 sm:p-8">
-        {error && (
-          <div className="mb-6 p-4 bg-error-light text-error rounded-xl text-sm border border-error/20">
-            {error}
-          </div>
-        )}
-
         {savedPackageId ? (
           <div className="space-y-6">
-            <div className="p-4 bg-green-50 text-green-700 rounded-xl text-sm border border-green-200 flex items-center gap-2">
-              <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              Roteiro &quot;<strong>{form.title}</strong>&quot; salvo com sucesso! Agora adicione as imagens.
-            </div>
+            <h2 className="text-lg font-bold text-on-surface">Imagens do Roteiro</h2>
 
             <TourImageManager packageId={savedPackageId} />
 
