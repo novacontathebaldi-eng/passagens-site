@@ -10,6 +10,7 @@ import RealtimeSeatCount from "@/components/RealtimeSeatCount";
 import WaitlistButton from "./WaitlistButton";
 import LightboxGallery from "./LightboxGallery";
 import StickyExcursionTitle from "@/components/StickyExcursionTitle";
+import MobileFloatingReserve from "@/components/MobileFloatingReserve";
 import { getCoverImage, getGalleryImages } from "@/lib/tour-images";
 
 export const dynamic = "force-dynamic";
@@ -246,7 +247,7 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
 
           {/* ── DIREITA: STICKY CHECKOUT PANEL ── */}
           <div className="w-full lg:w-1/3">
-            <div className="sticky top-24 bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 shadow-xl">
+            <div id="reserve-section" className="sticky top-24 bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 shadow-xl">
               
               {/* COMPONENTE DE TÍTULO ANIMADO STICKY */}
               <StickyExcursionTitle title={pkg.title} />
@@ -332,6 +333,13 @@ export default async function ExcursaoDetailsPage({ params }: { params: Params }
 
         </div>
       </div>
+
+      {availableExcursions.length > 0 && (
+        <MobileFloatingReserve 
+          targetId="reserve-section" 
+          price={Math.min(...availableExcursions.map((e: any) => Number(e.price_per_seat)))} 
+        />
+      )}
     </div>
   );
 }
