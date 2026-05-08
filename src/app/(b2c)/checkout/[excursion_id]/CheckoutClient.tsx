@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,6 +56,7 @@ export default function CheckoutClient({ excursion, profile, savedPassengers, oc
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [editFromReview, setEditFromReview] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const checkoutTopRef = useRef<HTMLDivElement>(null);
 
   const validOccupiedSeats = occupiedSeats.filter(seat => !seat.startsWith('WAITING_ALLOCATION'));
   const liveOccupiedSeats = useRealtimeSeats(excursion.id, validOccupiedSeats);
@@ -136,6 +137,11 @@ export default function CheckoutClient({ excursion, profile, savedPassengers, oc
       setSelectedSeats(prev => prev.slice(0, quantity));
     }
   }, [quantity, selectedSeats.length]);
+
+  // Scroll suave até o topo do formulário ao trocar de etapa
+  useEffect(() => {
+    checkoutTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [step]);
 
   const handleNextStep = async () => {
     setGlobalError(null);
@@ -267,7 +273,7 @@ export default function CheckoutClient({ excursion, profile, savedPassengers, oc
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div ref={checkoutTopRef} className="flex flex-col lg:flex-row gap-8">
       {/* ── Main Form Area ── */}
       <div className="w-full lg:w-2/3">
         {/* ProgressBar */}
