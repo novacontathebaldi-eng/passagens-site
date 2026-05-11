@@ -7,7 +7,9 @@ import { HeroSearchBar } from "@/components/HeroSearchBar";
 import { ExcursionGrid } from "@/components/ExcursionGrid";
 import { HeroCategoryPills } from "@/components/CategoryPills";
 import { getSiteSettings } from "@/lib/get-settings";
+import type { FaqItem } from "@/lib/get-settings";
 import type { ExcursionItem } from "@/lib/search-utils";
+import { FaqAccordion } from "@/components/FaqAccordion";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -289,6 +291,42 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ══════════ FAQ — PERGUNTAS FREQUENTES ══════════ */}
+      {settings.faq_items && settings.faq_items.length > 0 && (
+        <section className="py-16 sm:py-20">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Tire suas dúvidas
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-on-surface">
+                Perguntas Frequentes
+              </h2>
+              <p className="mt-3 text-on-surface-variant text-lg max-w-xl mx-auto">
+                Tudo o que você precisa saber antes de garantir sua vaga.
+              </p>
+            </div>
+
+            <FaqAccordion items={settings.faq_items as FaqItem[]} />
+
+            <div className="mt-8 text-center">
+              <p className="text-sm text-on-surface-variant">
+                Ainda tem dúvidas?{" "}
+                <Link
+                  href="/contato"
+                  className="text-primary font-semibold hover:underline transition-colors"
+                >
+                  Fale com a gente →
+                </Link>
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ══════════ CTA FINAL ══════════ */}
       <section className="py-16">

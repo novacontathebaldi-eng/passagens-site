@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { unstable_noStore as noStore } from "next/cache";
 
+export type FaqItem = {
+  id: string;
+  question: string;
+  answer: string;
+};
+
 export type PixKeyEntry = {
   type: string;
   key: string;
@@ -52,6 +58,7 @@ export type SiteSettings = {
   cancellation_policy_text: string | null;
   social_links: SocialLinkEntry[] | null;
   hero_stats: HeroStat[] | null;
+  faq_items: FaqItem[] | null;
   updated_at: string;
 };
 
@@ -83,6 +90,7 @@ const SETTINGS_FIELDS = `
   cancellation_policy_text,
   social_links,
   hero_stats,
+  faq_items,
   updated_at
 `;
 
@@ -135,6 +143,15 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     }
   }
 
+  let parsedFaqItems = settings.faq_items;
+  if (typeof parsedFaqItems === "string") {
+    try {
+      parsedFaqItems = JSON.parse(parsedFaqItems);
+    } catch {
+      parsedFaqItems = null;
+    }
+  }
+
   return {
     company_name: settings.company_name ?? "Partiu Turismo",
     logo_url: settings.logo_url ?? null,
@@ -163,6 +180,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     cancellation_policy_text: settings.cancellation_policy_text ?? null,
     social_links: Array.isArray(parsedSocialLinks) ? parsedSocialLinks : null,
     hero_stats: Array.isArray(parsedHeroStats) ? parsedHeroStats : null,
+    faq_items: Array.isArray(parsedFaqItems) ? parsedFaqItems : null,
     updated_at: settings.updated_at ?? new Date().toISOString(),
   };
 }
