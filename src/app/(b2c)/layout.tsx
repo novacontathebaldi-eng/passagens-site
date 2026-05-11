@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SmoothScrollLink } from "@/components/SmoothScrollLink";
 import { SocialLinks } from "@/components/SocialLinks";
 import { GoogleOneTap } from "@/components/GoogleOneTap";
+import { WhatsAppWidget } from "@/components/WhatsAppWidget";
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -93,6 +94,13 @@ export default async function B2CLayout({
 
       {/* ── Google One Tap (only for unauthenticated visitors) ── */}
       {!user && <GoogleOneTap />}
+
+      {/* ── Floating WhatsApp Support Widget ── */}
+      <WhatsAppWidget
+        phoneNumbers={settings.whatsapp_support_numbers ?? []}
+        companyName={settings.company_name}
+        operatingHours={settings.operating_hours}
+      />
 
       {/* ── Footer ── */}
       <footer className="bg-on-surface text-surface-container-low">
