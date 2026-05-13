@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, MessageCircle, HelpCircle, ShieldAlert, ExternalLink, Mail, Info, CreditCard, Users, CheckCircle } from "lucide-react";
 import { SocialLinks } from "@/components/SocialLinks";
+import { InteractiveFaq } from "./InteractiveFaq";
 
 export const metadata = {
   title: "Central de Ajuda | Partiu Turismo",
@@ -157,44 +158,29 @@ export default async function AjudaPage() {
           </section>
 
           {/* PERGUNTAS FREQUENTES (FAQ) */}
-          {faqItems.length > 0 && (
-            <section className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 sm:p-8 shadow-sm">
-              <h2 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-primary" /> Perguntas Frequentes
-              </h2>
-              
-              <div className="space-y-4">
-                {faqItems.map((faq, i) => (
-                  <details key={faq.id || i} className="group border border-outline-variant/30 rounded-2xl bg-surface overflow-hidden [&_summary::-webkit-details-marker]:hidden">
-                    <summary className="flex items-center justify-between p-4 font-semibold text-on-surface cursor-pointer hover:bg-surface-container-lowest transition-colors">
-                      {faq.question}
-                      <span className="ml-4 flex-shrink-0 text-primary transition duration-300 group-open:-rotate-180">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </span>
-                    </summary>
-                    <div className="p-4 pt-4 text-sm text-on-surface-variant leading-relaxed bg-surface-container-lowest border-t border-outline-variant/20">
-                      {faq.answer.split('\n').map((line, j) => (
-                        <p key={j} className={j > 0 ? "mt-2" : ""}>{line}</p>
-                      ))}
-                    </div>
-                  </details>
-                ))}
-              </div>
-            </section>
-          )}
+          <InteractiveFaq faqItems={faqItems} />
 
           {/* POLÍTICA DE CANCELAMENTO E TERMOS */}
           {settings.cancellation_policy_text && (
             <section className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 sm:p-8 shadow-sm">
-              <h2 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-2">
                 <ShieldAlert className="w-5 h-5 text-on-surface-variant" /> Política de Cancelamento e Reembolso
               </h2>
-              <div className="prose prose-sm prose-p:text-on-surface-variant prose-p:leading-relaxed max-w-none bg-surface p-4 rounded-2xl border border-outline-variant/20">
-                {settings.cancellation_policy_text.split('\n').map((line: string, i: number) => (
-                  <p key={i}>{line}</p>
-                ))}
+              <div className="flex flex-col gap-4">
+                {settings.cancellation_policy_text.split('\n').map((line: string, i: number) => {
+                  const trimmedLine = line.trim();
+                  if (!trimmedLine) return null;
+                  return (
+                    <div key={i} className="flex items-start gap-4 p-5 rounded-2xl bg-surface border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="mt-0.5 shrink-0 text-primary">
+                        <CheckCircle className="w-5 h-5" />
+                      </div>
+                      <p className="text-sm text-on-surface-variant leading-relaxed">
+                        {trimmedLine}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
