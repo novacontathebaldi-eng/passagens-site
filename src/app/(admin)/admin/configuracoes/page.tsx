@@ -22,6 +22,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import FaqInsights from "@/components/admin/FaqInsights";
 
 type PixKeyEntry = { type: string; key: string; label: string };
 type HeroStatEntry = { number: string; label: string; iconPath: string };
@@ -1291,6 +1292,8 @@ export default function ConfiguracoesPage() {
           <p className="text-xs text-on-surface-variant">
             Perguntas e respostas que aparecerão na Central de Ajuda do cliente.
           </p>
+
+          <FaqInsights />
 
           <div className="space-y-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4">
             {settings.faq_items.length === 0 && (
