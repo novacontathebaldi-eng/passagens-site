@@ -54,7 +54,7 @@ export function AdminMobileMenu({ navItems, profile, initials, logoUrl, companyN
       // Auto-expand if current page matches a child
       const autoExpand = new Set<string>();
       navItems.forEach(item => {
-        if (item.children?.some(child => pathname.startsWith(child.href))) {
+        if (item.children?.some(child => pathname === child.href || pathname.startsWith(`${child.href}/`))) {
           autoExpand.add(item.label);
         }
       });
@@ -173,7 +173,7 @@ export function AdminMobileMenu({ navItems, profile, initials, logoUrl, companyN
                 {navItems.map((item) => {
                   const hasChildren = item.children && item.children.length > 0;
                   const isExpanded = expandedItems.has(item.label);
-                  const isChildActive = item.children?.some(child => pathname.startsWith(child.href));
+                  const isChildActive = item.children?.some(child => pathname === child.href || pathname.startsWith(`${child.href}/`));
                   const isActive = hasChildren ? false : pathname === item.href;
                   const isParentHighlighted = hasChildren && isChildActive;
 
@@ -211,7 +211,7 @@ export function AdminMobileMenu({ navItems, profile, initials, logoUrl, companyN
                         >
                           <div className="ml-4 pl-4 border-l border-white/10 space-y-0.5">
                             {item.children!.map(child => {
-                              const isChildItemActive = pathname.startsWith(child.href);
+                              const isChildItemActive = pathname === child.href || pathname.startsWith(`${child.href}/`);
                               return (
                                 <Link
                                   key={child.href}

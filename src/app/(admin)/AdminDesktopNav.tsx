@@ -15,7 +15,7 @@ export function AdminDesktopNav({ navItems }: AdminDesktopNavProps) {
     // Auto-expand if current page matches a child
     const initial = new Set<string>();
     navItems.forEach(item => {
-      if (item.children?.some(child => pathname.startsWith(child.href))) {
+      if (item.children?.some(child => pathname === child.href || pathname.startsWith(`${child.href}/`))) {
         initial.add(item.label);
       }
     });
@@ -39,7 +39,7 @@ export function AdminDesktopNav({ navItems }: AdminDesktopNavProps) {
       {navItems.map((item) => {
         const hasChildren = item.children && item.children.length > 0;
         const isExpanded = expandedItems.has(item.label);
-        const isChildActive = item.children?.some(child => pathname.startsWith(child.href));
+        const isChildActive = item.children?.some(child => pathname === child.href || pathname.startsWith(`${child.href}/`));
         const isActive = hasChildren ? false : pathname === item.href;
         const isParentHighlighted = hasChildren && isChildActive;
 
@@ -77,7 +77,7 @@ export function AdminDesktopNav({ navItems }: AdminDesktopNavProps) {
               >
                 <div className="ml-4 pl-4 border-l border-white/10 space-y-0.5">
                   {item.children!.map(child => {
-                    const isChildItemActive = pathname.startsWith(child.href);
+                    const isChildItemActive = pathname === child.href || pathname.startsWith(`${child.href}/`);
                     return (
                       <Link
                         key={child.href}
