@@ -34,10 +34,11 @@ export function useFaqSearch(items: FaqItem[], searchTerm: string, pageName: str
   }, [items]);
 
   const results = useMemo(() => {
-    if (!debouncedTerm.trim()) {
+    const cleanTerm = debouncedTerm.trim();
+    if (!cleanTerm) {
       return items.map(item => ({ item, matches: [] }));
     }
-    return fuse.search(debouncedTerm);
+    return fuse.search(cleanTerm);
   }, [debouncedTerm, fuse, items]);
 
   const lastTrackedTerm = useRef<string>("");
