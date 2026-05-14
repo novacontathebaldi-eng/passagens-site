@@ -10,6 +10,7 @@ import { getSiteSettings } from "@/lib/get-settings";
 import type { FaqItem } from "@/lib/get-settings";
 import type { ExcursionItem } from "@/lib/search-utils";
 import { FaqAccordion } from "@/components/FaqAccordion";
+import { MessageCircle } from "lucide-react";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -294,7 +295,7 @@ export default async function HomePage() {
 
       {/* ══════════ FAQ — PERGUNTAS FREQUENTES ══════════ */}
       {settings.faq_items && settings.faq_items.length > 0 && (
-        <section className="py-16 sm:py-20">
+        <section className="pt-16 pb-8 sm:pt-20 sm:pb-10">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4">
@@ -313,23 +314,31 @@ export default async function HomePage() {
 
             <FaqAccordion items={settings.faq_items as FaqItem[]} />
 
-            <div className="mt-8 text-center">
-              <p className="text-sm text-on-surface-variant">
-                Ainda tem dúvidas?{" "}
-                <Link
-                  href="/contato"
-                  className="text-primary font-semibold hover:underline transition-colors"
-                >
-                  Fale com a gente →
-                </Link>
-              </p>
+            <div className="mt-12 bg-surface-container-low rounded-3xl p-6 sm:p-8 border border-outline-variant/30 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 text-center sm:text-left">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <MessageCircle className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface">Ainda tem dúvidas?</h3>
+                  <p className="mt-1 text-sm text-on-surface-variant max-w-md">
+                    Nossa equipe está pronta para te ajudar a esclarecer tudo para sua próxima viagem.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/contato"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-surface border-2 border-outline-variant/50 text-on-surface font-bold hover:border-primary hover:text-primary hover:shadow-md transition-all text-center whitespace-nowrap"
+              >
+                Fale com a gente
+              </Link>
             </div>
           </div>
         </section>
       )}
 
       {/* ══════════ CTA FINAL ══════════ */}
-      <section className="py-16">
+      <section className="pt-8 pb-16 sm:pt-10 sm:pb-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="gradient-hero rounded-3xl p-10 sm:p-16 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
