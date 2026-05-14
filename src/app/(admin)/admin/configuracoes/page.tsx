@@ -483,13 +483,24 @@ export default function ConfiguracoesPage() {
   useEffect(() => {
     if (!isLoading && window.location.hash) {
       const id = window.location.hash.slice(1);
-      // Small delay to ensure DOM has painted
       setTimeout(() => {
         const el = document.getElementById(id);
         if (el) {
           el.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }, 100);
+
+      // Show toast for copied FAQ term (sent from analytics page via sessionStorage)
+      const copiedTerm = sessionStorage.getItem("faq_copied_term");
+      if (copiedTerm) {
+        sessionStorage.removeItem("faq_copied_term");
+        setTimeout(() => {
+          toast.success(`Termo "${copiedTerm}" copiado!`, {
+            description: "Cole no campo de pergunta para criar uma nova resposta no FAQ.",
+            duration: 6000,
+          });
+        }, 400);
+      }
     }
   }, [isLoading]);
 

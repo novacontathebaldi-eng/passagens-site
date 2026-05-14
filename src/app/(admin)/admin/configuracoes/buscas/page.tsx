@@ -149,18 +149,12 @@ export default function FaqAnalyticsPage() {
   const handleAddFaq = async (term: string) => {
     try {
       await navigator.clipboard.writeText(term);
-      toast.success(`Termo "${term}" copiado!`, {
-        description: "Cole no campo de pergunta do FAQ para criar uma nova resposta.",
-      });
-      // Full page navigation so the browser handles the #hash scroll natively
-      setTimeout(() => {
-        window.location.href = "/admin/configuracoes#faq-editor";
-      }, 600);
+      // Store in sessionStorage so the config page can show the toast after load
+      sessionStorage.setItem("faq_copied_term", term);
     } catch {
-      toast.info(`Termo: "${term}"`, {
-        description: "Copie manualmente e adicione ao FAQ.",
-      });
+      // Fallback: still navigate, just without clipboard
     }
+    window.location.href = "/admin/configuracoes#faq-editor";
   };
 
   // Filtered logs based on origin selector
