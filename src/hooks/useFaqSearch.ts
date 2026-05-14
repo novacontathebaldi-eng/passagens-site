@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Fuse from 'fuse.js';
 import { createClient } from '@/lib/supabase/client';
 
@@ -40,20 +40,41 @@ export function useFaqSearch(items: FaqItem[], searchTerm: string, pageName: str
     return fuse.search(debouncedTerm);
   }, [debouncedTerm, fuse, items]);
 
-  // Analytics for empty results
+  const lastTrackedTerm = useRef<string>("");
+
+  // Analytics: log failures to faq_search_analytics, count all searches in faq_stats
   useEffect(() => {
-    const term = debouncedTerm.trim();
-    if (term.length >= 3 && results.length === 0) {
-      const supabase = createClient();
-      // Fire and forget
-      supabase.from('faq_search_analytics').insert({
-        search_term: term,
-        results_count: 0,
-        page: pageName,
-      }).then(({ error }) => {
-        if (error) console.error('Error logging FAQ search:', error);
-      });
-    }
+    const term = debouncedTerm.trim().toLowerCase();
+    if (term.length < 3 || term === lastTrackedTerm.current) return;
+
+    // Update last tracked term to avoid double counting same term
+    lastTrackedTerm.current = term;
+
+    const supabase = createClient();
+
+    const trackSearch = async () => {
+      try {
+        if (results.length === 0) {
+          // Failure: save full log so admin can see the term
+          const { error } = await supabase.from('faq_search_analytics').insert({
+            search_term: term,
+            results_count: 0,
+            page: pageName,
+          });
+          if (error) console.error('Error logging FAQ failure:', error);
+        } else {
+          // Success: only increment aggregated counters (no row bloat)
+          await Promise.all([
+            supabase.rpc('increment_faq_stat', { key_param: 'total_searches' }),
+            supabase.rpc('increment_faq_stat', { key_param: `total_searches_${pageName}` })
+          ]);
+        }
+      } catch (err) {
+        console.error('FAQ Analytics unexpected error:', err);
+      }
+    };
+
+    trackSearch();
   }, [debouncedTerm, results.length, pageName]);
 
   return results;
