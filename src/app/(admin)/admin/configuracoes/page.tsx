@@ -334,6 +334,94 @@ function SortableSocialItem({
   );
 }
 
+function KeywordChipsInput({
+  keywords = [],
+  onChange
+}: {
+  keywords: string[];
+  onChange: (keywords: string[]) => void;
+}) {
+  const [inputValue, setInputValue] = useState("");
+
+  const addKeyword = (val: string) => {
+    const trimmed = val.trim();
+    if (trimmed && !keywords.includes(trimmed)) {
+      onChange([...keywords, trimmed]);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addKeyword(inputValue);
+      setInputValue("");
+    } else if (e.key === "Backspace" && inputValue === "" && keywords.length > 0) {
+      onChange(keywords.slice(0, -1));
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (val.includes(",")) {
+      const parts = val.split(",");
+      let currentKeywords = [...keywords];
+      
+      // Process all parts except the very last one
+      for (let i = 0; i < parts.length - 1; i++) {
+        const trimmed = parts[i].trim();
+        if (trimmed && !currentKeywords.includes(trimmed)) {
+          currentKeywords.push(trimmed);
+        }
+      }
+      
+      onChange(currentKeywords);
+      setInputValue(parts[parts.length - 1].trimStart());
+    } else {
+      setInputValue(val);
+    }
+  };
+
+  const removeKeyword = (indexToRemove: number) => {
+    onChange(keywords.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleBlur = () => {
+    if (inputValue.trim()) {
+      addKeyword(inputValue);
+      setInputValue("");
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-surface-container-lowest border border-outline-variant/60 border-dashed rounded-xl focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+      {keywords.map((keyword, index) => (
+        <span key={index} className="flex items-center gap-1 pl-2 pr-1 py-1 rounded-md bg-primary-container/40 text-primary text-xs font-medium">
+          {keyword}
+          <button
+            type="button"
+            onClick={() => removeKeyword(index)}
+            className="text-primary hover:text-error transition-colors p-0.5 rounded-full hover:bg-error/10 focus:outline-none"
+            title="Remover"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </span>
+      ))}
+      <input
+        type="text"
+        value={inputValue}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+        placeholder={keywords.length === 0 ? "Digite palavras-chave e pressione Enter ou Vírgula..." : "Adicionar mais..."}
+        className="flex-1 min-w-[200px] bg-transparent text-xs font-medium outline-none placeholder:text-on-surface-variant/50"
+      />
+    </div>
+  );
+}
+
 export default function ConfiguracoesPage() {
   const [settings, setSettings] = useState<GlobalSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -1344,12 +1432,9 @@ export default function ConfiguracoesPage() {
                     className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"
                     required
                   />
-                  <input
-                    type="text"
-                    value={item.keywords?.join(", ") || ""}
-                    onChange={(e) => updateFaqItem(i, "keywords", e.target.value.split(",").map((k) => k.trim()).filter(Boolean))}
-                    placeholder="Palavras-chave separadas por vírgula (Ocultas do cliente, melhoram a busca)"
-                    className="w-full bg-surface-container-lowest border border-outline-variant/60 border-dashed rounded-xl px-3 py-2 text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  <KeywordChipsInput
+                    keywords={item.keywords || []}
+                    onChange={(newKeywords) => updateFaqItem(i, "keywords", newKeywords)}
                   />
                 </div>
                 
