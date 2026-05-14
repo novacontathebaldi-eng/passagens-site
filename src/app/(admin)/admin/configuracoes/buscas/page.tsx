@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   ArrowLeft, SearchX, Activity, Search, AlertCircle,
@@ -43,7 +42,6 @@ export default function FaqAnalyticsPage() {
   const [resetConfirmText, setResetConfirmText] = useState("");
 
   const supabase = createClient();
-  const router = useRouter();
 
   const loadData = useCallback(async () => {
     const [logsResult, statsResult] = await Promise.all([
@@ -153,14 +151,10 @@ export default function FaqAnalyticsPage() {
       await navigator.clipboard.writeText(term);
       toast.success(`Termo "${term}" copiado!`, {
         description: "Cole no campo de pergunta do FAQ para criar uma nova resposta.",
-        action: {
-          label: "Ir para FAQ",
-          onClick: () => router.push("/admin/configuracoes#faq-editor"),
-        },
       });
-      // Navigate after a brief delay so the toast is visible
+      // Full page navigation so the browser handles the #hash scroll natively
       setTimeout(() => {
-        router.push("/admin/configuracoes#faq-editor");
+        window.location.href = "/admin/configuracoes#faq-editor";
       }, 600);
     } catch {
       toast.info(`Termo: "${term}"`, {
