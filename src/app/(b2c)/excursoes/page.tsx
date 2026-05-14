@@ -11,12 +11,13 @@ export const dynamic = "force-dynamic";
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; cat?: string }>;
+  searchParams: Promise<{ q?: string; cat?: string; src?: string }>;
 }) {
   const supabase = await createClient();
   const sp = await searchParams;
   const q = sp.q || "";
   const cat = sp.cat || "";
+  const searchSource = sp.src || "";
 
   // Fetch available categories (only those with published excursions)
   const { data: categoriesRaw } = await supabase
@@ -115,7 +116,8 @@ export default async function CatalogoPage({
   }
 
   // Analytics: track catalog searches (fire-and-forget, never blocks render)
-  if (q && q.trim().length >= 2) {
+  // Skip if search came from Hero (src=hero) — already tracked client-side
+  if (q && q.trim().length >= 2 && searchSource !== "hero") {
     const cleanTerm = q.trim().toLowerCase().slice(0, 200);
     const trackPromises: PromiseLike<unknown>[] = [
       supabase.rpc("increment_excursion_search_stat", { key_param: "total" }).then(),

@@ -120,7 +120,7 @@ export function HeroSearchBar({ excursions, categories }: HeroSearchBarProps) {
     if (!query.trim()) return;
     setIsOpen(false);
     logSearch(query, suggestions.filter((s) => s.type === "excursion").length);
-    router.push(`/excursoes?q=${encodeURIComponent(query.trim())}`);
+    router.push(`/excursoes?q=${encodeURIComponent(query.trim())}&src=hero`);
   }
 
   function handleSelect(suggestion: SearchSuggestion) {
@@ -263,7 +263,7 @@ export function HeroSearchBar({ excursions, categories }: HeroSearchBarProps) {
             if (query.trim()) {
               logSearch(query, suggestions.filter((s) => s.type === "excursion").length);
             }
-            router.push(query.trim() ? `/excursoes?q=${encodeURIComponent(query.trim())}` : "/excursoes");
+            router.push(query.trim() ? `/excursoes?q=${encodeURIComponent(query.trim())}&src=hero` : "/excursoes");
           }}
           className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-colors ${
             activeIndex === suggestions.length

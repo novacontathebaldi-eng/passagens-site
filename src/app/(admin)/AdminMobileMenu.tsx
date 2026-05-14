@@ -6,9 +6,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
+import type { NavItem } from "./layout";
 
 interface AdminMobileMenuProps {
-  navItems: { href: string; icon: string; label: string }[];
+  navItems: NavItem[];
   profile: { full_name: string; role: string; avatar_url: string | null };
   initials: string;
   logoUrl?: string | null;
@@ -44,18 +45,39 @@ const itemVariants: Variants = {
 
 export function AdminMobileMenu({ navItems, profile, initials, logoUrl, companyName }: AdminMobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const pathname = usePathname();
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      // Auto-expand if current page matches a child
+      const autoExpand = new Set<string>();
+      navItems.forEach(item => {
+        if (item.children?.some(child => pathname.startsWith(child.href))) {
+          autoExpand.add(item.label);
+        }
+      });
+      if (autoExpand.size > 0) setExpandedItems(autoExpand);
     } else {
       document.body.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen, navItems, pathname]);
+
+  const toggleExpand = (label: string) => {
+    setExpandedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  };
 
   return (
     <>
@@ -149,7 +171,69 @@ export function AdminMobileMenu({ navItems, profile, initials, logoUrl, companyN
 
               <nav className="flex-1 overflow-y-auto py-4 px-4 space-y-1">
                 {navItems.map((item) => {
-                  const isActive = pathname === item.href;
+                  const hasChildren = item.children && item.children.length > 0;
+                  const isExpanded = expandedItems.has(item.label);
+                  const isChildActive = item.children?.some(child => pathname.startsWith(child.href));
+                  const isActive = hasChildren ? false : pathname === item.href;
+                  const isParentHighlighted = hasChildren && isChildActive;
+
+                  if (hasChildren) {
+                    return (
+                      <motion.div key={item.label} variants={itemVariants}>
+                        <button
+                          onClick={() => toggleExpand(item.label)}
+                          className={`w-full flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                            isParentHighlighted
+                              ? "bg-white/10 text-white"
+                              : "text-white/60 hover:text-white hover:bg-white/5"
+                          }`}
+                        >
+                          <svg className={`w-5 h-5 shrink-0 ${isParentHighlighted ? "text-primary" : "text-white/50"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                          </svg>
+                          <span className="flex-1 text-left">{item.label}</span>
+                          <svg
+                            className={`w-4 h-4 shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""} ${isParentHighlighted ? "text-white/80" : "text-white/30"}`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        {/* Sub-items */}
+                        <div
+                          className={`overflow-hidden transition-all duration-200 ease-in-out ${
+                            isExpanded ? "max-h-40 opacity-100 mt-1" : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          <div className="ml-4 pl-4 border-l border-white/10 space-y-0.5">
+                            {item.children!.map(child => {
+                              const isChildItemActive = pathname.startsWith(child.href);
+                              return (
+                                <Link
+                                  key={child.href}
+                                  href={child.href}
+                                  onClick={() => setIsOpen(false)}
+                                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                                    isChildItemActive
+                                      ? "bg-primary/20 text-primary"
+                                      : "text-white/50 hover:text-white hover:bg-white/5"
+                                  }`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isChildItemActive ? "bg-primary" : "bg-white/20"}`} />
+                                  {child.label}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  }
+
                   return (
                     <motion.div key={item.href} variants={itemVariants}>
                       <Link
@@ -203,4 +287,3 @@ export function AdminMobileMenu({ navItems, profile, initials, logoUrl, companyN
     </>
   );
 }
-
