@@ -30,6 +30,7 @@ export function WhatsAppWidget({
   const [isOpen, setIsOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [hasDismissedTooltip, setHasDismissedTooltip] = useState(false);
+  const [isNearFooter, setIsNearFooter] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -113,6 +114,22 @@ export function WhatsAppWidget({
     setIsOpen(false);
   }, [pathname]);
 
+  // Detect when user is near the footer
+  useEffect(() => {
+    const footer = document.getElementById("site-footer");
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsNearFooter(entry.isIntersecting);
+      },
+      { rootMargin: "50px", threshold: 0 }
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
   // Don't render if no phone numbers configured
   if (!phoneNumbers || phoneNumbers.length === 0) return null;
 
@@ -122,10 +139,19 @@ export function WhatsAppWidget({
     ? operatingHours.split("\n")[0]
     : null;
 
+  const isExcursionDetail = pathname.startsWith("/excursao/");
+
   return (
-    <div
+    <motion.div
       ref={popoverRef}
-      className="fixed bottom-6 right-4 sm:right-6 z-[45] flex flex-col items-end gap-3"
+      initial={false}
+      animate={{
+        opacity: isNearFooter ? 0 : 1,
+        y: isNearFooter ? 20 : 0,
+        pointerEvents: isNearFooter ? "none" : "auto",
+      }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className={`fixed bottom-6 right-4 sm:right-6 z-[45] flex-col items-end gap-3 ${isExcursionDetail ? "hidden md:flex" : "flex"}`}
     >
       {/* ── Popover Card ── */}
       <AnimatePresence>
@@ -216,9 +242,9 @@ export function WhatsAppWidget({
 
       {/* ── FAB (Floating Action Button) ── */}
       <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", bounce: 0.45, delay: 1.2 }}
+        initial={{ scale: 0, opacity: 0, y: 40, rotate: -15 }}
+        animate={{ scale: 1, opacity: 1, y: 0, rotate: 0 }}
+        transition={{ type: "spring", damping: 12, stiffness: 200, delay: 1.2 }}
         onClick={() => {
           setIsOpen((prev) => !prev);
           setShowTooltip(false);
@@ -252,6 +278,6 @@ export function WhatsAppWidget({
           </motion.div>
         </AnimatePresence>
       </motion.button>
-    </div>
+    </motion.div>
   );
 }
