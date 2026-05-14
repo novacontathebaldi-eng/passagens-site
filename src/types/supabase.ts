@@ -157,6 +157,48 @@ export type Database = {
           },
         ]
       }
+      excursion_search_analytics: {
+        Row: {
+          created_at: string | null
+          id: string
+          page_origin: string
+          result_count: number
+          search_term: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          page_origin?: string
+          result_count?: number
+          search_term: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          page_origin?: string
+          result_count?: number
+          search_term?: string
+        }
+        Relationships: []
+      }
+      excursion_search_stats: {
+        Row: {
+          key: string
+          updated_at: string | null
+          value: number | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Relationships: []
+      }
       excursions: {
         Row: {
           allow_seat_selection: boolean
@@ -216,6 +258,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      faq_search_analytics: {
+        Row: {
+          created_at: string | null
+          id: string
+          page: string
+          results_count: number
+          search_term: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          page: string
+          results_count: number
+          search_term: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          page?: string
+          results_count?: number
+          search_term?: string
+        }
+        Relationships: []
+      }
+      faq_stats: {
+        Row: {
+          key: string
+          updated_at: string | null
+          value: number | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Relationships: []
       }
       global_settings: {
         Row: {
@@ -660,27 +744,6 @@ export type Database = {
           },
         ]
       }
-      search_logs: {
-        Row: {
-          created_at: string | null
-          id: string
-          result_count: number
-          term: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          result_count?: number
-          term: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          result_count?: number
-          term?: string
-        }
-        Relationships: []
-      }
       tour_package_images: {
         Row: {
           alt_text: string | null
@@ -920,6 +983,11 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      increment_excursion_search_stat: {
+        Args: { key_param: string }
+        Returns: number
+      }
+      increment_faq_stat: { Args: { key_param: string }; Returns: number }
       insert_passenger_tickets_secure: {
         Args: {
           p_excursion_id: string
@@ -928,6 +996,9 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin_or_agent: { Args: never; Returns: boolean }
+      reset_excursion_analytics: { Args: never; Returns: undefined }
+      reset_faq_analytics: { Args: never; Returns: undefined }
     }
     Enums: {
       excursion_status:
