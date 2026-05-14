@@ -8,7 +8,7 @@ const MAX_REQUESTS_PER_MINUTE = 30;
 export async function POST(req: NextRequest) {
   try {
     // Basic IP detection
-    const ip = req.headers.get("x-forwarded-for")?.split(',')[0]?.trim() || "unknown";
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     const now = Date.now();
 
     // Clean up expired entries occasionally to prevent memory leaks
@@ -26,24 +26,47 @@ export async function POST(req: NextRequest) {
         }
         record.count++;
       } else {
-        // Reset or initialize
         ipCache.set(ip, { count: 1, resetAt: now + 60 * 1000 });
       }
     }
 
     const body = await req.json();
-    const { term, result_count } = body;
+    const { term, result_count, page_origin } = body;
 
     if (!term || typeof term !== "string" || term.trim().length < 2) {
       return NextResponse.json({ error: "Invalid term" }, { status: 400 });
     }
 
+    const cleanTerm = term.trim().toLowerCase().slice(0, 200);
+    const origin = page_origin === "catalog" ? "catalog" : "hero";
+    const count = typeof result_count === "number" ? result_count : 0;
+
     const supabase = await createClient();
 
-    await supabase.from("search_logs").insert({
-      term: term.trim().toLowerCase().slice(0, 200),
-      result_count: typeof result_count === "number" ? result_count : 0,
-    });
+    // ALWAYS increment total counters
+    const statCalls: PromiseLike<unknown>[] = [
+      supabase.rpc("increment_excursion_search_stat", { key_param: "total" }).then(),
+      supabase.rpc("increment_excursion_search_stat", { key_param: `total_${origin}` }).then(),
+    ];
+
+    if (count > 0) {
+      // Success: only increment counter (no row bloat)
+      statCalls.push(
+        supabase.rpc("increment_excursion_search_stat", { key_param: "success" }).then()
+      );
+    } else {
+      // Failure: save full log + increment failure counter
+      statCalls.push(
+        supabase.from("excursion_search_analytics").insert({
+          search_term: cleanTerm,
+          result_count: 0,
+          page_origin: origin,
+        }).then(),
+        supabase.rpc("increment_excursion_search_stat", { key_param: "failure" }).then()
+      );
+    }
+
+    await Promise.all(statCalls);
 
     return NextResponse.json({ ok: true });
   } catch {

@@ -23,6 +23,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import FaqInsights from "@/components/admin/FaqInsights";
+import ExcursionSearchInsights from "@/components/admin/ExcursionSearchInsights";
 
 type PixKeyEntry = { type: string; key: string; label: string };
 type HeroStatEntry = { number: string; label: string; iconPath: string };
@@ -1407,6 +1408,7 @@ export default function ConfiguracoesPage() {
           </p>
 
           <FaqInsights />
+          <ExcursionSearchInsights />
 
           <div className="space-y-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4">
             {settings.faq_items.length === 0 && (

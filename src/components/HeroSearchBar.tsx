@@ -22,6 +22,7 @@ export function HeroSearchBar({ excursions, categories }: HeroSearchBarProps) {
   const formWrapperRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const lastTrackedRef = useRef<string>("");
 
   // Ensure portal only renders client-side (SSR safety)
   useEffect(() => {
@@ -102,11 +103,15 @@ export function HeroSearchBar({ excursions, categories }: HeroSearchBarProps) {
   }
 
   function logSearch(term: string, count: number) {
-    if (term.trim().length < 2) return;
+    const cleanTerm = term.trim().toLowerCase();
+    if (cleanTerm.length < 2) return;
+    // Dedup: don't track the same term twice in a session
+    if (cleanTerm === lastTrackedRef.current) return;
+    lastTrackedRef.current = cleanTerm;
     fetch("/api/search-logs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ term, result_count: count }),
+      body: JSON.stringify({ term: cleanTerm, result_count: count, page_origin: "hero" }),
     }).catch(() => {});
   }
 

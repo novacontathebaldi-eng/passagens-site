@@ -114,6 +114,34 @@ export default async function CatalogoPage({
     fallbackExcursions = allExc;
   }
 
+  // Analytics: track catalog searches (fire-and-forget, never blocks render)
+  if (q && q.trim().length >= 2) {
+    const cleanTerm = q.trim().toLowerCase().slice(0, 200);
+    const trackPromises: PromiseLike<unknown>[] = [
+      supabase.rpc("increment_excursion_search_stat", { key_param: "total" }).then(),
+      supabase.rpc("increment_excursion_search_stat", { key_param: "total_catalog" }).then(),
+    ];
+
+    if (noResults) {
+      // Failure: log full term + increment failure counter
+      trackPromises.push(
+        supabase.from("excursion_search_analytics").insert({
+          search_term: cleanTerm,
+          result_count: 0,
+          page_origin: "catalog",
+        }).then(),
+        supabase.rpc("increment_excursion_search_stat", { key_param: "failure" }).then()
+      );
+    } else {
+      // Success: only increment counter
+      trackPromises.push(
+        supabase.rpc("increment_excursion_search_stat", { key_param: "success" }).then()
+      );
+    }
+
+    Promise.all(trackPromises).catch(() => {});
+  }
+
   const rawExcursions = noResults ? fallbackExcursions : excursions;
 
   // Calcular ocupação real das poltronas via RPC seguro
