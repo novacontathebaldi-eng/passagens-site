@@ -479,6 +479,20 @@ export default function ConfiguracoesPage() {
     fetchSettings();
   }, [supabase]);
 
+  // Scroll to hash anchor after data loads (browser can't scroll to #faq-editor before it renders)
+  useEffect(() => {
+    if (!isLoading && window.location.hash) {
+      const id = window.location.hash.slice(1);
+      // Small delay to ensure DOM has painted
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+  }, [isLoading]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!settings) return;
