@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { HelpCircle, Search, FileQuestion } from "lucide-react";
+import { useFaqSearch } from "@/hooks/useFaqSearch";
 
 type FaqItem = {
   id: string;
   question: string;
   answer: string;
+  keywords?: string[];
 };
 
 interface InteractiveFaqProps {
@@ -20,13 +22,7 @@ export function InteractiveFaq({ faqItems }: InteractiveFaqProps) {
     return null;
   }
 
-  const filteredFaqs = faqItems.filter((faq) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      faq.question.toLowerCase().includes(term) ||
-      faq.answer.toLowerCase().includes(term)
-    );
-  });
+  const searchResults = useFaqSearch(faqItems, searchTerm, "painel");
 
   return (
     <section className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 sm:p-8 shadow-sm">
@@ -50,8 +46,8 @@ export function InteractiveFaq({ faqItems }: InteractiveFaqProps) {
       </div>
 
       <div className="space-y-4">
-        {filteredFaqs.length > 0 ? (
-          filteredFaqs.map((faq, i) => (
+        {searchResults.length > 0 ? (
+          searchResults.map(({ item: faq, matches }, i) => (
             <details
               key={faq.id || i}
               className="group border border-outline-variant/30 rounded-2xl bg-surface overflow-hidden [&_summary::-webkit-details-marker]:hidden"
@@ -64,12 +60,8 @@ export function InteractiveFaq({ faqItems }: InteractiveFaqProps) {
                   </svg>
                 </span>
               </summary>
-              <div className="p-4 pt-4 text-sm text-on-surface-variant leading-relaxed bg-surface-container-lowest border-t border-outline-variant/20 transition-all duration-300 ease-in-out">
-                {faq.answer.split("\n").map((line, j) => (
-                  <p key={j} className={j > 0 ? "mt-2" : ""}>
-                    {line}
-                  </p>
-                ))}
+              <div className="p-4 pt-4 text-sm text-on-surface-variant leading-relaxed bg-surface-container-lowest border-t border-outline-variant/20 transition-all duration-300 ease-in-out whitespace-pre-wrap">
+                {faq.answer}
               </div>
             </details>
           ))

@@ -28,7 +28,12 @@ type HeroStatEntry = { number: string; label: string; iconPath: string };
 type DriverContactEntry = { id: string; label: string; number: string; whatsapp: boolean };
 type ChecklistItem = { id: string; label: string };
 type SocialLinkEntry = { id: string; platform: string; name: string; url: string; isActive: boolean; };
-type FaqItem = { id: string; question: string; answer: string; };
+type FaqItem = {
+  id: string;
+  question: string;
+  answer: string;
+  keywords?: string[];
+};
 
 const PIX_KEY_TYPES = [
   { value: "TELEFONE", label: "Telefone" },
@@ -654,7 +659,7 @@ export default function ConfiguracoesPage() {
     setSettings({ ...settings, faq_items: [...settings.faq_items, { id: crypto.randomUUID(), question: "", answer: "" }] });
   };
 
-  const updateFaqItem = (index: number, field: keyof FaqItem, value: string) => {
+  const updateFaqItem = (index: number, field: keyof FaqItem, value: string | string[]) => {
     if (!settings) return;
     const newItems = [...settings.faq_items];
     newItems[index] = { ...newItems[index], [field]: value };
@@ -1310,6 +1315,13 @@ export default function ConfiguracoesPage() {
                     rows={2}
                     className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"
                     required
+                  />
+                  <input
+                    type="text"
+                    value={item.keywords?.join(", ") || ""}
+                    onChange={(e) => updateFaqItem(i, "keywords", e.target.value.split(",").map((k) => k.trim()).filter(Boolean))}
+                    placeholder="Palavras-chave separadas por vírgula (Ocultas do cliente, melhoram a busca)"
+                    className="w-full bg-surface-container-lowest border border-outline-variant/60 border-dashed rounded-xl px-3 py-2 text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
                 
